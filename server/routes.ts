@@ -261,6 +261,30 @@ router.get('/users', (_req: Request, res: Response) => {
   res.json({ success: true, users: db.getUsers() });
 });
 
+router.post('/auth/login', (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ success: false, error: 'Email and password are required' });
+    }
+    const users = db.getUsers();
+    const user = users.find(
+      u => u.email?.toLowerCase() === String(email).trim().toLowerCase() && u.password === String(password).trim()
+    );
+
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Invalid email or password' });
+    }
+
+    db.logAudit(user.id, user.name, 'USER_LOGIN', 'SETTINGS', user.id, `User ${user.name} (${user.role}) logged in successfully`);
+    res.json({ success: true, user });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Login failed';
+    res.status(500).json({ success: false, error: msg });
+  }
+});
+
+
 router.get('/audit-logs', (req: Request, res: Response) => {
   const limit = req.query.limit ? Number(req.query.limit) : 100;
   res.json({ success: true, auditLogs: db.getAuditLogs(limit) });

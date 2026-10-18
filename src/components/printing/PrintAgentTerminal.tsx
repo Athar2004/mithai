@@ -41,7 +41,7 @@ export const PrintAgentTerminal: React.FC = () => {
 
   const handleReprint = async (job: PrintJob) => {
     try {
-      const updated = await api.reprintJob(job.id, currentUser.name);
+      const updated = await api.reprintJob(job.id, currentUser?.name || 'Staff');
       openThermalReceipt({
         title: `Reprint - ${job.jobType} (${job.tokenNumber})`,
         text: updated.payload,

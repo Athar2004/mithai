@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext.tsx';
-import type { Product, UnitType, Order } from '../../types/index.ts';
+import type { Product, Order } from '../../types/index.ts';
 import * as api from '../../lib/api.ts';
 import {
   Search,
@@ -8,16 +8,19 @@ import {
   Minus,
   Trash2,
   Printer,
-  Sparkles,
   UtensilsCrossed,
   CheckCircle2,
   X,
-  FileText,
   Ticket,
-  ChefHat,
-  SplitSquareVertical,
   Eye,
   History,
+  ShoppingCart,
+  Receipt,
+  ArrowRight,
+  Loader2,
+  Play,
+  Check,
+  ListOrdered,
 } from 'lucide-react';
 
 export const OrderPOS: React.FC = () => {
@@ -40,30 +43,109 @@ export const OrderPOS: React.FC = () => {
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [orderNotes, setOrderNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
   const [showRecentOrdersModal, setShowRecentOrdersModal] = useState<boolean>(false);
+
+  // Order Summary Popup State (Toggle on side for mobile & POS)
+  const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState<boolean>(false);
 
   // Variable-weight selection modal state
   const [weightModalProduct, setWeightModalProduct] = useState<Product | null>(null);
   const [selectedWeightKg, setSelectedWeightKg] = useState<number>(0.25);
   const [customWeightGrams, setCustomWeightGrams] = useState<string>('');
-  const [itemNote, setItemNote] = useState<string>('');
 
   // Count selection modal state
   const [countModalProduct, setCountModalProduct] = useState<Product | null>(null);
   const [selectedCount, setSelectedCount] = useState<number>(1);
 
-  // Success Modal with Dual Receipts
   const [confirmedOrderData, setConfirmedOrderData] = useState<{
     tokenNumber: string;
     orderId: string;
     amount: number;
     customerReceiptText: string;
-    kitchenReceiptText: string;
-    isKitchenRequired: boolean;
+    counterReceiptText: string;
   } | null>(null);
+
+  // Sequential Thermal Print Queue State
+  const [queueState, setQueueState] = useState<{
+    isRunning: boolean;
+    job1Status: 'waiting' | 'printing' | 'completed';
+    job2Status: 'waiting' | 'printing' | 'completed';
+    activeMessage: string;
+    completed: boolean;
+  }>({
+    isRunning: false,
+    job1Status: 'waiting',
+    job2Status: 'waiting',
+    activeMessage: 'Ready to print both 2-inch slips sequentially in queue',
+    completed: false,
+  });
+
+  const runSequentialPrintQueue = async (customerText: string, counterText: string, tokenNo: string) => {
+    try {
+      setQueueState({
+        isRunning: true,
+        job1Status: 'printing',
+        job2Status: 'waiting',
+        activeMessage: `Printing Job 1 of 2: Customer Token Slip (50.8mm / 2-inch) - Token #${tokenNo}...`,
+        completed: false,
+      });
+
+      // Preview/Send Job 1
+      openThermalReceipt({
+        title: `Customer Token Slip (2-Inch / 50.8mm) - Token ${tokenNo}`,
+        secondaryTitle: `Order POS Dispatch Slip (2-Inch / 50.8mm)`,
+        text: customerText,
+        secondaryText: counterText,
+        paperWidth: '58mm',
+        secondaryPaperWidth: '58mm',
+        tokenNumber: tokenNo,
+        jobType: 'CUSTOMER_TOKEN',
+        initialTab: 'primary',
+      });
+
+      // Sequential delay for printer cut & feed
+      await new Promise((resolve) => setTimeout(resolve, 1400));
+
+      setQueueState({
+        isRunning: true,
+        job1Status: 'completed',
+        job2Status: 'printing',
+        activeMessage: `Printing Job 2 of 2: Order POS Slip (50.8mm / 2-inch) - Token #${tokenNo}...`,
+        completed: false,
+      });
+
+      // Preview/Send Job 2
+      openThermalReceipt({
+        title: `Customer Token Slip (2-Inch / 50.8mm) - Token ${tokenNo}`,
+        secondaryTitle: `Order POS Dispatch Slip (2-Inch / 50.8mm)`,
+        text: customerText,
+        secondaryText: counterText,
+        paperWidth: '58mm',
+        secondaryPaperWidth: '58mm',
+        tokenNumber: tokenNo,
+        jobType: 'COUNTER_RECEIPT',
+        initialTab: 'secondary',
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 1400));
+
+      setQueueState({
+        isRunning: false,
+        job1Status: 'completed',
+        job2Status: 'completed',
+        activeMessage: `Queue Finished! Both 2-inch (50.8mm) receipts printed one after the other.`,
+        completed: true,
+      });
+    } catch {
+      setQueueState(prev => ({
+        ...prev,
+        isRunning: false,
+        activeMessage: 'Print queue encountered an interruption.',
+      }));
+    }
+  };
 
   // Filter products by category and search
   const filteredProducts = useMemo(() => {
@@ -85,11 +167,9 @@ export const OrderPOS: React.FC = () => {
       setWeightModalProduct(product);
       setSelectedWeightKg(0.25); // Default to 250 grams
       setCustomWeightGrams('');
-      setItemNote('');
     } else {
       setCountModalProduct(product);
       setSelectedCount(1);
-      setItemNote('');
     }
   };
 
@@ -100,13 +180,15 @@ export const OrderPOS: React.FC = () => {
       : selectedWeightKg;
 
     if (finalKg <= 0) return;
-    addToCart(weightModalProduct, finalKg, itemNote);
+    // Special instruction removed from order taking as requested
+    addToCart(weightModalProduct, finalKg);
     setWeightModalProduct(null);
   };
 
   const handleConfirmCount = () => {
     if (!countModalProduct || selectedCount <= 0) return;
-    addToCart(countModalProduct, selectedCount, itemNote);
+    // Special instruction removed from order taking as requested
+    addToCart(countModalProduct, selectedCount);
     setCountModalProduct(null);
   };
 
@@ -120,11 +202,9 @@ export const OrderPOS: React.FC = () => {
         items: cart.map(item => ({
           productId: item.product.id,
           quantity: item.quantity,
-          specialInstructions: item.specialInstructions,
         })),
-        notes: orderNotes.trim() || undefined,
-        userId: currentUser.id,
-        userName: currentUser.name,
+        userId: currentUser?.id || 'usr_pos',
+        userName: currentUser?.name || 'Order POS Staff',
         counterId: 'POS-1',
       };
 
@@ -135,12 +215,11 @@ export const OrderPOS: React.FC = () => {
         orderId: result.order.id,
         amount: result.order.finalAmount,
         customerReceiptText: result.printJobs.customerToken?.payload || '',
-        kitchenReceiptText: result.printJobs.kitchenTicket?.payload || '',
-        isKitchenRequired: result.order.isKitchenRequired,
+        counterReceiptText: result.printJobs.kitchenTicket?.payload || '',
       });
 
       clearCart();
-      setOrderNotes('');
+      setIsOrderSummaryOpen(false); // Close popup upon confirmation
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to confirm order';
       setErrorBanner(msg);
@@ -150,19 +229,19 @@ export const OrderPOS: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+    <div className="max-w-7xl mx-auto px-4 md:px-8 py-5 relative">
       {/* Top Banner & Quick Metrics */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-stone-200 gap-4">
         <div>
           <h1 className="text-xl md:text-2xl font-bold tracking-tight text-stone-900">
-            Order-Taking Terminal
+            Order-Taking POS Terminal
           </h1>
           <div className="flex items-center gap-2 text-xs text-stone-500 mt-0.5">
             <span>Counter POS-1</span>
             <span aria-hidden="true">·</span>
-            <span>Operator: {currentUser.name}</span>
+            <span>Operator: {currentUser?.name || 'Order POS'}</span>
             <span aria-hidden="true">·</span>
-            <span className="text-amber-700 font-medium">Dual-Receipt Active: 1. Customer Slip (58mm) + 2. Kitchen Ticket (80mm)</span>
+            <span className="text-amber-800 font-medium">2-Inch (50.8mm) Slips: Short Token Slip &amp; Order POS Slip (Sequential Queue)</span>
           </div>
         </div>
 
@@ -171,12 +250,12 @@ export const OrderPOS: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowRecentOrdersModal(true)}
-            className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors border border-stone-200 shrink-0"
-            title="View recent orders to reprint Customer Slip or Kitchen Ticket"
+            className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors border border-stone-200 shrink-0 cursor-pointer"
+            title="View recent orders to reprint Customer Slip or Receipt"
           >
             <History className="w-3.5 h-3.5 text-stone-600" />
             <span className="hidden sm:inline">Recent Orders &amp; Receipts</span>
-            <span className="sm:hidden">Recent</span>
+            <span className="sm:hidden">Orders</span>
             {orders.length > 0 && (
               <span className="bg-amber-600 text-white text-[10px] font-mono px-1.5 py-0.2 rounded-full">
                 {orders.length}
@@ -184,20 +263,40 @@ export const OrderPOS: React.FC = () => {
             )}
           </button>
 
+          {/* Order Summary Trigger Button in Header */}
+          <button
+            type="button"
+            onClick={() => setIsOrderSummaryOpen(true)}
+            className="px-3 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors shadow-sm shrink-0 cursor-pointer"
+            title="Open Order Summary Popup"
+          >
+            <ShoppingCart className="w-3.5 h-3.5" />
+            <span>Order Summary</span>
+            {cart.length > 0 ? (
+              <span className="bg-stone-950 text-amber-300 text-[10px] font-mono px-1.5 py-0.2 rounded font-bold">
+                {cart.length} · ₹{cartTotal.toFixed(0)}
+              </span>
+            ) : (
+              <span className="bg-amber-700/80 text-amber-100 text-[10px] font-mono px-1.5 py-0.2 rounded">
+                0
+              </span>
+            )}
+          </button>
+
           {/* Search Input */}
-          <div className="relative w-full md:w-72">
+          <div className="relative w-full md:w-64">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search sweets, namkeen, snacks..."
-              className="w-full bg-white border border-stone-300 rounded-lg pl-9 pr-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-sm"
+              placeholder="Search sweets, namkeen..."
+              className="w-full bg-white border border-stone-300 rounded-lg pl-9 pr-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -209,292 +308,370 @@ export const OrderPOS: React.FC = () => {
       {errorBanner && (
         <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg flex items-center justify-between">
           <span>{errorBanner}</span>
-          <button onClick={() => setErrorBanner(null)} className="text-red-500 hover:text-red-700">
+          <button onClick={() => setErrorBanner(null)} className="text-red-500 hover:text-red-700 cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
-      {/* Main Grid: 2 Columns (Products Left 65%, Cart Right 35%) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 items-start">
-        {/* Left Column: Product Selection */}
-        <div className="lg:col-span-8 space-y-4">
-          {/* Category Tabs (Segmented Button Bar) */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+      {/* Main Full-Width Product Showcase (No cramped grid; Summary is in popup!) */}
+      <div className="mt-5 space-y-4">
+        {/* Category Tabs (Segmented Button Bar) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <button
+            onClick={() => setSelectedCategory('all')}
+            className={`px-3.5 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
+              selectedCategory === 'all'
+                ? 'bg-stone-900 text-white shadow-sm'
+                : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'
+            }`}
+          >
+            All Items ({products.length})
+          </button>
+          {categories.map(cat => (
             <button
-              onClick={() => setSelectedCategory('all')}
-              className={`px-3.5 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors ${
-                selectedCategory === 'all'
-                  ? 'bg-stone-900 text-white shadow-sm'
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
+                selectedCategory === cat.id
+                  ? 'bg-amber-700 text-white shadow-sm'
                   : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'
               }`}
             >
-              All Items
+              {cat.name}
             </button>
-            {categories.map(cat => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors ${
-                  selectedCategory === cat.id
-                    ? 'bg-amber-700 text-white shadow-sm'
-                    : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'
-                }`}
+          ))}
+        </div>
+
+        {/* Product Cards Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          {filteredProducts.map(product => {
+            const isWeight = product.unit === 'kg';
+            const cartQty = cart
+              .filter(ci => ci.product.id === product.id)
+              .reduce((sum, ci) => sum + ci.quantity, 0);
+
+            return (
+              <div
+                key={product.id}
+                onClick={() => handleProductClick(product)}
+                className="bg-white rounded-xl border border-stone-200 hover:border-amber-400 p-3 flex flex-col justify-between cursor-pointer transition-all hover:shadow-md active:scale-[0.98] select-none group relative"
               >
-                {cat.name}
-              </button>
-            ))}
-          </div>
+                {/* Active in cart indicator badge */}
+                {cartQty > 0 && (
+                  <span className="absolute top-2 right-2 z-10 bg-amber-600 text-white font-mono text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                    {isWeight
+                      ? cartQty < 1
+                        ? `${Math.round(cartQty * 1000)}g`
+                        : `${cartQty.toFixed(2)}kg`
+                      : `${cartQty} pcs`}
+                  </span>
+                )}
 
-          {/* Product Cards Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
-            {filteredProducts.map(product => {
-              const isWeight = product.unit === 'kg';
-              return (
-                <div
-                  key={product.id}
-                  onClick={() => handleProductClick(product)}
-                  className="bg-white rounded-lg border border-stone-200 hover:border-amber-400 p-3 flex flex-col justify-between cursor-pointer transition-all hover:shadow-md active:scale-[0.98] select-none group"
-                >
-                  <div>
-                    {/* Product Image Slot with Fallback */}
-                    <div className="w-full aspect-4/3 rounded bg-stone-100 overflow-hidden mb-2 relative">
-                      {product.imageUrl ? (
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          loading="lazy"
-                          referrerPolicy="no-referrer"
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center bg-stone-100 text-stone-400">
-                          <UtensilsCrossed className="w-6 h-6 mb-1 text-stone-300" />
-                          <span className="text-[10px] text-stone-400">Pure Mithai</span>
-                        </div>
-                      )}
-                      {product.requiresKitchen && (
-                        <span className="absolute bottom-1 right-1 bg-stone-900/80 text-amber-300 text-[9px] px-1.5 py-0.5 rounded font-medium">
-                          Kitchen Prep
-                        </span>
-                      )}
-                    </div>
-
-                    <h3 className="text-xs font-semibold text-stone-900 line-clamp-1 group-hover:text-amber-700">
-                      {product.name}
-                    </h3>
-                    {product.hindiName && (
-                      <p className="text-[11px] text-stone-400 font-normal">{product.hindiName}</p>
+                <div>
+                  {/* Product Image Slot with Fallback */}
+                  <div className="w-full aspect-4/3 rounded-lg bg-stone-100 overflow-hidden mb-2 relative">
+                    {product.imageUrl ? (
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-stone-100 text-stone-400">
+                        <UtensilsCrossed className="w-6 h-6 mb-1 text-stone-300" />
+                        <span className="text-[10px] text-stone-400">Pure Mithai</span>
+                      </div>
                     )}
                   </div>
 
-                  <div className="mt-2.5 pt-2 border-t border-stone-100 flex items-center justify-between">
-                    <div>
-                      <span className="text-xs font-bold text-stone-900 font-mono tabular-nums">
-                        ₹{product.pricePerUnit}
-                      </span>
-                      <span className="text-[11px] text-stone-500">/{product.unit}</span>
-                    </div>
-                    <span className="text-[10px] bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded font-mono">
-                      {isWeight ? 'Weight' : 'Count'}
-                    </span>
-                  </div>
+                  <h3 className="text-xs font-semibold text-stone-900 line-clamp-1 group-hover:text-amber-700">
+                    {product.name}
+                  </h3>
+                  {product.hindiName && (
+                    <p className="text-[11px] text-stone-400 font-normal">{product.hindiName}</p>
+                  )}
                 </div>
-              );
-            })}
-          </div>
 
-          {filteredProducts.length === 0 && (
-            <div className="bg-white rounded-lg border border-stone-200 p-8 text-center text-stone-500">
-              <UtensilsCrossed className="w-8 h-8 mx-auto text-stone-300 mb-2" />
-              <p className="text-sm">No items found matching "{searchQuery}"</p>
-            </div>
-          )}
-        </div>
-
-        {/* Right Column: Order Summary / Cart */}
-        <div className="lg:col-span-4 bg-white rounded-xl border border-stone-200 shadow-sm p-4 sticky top-18">
-          <div className="flex items-center justify-between pb-3 border-b border-stone-200">
-            <div>
-              <h2 className="text-base font-bold text-stone-900">Current Order</h2>
-              <p className="text-xs text-stone-500">{cart.length} line {cart.length === 1 ? 'item' : 'items'}</p>
-            </div>
-            {cart.length > 0 && (
-              <button
-                onClick={clearCart}
-                className="text-xs text-red-600 hover:text-red-800 font-medium transition-colors"
-              >
-                Clear Cart
-              </button>
-            )}
-          </div>
-
-          {/* Cart Item List */}
-          <div className="divide-y divide-stone-100 max-h-[320px] overflow-y-auto py-2">
-            {cart.length === 0 ? (
-              <div className="py-12 text-center text-stone-400">
-                <UtensilsCrossed className="w-8 h-8 mx-auto mb-2 text-stone-300" />
-                <p className="text-xs">Your cart is empty.</p>
-                <p className="text-[11px] text-stone-400 mt-0.5">Click any sweet or snack on the left to add.</p>
-              </div>
-            ) : (
-              cart.map((item, idx) => {
-                const isKg = item.product.unit === 'kg';
-                const formattedQty = isKg
-                  ? item.quantity < 1
-                    ? `${Math.round(item.quantity * 1000)}g`
-                    : `${item.quantity.toFixed(2)}kg`
-                  : `${item.quantity} ${item.product.unit}`;
-
-                return (
-                  <div key={idx} className="py-2.5 flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-semibold text-stone-900 truncate">
-                          {item.product.name}
-                        </span>
-                        {item.product.requiresKitchen && (
-                          <span className="text-[9px] text-amber-700 bg-amber-50 px-1 py-0.2 rounded font-medium">
-                            KOT
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-[11px] text-stone-500 flex items-center gap-2 mt-0.5 font-mono tabular-nums">
-                        <span>{formattedQty}</span>
-                        <span>@ ₹{item.product.pricePerUnit}</span>
-                      </div>
-                      {item.specialInstructions && (
-                        <p className="text-[10px] text-amber-700 bg-amber-50/60 rounded px-1.5 py-0.5 mt-1">
-                          Note: {item.specialInstructions}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      <div className="flex items-center border border-stone-200 rounded">
-                        <button
-                          onClick={() => {
-                            const step = isKg ? 0.25 : 1;
-                            updateCartItemQuantity(idx, Math.max(0, Math.round((item.quantity - step) * 100) / 100));
-                          }}
-                          className="px-1.5 py-1 text-stone-500 hover:text-stone-900 hover:bg-stone-100"
-                          title="Decrease"
-                        >
-                          <Minus className="w-3 h-3" />
-                        </button>
-                        <span className="px-1.5 text-xs font-mono font-medium text-stone-800">
-                          {formattedQty}
-                        </span>
-                        <button
-                          onClick={() => {
-                            const step = isKg ? 0.25 : 1;
-                            updateCartItemQuantity(idx, Math.round((item.quantity + step) * 100) / 100);
-                          }}
-                          className="px-1.5 py-1 text-stone-500 hover:text-stone-900 hover:bg-stone-100"
-                          title="Increase"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </button>
-                      </div>
-
-                      <span className="text-xs font-bold text-stone-900 font-mono tabular-nums min-w-[54px] text-right">
-                        ₹{item.lineTotal.toFixed(2)}
-                      </span>
-
-                      <button
-                        onClick={() => removeCartItem(idx)}
-                        className="text-stone-400 hover:text-red-600 p-1 transition-colors"
-                        title="Remove"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                <div className="mt-2.5 pt-2 border-t border-stone-100 flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-stone-900 font-mono tabular-nums">
+                      ₹{product.pricePerUnit}
+                    </span>
+                    <span className="text-[11px] text-stone-500">/{product.unit}</span>
                   </div>
-                );
-              })
-            )}
-          </div>
-
-          {/* Special Kitchen / Order Note */}
-          {cart.length > 0 && (
-            <div className="mt-2 pt-2 border-t border-stone-100">
-              <input
-                type="text"
-                value={orderNotes}
-                onChange={(e) => setOrderNotes(e.target.value)}
-                placeholder="Kitchen note (e.g. Gift pack, Less sugar)..."
-                className="w-full text-xs bg-stone-50 border border-stone-200 rounded px-2.5 py-1.5 text-stone-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
-              />
-            </div>
-          )}
-
-          {/* Totals Breakdown */}
-          <div className="mt-3 pt-3 border-t border-stone-200 space-y-1.5 text-xs text-stone-600">
-            <div className="flex justify-between">
-              <span>Subtotal (Taxable)</span>
-              <span className="font-mono tabular-nums text-stone-900">₹{cartSubtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>GST (5% — CGST 2.5% + SGST 2.5%)</span>
-              <span className="font-mono tabular-nums text-stone-900">₹{cartTax.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-sm font-bold text-stone-900 pt-1.5 border-t border-stone-200">
-              <span>Amount Payable</span>
-              <span className="font-mono tabular-nums text-amber-700 text-base">₹{cartTotal.toFixed(2)}</span>
-            </div>
-          </div>
-
-          {/* Dual Receipt Notice */}
-          <div className="mt-3 p-2 bg-amber-50/80 border border-amber-200/90 rounded-lg text-[11px] text-amber-950 flex items-start gap-1.5 leading-snug">
-            <SplitSquareVertical className="w-3.5 h-3.5 text-amber-700 shrink-0 mt-0.5" />
-            <span>
-              <strong>Dual Receipts:</strong> Generates 1 small <strong>Customer Waiting Slip</strong> (to sit &amp; wait) and 1 detailed <strong>Kitchen KOT</strong> (for chef).
-            </span>
-          </div>
-
-          {/* Confirm Button */}
-          <button
-            onClick={handleConfirmOrder}
-            disabled={cart.length === 0 || isSubmitting}
-            className={`w-full mt-3 py-3 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-sm ${
-              cart.length === 0 || isSubmitting
-                ? 'bg-stone-200 text-stone-400 cursor-not-allowed'
-                : 'bg-amber-600 hover:bg-amber-700 active:scale-[0.99] text-white'
-            }`}
-          >
-            {isSubmitting ? (
-              <span>Saving Order &amp; Generating Receipts...</span>
-            ) : (
-              <>
-                <Printer className="w-4 h-4" />
-                <span>CONFIRM ORDER &amp; PRINT RECEIPTS</span>
-              </>
-            )}
-          </button>
+                  <span className="text-[10px] bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded font-mono">
+                    {isWeight ? 'Weight' : 'Count'}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
+
+        {filteredProducts.length === 0 && (
+          <div className="bg-white rounded-xl border border-stone-200 p-12 text-center text-stone-500">
+            <UtensilsCrossed className="w-8 h-8 mx-auto text-stone-300 mb-2" />
+            <p className="text-sm">No items found matching "{searchQuery}"</p>
+          </div>
+        )}
       </div>
 
-      {/* WEIGHT SELECTION DIALOG (For sweets sold by kg) */}
+      {/* ========================================================================= */}
+      {/* FLOATING SIDE TOGGLE FOR ORDER SUMMARY (Visible on mobile & desktop POS) */}
+      {/* ========================================================================= */}
+      {/* 1. Edge Tab Toggle on the right side */}
+      <button
+        type="button"
+        onClick={() => setIsOrderSummaryOpen(true)}
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-stone-900 hover:bg-stone-800 text-white py-4 px-2.5 rounded-l-xl shadow-2xl flex flex-col items-center gap-2 transition-transform hover:-translate-x-1 cursor-pointer border-t border-b border-l border-amber-500/30 group"
+        title="Open Order Summary Popup"
+        aria-label="Open Order Summary Popup"
+      >
+        <ShoppingCart className="w-5 h-5 text-amber-400 group-hover:scale-110 transition-transform" />
+        <span className="text-[11px] font-bold font-mono bg-amber-500 text-stone-950 px-1.5 py-0.5 rounded-full shadow-xs">
+          {cart.length}
+        </span>
+        <span className="text-[10px] font-semibold tracking-wider uppercase [writing-mode:vertical-rl] rotate-180 text-stone-300 group-hover:text-white">
+          Order Summary
+        </span>
+      </button>
+
+      {/* 2. Floating Action Button on Bottom-Right for easy thumb tapping on Mobile/POS */}
+      <button
+        type="button"
+        onClick={() => setIsOrderSummaryOpen(true)}
+        className="fixed right-4 bottom-5 z-40 bg-amber-600 hover:bg-amber-500 text-white pl-4 pr-5 py-3 rounded-full shadow-2xl border border-amber-400/40 flex items-center gap-3 transition-transform hover:scale-105 active:scale-95 cursor-pointer sm:hidden"
+        title="Open Order Summary"
+      >
+        <div className="relative">
+          <ShoppingCart className="w-5 h-5" />
+          {cart.length > 0 && (
+            <span className="absolute -top-2 -right-2 bg-stone-950 text-amber-400 font-bold font-mono text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-amber-600">
+              {cart.length}
+            </span>
+          )}
+        </div>
+        <div className="flex flex-col text-left">
+          <span className="text-xs font-bold leading-tight">Order Summary</span>
+          <span className="text-[11px] font-mono text-amber-100 font-semibold leading-tight">
+            {cart.length > 0 ? `₹${cartTotal.toFixed(2)}` : 'Cart empty'}
+          </span>
+        </div>
+      </button>
+
+      {/* ========================================================================= */}
+      {/* ORDER SUMMARY POPUP MODAL (SLIDE-OVER FROM SIDE - NEVER AT THE LAST/BOTTOM) */}
+      {/* ========================================================================= */}
+      {isOrderSummaryOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          {/* Backdrop overlay */}
+          <div
+            onClick={() => setIsOrderSummaryOpen(false)}
+            className="fixed inset-0 bg-stone-950/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+          />
+
+          {/* Slide-over popup drawer */}
+          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col z-10 border-l border-stone-200 animate-in slide-in-from-right duration-200">
+            {/* Popup Header */}
+            <div className="p-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center">
+                  <ShoppingCart className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-stone-900 leading-tight">Current Order Summary</h2>
+                  <p className="text-xs text-stone-500 font-mono">
+                    {cart.length} line {cart.length === 1 ? 'item' : 'items'} in cart
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                {cart.length > 0 && (
+                  <button
+                    onClick={clearCart}
+                    className="text-xs text-red-600 hover:text-red-800 font-medium px-2 py-1 hover:bg-red-50 rounded transition-colors cursor-pointer"
+                  >
+                    Clear All
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsOrderSummaryOpen(false)}
+                  className="p-1.5 text-stone-400 hover:text-stone-700 hover:bg-stone-200 rounded-lg transition-colors cursor-pointer"
+                  title="Close Summary Popup"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Cart Item List */}
+            <div className="flex-1 overflow-y-auto p-4 divide-y divide-stone-100">
+              {cart.length === 0 ? (
+                <div className="py-20 text-center text-stone-400">
+                  <UtensilsCrossed className="w-12 h-12 mx-auto mb-3 text-stone-300" />
+                  <p className="text-sm font-medium text-stone-600">Your cart is currently empty</p>
+                  <p className="text-xs text-stone-400 mt-1 max-w-xs mx-auto">
+                    Click any sweet or namkeen item from the menu to select weight or count and add to your order.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setIsOrderSummaryOpen(false)}
+                    className="mt-5 px-4 py-2 bg-stone-900 text-white text-xs font-semibold rounded-lg hover:bg-stone-800 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>Browse Sweets &amp; Snacks</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                cart.map((item, idx) => {
+                  const isKg = item.product.unit === 'kg';
+                  const formattedQty = isKg
+                    ? item.quantity < 1
+                      ? `${Math.round(item.quantity * 1000)}g`
+                      : `${item.quantity.toFixed(2)}kg`
+                    : `${item.quantity} ${item.product.unit}`;
+
+                  return (
+                    <div key={idx} className="py-3 flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-semibold text-stone-900 truncate">
+                            {item.product.name}
+                          </span>
+                        </div>
+                        {item.product.hindiName && (
+                          <div className="text-[11px] text-stone-400">{item.product.hindiName}</div>
+                        )}
+                        <div className="text-[11px] text-stone-500 flex items-center gap-2 mt-0.5 font-mono tabular-nums">
+                          <span>{formattedQty}</span>
+                          <span>@ ₹{item.product.pricePerUnit}/{item.product.unit}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        {/* Stepper */}
+                        <div className="flex items-center border border-stone-200 rounded-lg overflow-hidden bg-stone-50">
+                          <button
+                            onClick={() => {
+                              const step = isKg ? 0.25 : 1;
+                              updateCartItemQuantity(idx, Math.max(0, Math.round((item.quantity - step) * 100) / 100));
+                            }}
+                            className="px-2 py-1 text-stone-500 hover:text-stone-900 hover:bg-stone-200 transition-colors cursor-pointer"
+                            title="Decrease"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="px-2 text-xs font-mono font-medium text-stone-800 min-w-[42px] text-center">
+                            {formattedQty}
+                          </span>
+                          <button
+                            onClick={() => {
+                              const step = isKg ? 0.25 : 1;
+                              updateCartItemQuantity(idx, Math.round((item.quantity + step) * 100) / 100);
+                            }}
+                            className="px-2 py-1 text-stone-500 hover:text-stone-900 hover:bg-stone-200 transition-colors cursor-pointer"
+                            title="Increase"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+
+                        {/* Line Total */}
+                        <span className="text-xs font-bold text-stone-900 font-mono tabular-nums min-w-[56px] text-right">
+                          ₹{item.lineTotal.toFixed(2)}
+                        </span>
+
+                        {/* Remove */}
+                        <button
+                          onClick={() => removeCartItem(idx)}
+                          className="text-stone-400 hover:text-red-600 p-1 transition-colors cursor-pointer"
+                          title="Remove item"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Popup Footer: Totals Breakdown & Action Buttons */}
+            {cart.length > 0 && (
+              <div className="p-4 border-t border-stone-200 bg-stone-50 space-y-3">
+                <div className="space-y-1.5 text-xs text-stone-600">
+                  <div className="flex justify-between">
+                    <span>Subtotal (Taxable)</span>
+                    <span className="font-mono tabular-nums text-stone-900">₹{cartSubtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>GST (5% — CGST 2.5% + SGST 2.5%)</span>
+                    <span className="font-mono tabular-nums text-stone-900">₹{cartTax.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-base font-bold text-stone-900 pt-2 border-t border-stone-200">
+                    <span>Amount Payable</span>
+                    <span className="font-mono tabular-nums text-amber-700 text-lg">₹{cartTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                {/* Primary Confirmation Action */}
+                <button
+                  type="button"
+                  onClick={handleConfirmOrder}
+                  disabled={isSubmitting}
+                  className="w-full py-3 bg-stone-900 hover:bg-stone-800 active:bg-black text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                >
+                  {isSubmitting ? (
+                    <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Ticket className="w-4 h-4 text-amber-400" />
+                      <span>Confirm Order &amp; Generate Token Slip</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsOrderSummaryOpen(false)}
+                  className="w-full py-2 border border-stone-300 text-stone-700 text-xs font-semibold rounded-lg hover:bg-stone-100 transition-colors cursor-pointer"
+                >
+                  Continue Adding Sweets &amp; Snacks
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* VARIABLE WEIGHT SELECTION DIALOG (No special instructions) */}
+      {/* ========================================================================= */}
       {weightModalProduct && (
         <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-5 shadow-xl border border-stone-200">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-stone-200 animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
                 <h3 className="text-base font-bold text-stone-900">{weightModalProduct.name}</h3>
-                <p className="text-xs text-stone-500 font-mono">Rate: ₹{weightModalProduct.pricePerUnit}/kg</p>
+                <p className="text-xs text-stone-500 font-mono">Rate: ₹{weightModalProduct.pricePerUnit} / kg</p>
               </div>
               <button
                 onClick={() => setWeightModalProduct(null)}
-                className="text-stone-400 hover:text-stone-700"
+                className="text-stone-400 hover:text-stone-700 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Quick Weight Select Buttons */}
+            {/* Standard Weight Buttons */}
             <div className="mt-4">
               <label className="text-xs font-semibold text-stone-700 mb-2 block">
                 Select Standard Weight:
@@ -516,7 +693,7 @@ export const OrderPOS: React.FC = () => {
                         setSelectedWeightKg(opt.kg);
                         setCustomWeightGrams('');
                       }}
-                      className={`p-2.5 rounded-lg border text-center transition-all ${
+                      className={`p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
                         isSelected
                           ? 'border-amber-600 bg-amber-50 text-amber-900 font-bold ring-1 ring-amber-600'
                           : 'border-stone-200 hover:border-stone-400 text-stone-700 bg-white'
@@ -543,24 +720,10 @@ export const OrderPOS: React.FC = () => {
                   placeholder="e.g. 350"
                   value={customWeightGrams}
                   onChange={(e) => setCustomWeightGrams(e.target.value)}
-                  className="w-full text-sm bg-stone-50 border border-stone-300 rounded px-3 py-2 font-mono text-stone-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-full text-sm bg-stone-50 border border-stone-300 rounded-lg px-3 py-2 font-mono text-stone-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 />
                 <span className="text-xs font-medium text-stone-500">grams</span>
               </div>
-            </div>
-
-            {/* Special Instruction / Packing Note */}
-            <div className="mt-3">
-              <label className="text-xs font-semibold text-stone-700 mb-1 block">
-                Preparation / Packing Instruction:
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Less sweet, pack in tin box..."
-                value={itemNote}
-                onChange={(e) => setItemNote(e.target.value)}
-                className="w-full text-xs bg-stone-50 border border-stone-300 rounded px-3 py-2 text-stone-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
-              />
             </div>
 
             {/* Live Price Calculator */}
@@ -573,9 +736,9 @@ export const OrderPOS: React.FC = () => {
               const total = subtotal + tax;
 
               return (
-                <div className="mt-4 p-3 bg-stone-50 rounded-lg flex items-center justify-between text-xs">
+                <div className="mt-4 p-3 bg-stone-50 rounded-xl flex items-center justify-between text-xs border border-stone-200">
                   <div>
-                    <span className="text-stone-500">Calculated Total: </span>
+                    <span className="text-stone-500">Total Price: </span>
                     <span className="font-bold text-stone-900 font-mono text-sm">
                       ₹{total.toFixed(2)}
                     </span>
@@ -592,14 +755,14 @@ export const OrderPOS: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setWeightModalProduct(null)}
-                className="flex-1 py-2 border border-stone-300 text-stone-700 text-xs font-medium rounded-lg hover:bg-stone-50"
+                className="flex-1 py-2 border border-stone-300 text-stone-700 text-xs font-medium rounded-lg hover:bg-stone-50 cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleConfirmWeight}
-                className="flex-1 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg shadow-sm"
+                className="flex-1 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg shadow-sm cursor-pointer"
               >
                 Add to Order
               </button>
@@ -608,10 +771,12 @@ export const OrderPOS: React.FC = () => {
         </div>
       )}
 
-      {/* COUNT SELECTION DIALOG (For piece/portion items like Samosa, Lassi, Gulab Jamun) */}
+      {/* ========================================================================= */}
+      {/* COUNT SELECTION DIALOG (No special instructions) */}
+      {/* ========================================================================= */}
       {countModalProduct && (
         <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-sm w-full p-5 shadow-xl border border-stone-200">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-stone-200 animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div>
                 <h3 className="text-base font-bold text-stone-900">{countModalProduct.name}</h3>
@@ -619,7 +784,7 @@ export const OrderPOS: React.FC = () => {
               </div>
               <button
                 onClick={() => setCountModalProduct(null)}
-                className="text-stone-400 hover:text-stone-700"
+                className="text-stone-400 hover:text-stone-700 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -636,7 +801,7 @@ export const OrderPOS: React.FC = () => {
                     key={num}
                     type="button"
                     onClick={() => setSelectedCount(num)}
-                    className={`py-2 text-xs font-bold rounded border transition-colors font-mono ${
+                    className={`py-2 text-xs font-bold rounded-lg border transition-colors font-mono cursor-pointer ${
                       selectedCount === num
                         ? 'border-amber-600 bg-amber-50 text-amber-900 ring-1 ring-amber-600'
                         : 'border-stone-200 bg-white text-stone-700 hover:border-stone-400'
@@ -653,7 +818,7 @@ export const OrderPOS: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSelectedCount(Math.max(1, selectedCount - 1))}
-                className="w-9 h-9 rounded-full border border-stone-300 flex items-center justify-center text-stone-700 hover:bg-stone-100"
+                className="w-9 h-9 rounded-full border border-stone-300 flex items-center justify-center text-stone-700 hover:bg-stone-100 cursor-pointer"
               >
                 <Minus className="w-4 h-4" />
               </button>
@@ -663,25 +828,14 @@ export const OrderPOS: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSelectedCount(selectedCount + 1)}
-                className="w-9 h-9 rounded-full border border-stone-300 flex items-center justify-center text-stone-700 hover:bg-stone-100"
+                className="w-9 h-9 rounded-full border border-stone-300 flex items-center justify-center text-stone-700 hover:bg-stone-100 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Instruction */}
-            <div className="mt-3">
-              <input
-                type="text"
-                placeholder="Special instruction (e.g. Extra chutney, less ice)..."
-                value={itemNote}
-                onChange={(e) => setItemNote(e.target.value)}
-                className="w-full text-xs bg-stone-50 border border-stone-300 rounded px-3 py-2 text-stone-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
-              />
-            </div>
-
-            <div className="mt-4 p-2.5 bg-stone-50 rounded flex justify-between text-xs font-mono">
-              <span className="text-stone-500">Total:</span>
+            <div className="mt-4 p-2.5 bg-stone-50 rounded-xl flex justify-between text-xs font-mono border border-stone-200">
+              <span className="text-stone-500">Total Price:</span>
               <span className="font-bold text-stone-900">
                 ₹{(selectedCount * countModalProduct.pricePerUnit * 1.05).toFixed(2)} (incl. 5% GST)
               </span>
@@ -691,14 +845,14 @@ export const OrderPOS: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setCountModalProduct(null)}
-                className="flex-1 py-2 border border-stone-300 text-stone-700 text-xs font-medium rounded-lg hover:bg-stone-50"
+                className="flex-1 py-2 border border-stone-300 text-stone-700 text-xs font-medium rounded-lg hover:bg-stone-50 cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleConfirmCount}
-                className="flex-1 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg shadow-sm"
+                className="flex-1 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg shadow-sm cursor-pointer"
               >
                 Add {selectedCount} to Order
               </button>
@@ -707,7 +861,9 @@ export const OrderPOS: React.FC = () => {
         </div>
       )}
 
+      {/* ========================================================================= */}
       {/* CONFIRMED ORDER DUAL RECEIPT POPUP */}
+      {/* ========================================================================= */}
       {confirmedOrderData && (
         <div className="fixed inset-0 z-50 bg-stone-900/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in duration-200 my-auto">
@@ -734,35 +890,121 @@ export const OrderPOS: React.FC = () => {
               </div>
             </div>
 
-            {/* Instruction Callout */}
-            <div className="mt-3 p-3 bg-amber-50/90 border border-amber-200 rounded-xl text-xs text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <SplitSquareVertical className="w-4 h-4 text-amber-700 shrink-0" />
-                <span>
-                  <strong>Two receipts required:</strong> 1 small slip for customer to sit &amp; wait, and 1 kitchen ticket to give to kitchen.
+            {/* Sequential Thermal Print Queue Component */}
+            <div className="mt-3.5 p-3.5 bg-stone-900 text-white rounded-xl border border-stone-800 shadow-md">
+              <div className="flex items-center justify-between pb-2 border-b border-stone-800">
+                <div className="flex items-center gap-2">
+                  <ListOrdered className="w-4 h-4 text-amber-400" />
+                  <span className="text-xs font-bold text-stone-100">
+                    Sequential Thermal Print Queue (2-Inch / 50.8mm)
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800/60 font-semibold">
+                  Queue: 2 Jobs (One After One)
                 </span>
               </div>
-              <span className="text-[11px] font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded shrink-0 font-mono">
-                Direct to Cashier for Billing
-              </span>
+
+              {/* Steps status */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 my-3">
+                <div className={`p-2.5 rounded-lg border text-xs transition-colors ${
+                  queueState.job1Status === 'completed'
+                    ? 'bg-emerald-950/50 border-emerald-700/60 text-emerald-200'
+                    : queueState.job1Status === 'printing'
+                    ? 'bg-amber-950/60 border-amber-500 text-amber-200 animate-pulse'
+                    : 'bg-stone-800/60 border-stone-700 text-stone-300'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold flex items-center gap-1.5">
+                      {queueState.job1Status === 'completed' ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      ) : queueState.job1Status === 'printing' ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                      ) : (
+                        <span className="w-4 h-4 rounded-full bg-stone-700 flex items-center justify-center text-[10px] font-mono">1</span>
+                      )}
+                      1. Customer Token Slip
+                    </span>
+                    <span className="text-[10px] font-mono font-bold bg-stone-800 px-1.5 py-0.5 rounded">2-Inch (50.8mm)</span>
+                  </div>
+                  <p className="text-[11px] text-stone-400 mt-1">Very short · Token #{confirmedOrderData.tokenNumber} only (no items)</p>
+                </div>
+
+                <div className={`p-2.5 rounded-lg border text-xs transition-colors ${
+                  queueState.job2Status === 'completed'
+                    ? 'bg-emerald-950/50 border-emerald-700/60 text-emerald-200'
+                    : queueState.job2Status === 'printing'
+                    ? 'bg-amber-950/60 border-amber-500 text-amber-200 animate-pulse'
+                    : 'bg-stone-800/60 border-stone-700 text-stone-300'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold flex items-center gap-1.5">
+                      {queueState.job2Status === 'completed' ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      ) : queueState.job2Status === 'printing' ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                      ) : (
+                        <span className="w-4 h-4 rounded-full bg-stone-700 flex items-center justify-center text-[10px] font-mono">2</span>
+                      )}
+                      2. Order POS Dispatch Slip
+                    </span>
+                    <span className="text-[10px] font-mono font-bold bg-stone-800 px-1.5 py-0.5 rounded">2-Inch (50.8mm)</span>
+                  </div>
+                  <p className="text-[11px] text-stone-400 mt-1">Itemized packing ticket for order counter</p>
+                </div>
+              </div>
+
+              {/* Queue status feedback & Action */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-stone-300 pt-1">
+                <span className="text-[11px] font-mono text-amber-400 leading-snug">
+                  {queueState.activeMessage}
+                </span>
+
+                <button
+                  type="button"
+                  disabled={queueState.isRunning}
+                  onClick={() => runSequentialPrintQueue(confirmedOrderData.customerReceiptText, confirmedOrderData.counterReceiptText, confirmedOrderData.tokenNumber)}
+                  className={`w-full sm:w-auto px-4 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors cursor-pointer shrink-0 ${
+                    queueState.completed
+                      ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                      : 'bg-amber-500 hover:bg-amber-400 text-stone-950'
+                  }`}
+                >
+                  {queueState.isRunning ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Printing Queue...</span>
+                    </>
+                  ) : queueState.completed ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Reprint in Queue</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>Print Both in Queue (One After One)</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
-            {/* Dual Receipt Preview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 mt-4">
+            {/* Dual Receipt Preview Cards (2-Inch / 50.8mm) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 mt-3.5">
               {/* Receipt 1: Small Customer Waiting Slip */}
               <div className="border border-stone-200 rounded-xl p-3 bg-stone-50/70 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
                       <Ticket className="w-3.5 h-3.5 text-stone-600" />
-                      1. Small Customer Slip
+                      1. Customer Token Slip
                     </span>
                     <span className="text-[10px] bg-stone-200 text-stone-700 font-mono px-1.5 py-0.5 rounded font-semibold">
-                      58mm Thermal
+                      2-Inch (50.8mm)
                     </span>
                   </div>
                   <p className="text-[11px] text-stone-600 mb-2 leading-relaxed">
-                    Customer takes this small slip, <strong>sits down</strong>, and <strong>waits for token #{confirmedOrderData.tokenNumber}</strong> to be announced.
+                    Customer takes this short slip with Token <strong>#{confirmedOrderData.tokenNumber}</strong>. (No item details included)
                   </p>
 
                   {/* Micro Preview */}
@@ -776,9 +1018,9 @@ export const OrderPOS: React.FC = () => {
                     type="button"
                     onClick={() => {
                       openThermalReceipt({
-                        title: `Customer Waiting Slip - Token ${confirmedOrderData.tokenNumber}`,
+                        title: `Customer Token Slip (2-Inch) - Token ${confirmedOrderData.tokenNumber}`,
                         text: confirmedOrderData.customerReceiptText,
-                        secondaryText: confirmedOrderData.kitchenReceiptText,
+                        secondaryText: confirmedOrderData.counterReceiptText,
                         paperWidth: '58mm',
                         tokenNumber: confirmedOrderData.tokenNumber,
                         jobType: 'CUSTOMER_TOKEN',
@@ -786,25 +1028,25 @@ export const OrderPOS: React.FC = () => {
                       });
                       setTimeout(() => window.print(), 150);
                     }}
-                    className="flex-1 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 shadow-xs transition-colors"
+                    className="flex-1 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
                   >
                     <Printer className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Print Customer Slip</span>
+                    <span>Print Slip #1</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => {
                       openThermalReceipt({
-                        title: `Customer Waiting Slip - Token ${confirmedOrderData.tokenNumber}`,
+                        title: `Customer Token Slip (2-Inch) - Token ${confirmedOrderData.tokenNumber}`,
                         text: confirmedOrderData.customerReceiptText,
-                        secondaryText: confirmedOrderData.kitchenReceiptText,
+                        secondaryText: confirmedOrderData.counterReceiptText,
                         paperWidth: '58mm',
                         tokenNumber: confirmedOrderData.tokenNumber,
                         jobType: 'CUSTOMER_TOKEN',
                         initialTab: 'primary',
                       });
                     }}
-                    className="p-2 border border-stone-300 hover:bg-stone-100 text-stone-700 rounded-lg text-xs"
+                    className="p-2 border border-stone-300 hover:bg-stone-100 text-stone-700 rounded-lg text-xs cursor-pointer"
                     title="Preview Customer Slip"
                   >
                     <Eye className="w-3.5 h-3.5" />
@@ -812,25 +1054,25 @@ export const OrderPOS: React.FC = () => {
                 </div>
               </div>
 
-              {/* Receipt 2: Detailed Kitchen Preparation Slip */}
+              {/* Receipt 2: Itemized Order POS Slip */}
               <div className="border border-amber-200 rounded-xl p-3 bg-amber-50/40 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                      <ChefHat className="w-3.5 h-3.5 text-amber-700" />
-                      2. Kitchen KOT Ticket
+                      <Receipt className="w-3.5 h-3.5 text-amber-700" />
+                      2. Order POS Dispatch Slip
                     </span>
                     <span className="text-[10px] bg-amber-100 text-amber-800 font-mono px-1.5 py-0.5 rounded font-semibold">
-                      80mm / 58mm
+                      2-Inch (50.8mm)
                     </span>
                   </div>
                   <p className="text-[11px] text-amber-900 mb-2 leading-relaxed">
-                    Customer gives this <strong>detailed ticket</strong> with items &amp; notes directly to the <strong>kitchen preparation counter</strong>.
+                    Counter packing slip with item breakdown, weights, counts, and packaging details.
                   </p>
 
                   {/* Micro Preview */}
                   <div className="bg-[#fdfcf7] border border-amber-300/80 rounded p-2 text-[10px] font-mono max-h-36 overflow-y-auto leading-tight text-stone-800 select-text">
-                    <pre className="whitespace-pre-wrap">{confirmedOrderData.kitchenReceiptText}</pre>
+                    <pre className="whitespace-pre-wrap">{confirmedOrderData.counterReceiptText}</pre>
                   </div>
                 </div>
 
@@ -839,36 +1081,36 @@ export const OrderPOS: React.FC = () => {
                     type="button"
                     onClick={() => {
                       openThermalReceipt({
-                        title: `Kitchen Order Ticket - Token ${confirmedOrderData.tokenNumber}`,
+                        title: `Order POS Slip (2-Inch) - Token ${confirmedOrderData.tokenNumber}`,
                         text: confirmedOrderData.customerReceiptText,
-                        secondaryText: confirmedOrderData.kitchenReceiptText,
-                        paperWidth: '80mm',
+                        secondaryText: confirmedOrderData.counterReceiptText,
+                        paperWidth: '58mm',
                         tokenNumber: confirmedOrderData.tokenNumber,
-                        jobType: 'KITCHEN_TICKET',
+                        jobType: 'COUNTER_RECEIPT',
                         initialTab: 'secondary',
                       });
                       setTimeout(() => window.print(), 150);
                     }}
-                    className="flex-1 py-2 bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 shadow-xs transition-colors"
+                    className="flex-1 py-2 bg-amber-700 hover:bg-amber-600 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
                   >
                     <Printer className="w-3.5 h-3.5" />
-                    <span>Print Kitchen Receipt</span>
+                    <span>Print Slip #2</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => {
                       openThermalReceipt({
-                        title: `Kitchen Order Ticket - Token ${confirmedOrderData.tokenNumber}`,
+                        title: `Order POS Slip (2-Inch) - Token ${confirmedOrderData.tokenNumber}`,
                         text: confirmedOrderData.customerReceiptText,
-                        secondaryText: confirmedOrderData.kitchenReceiptText,
-                        paperWidth: '80mm',
+                        secondaryText: confirmedOrderData.counterReceiptText,
+                        paperWidth: '58mm',
                         tokenNumber: confirmedOrderData.tokenNumber,
-                        jobType: 'KITCHEN_TICKET',
+                        jobType: 'COUNTER_RECEIPT',
                         initialTab: 'secondary',
                       });
                     }}
-                    className="p-2 border border-stone-300 hover:bg-stone-100 text-stone-700 rounded-lg text-xs"
-                    title="Preview Kitchen Ticket"
+                    className="p-2 border border-amber-300 hover:bg-amber-100 text-amber-800 rounded-lg text-xs cursor-pointer"
+                    title="Preview Order Slip"
                   >
                     <Eye className="w-3.5 h-3.5" />
                   </button>
@@ -876,91 +1118,45 @@ export const OrderPOS: React.FC = () => {
               </div>
             </div>
 
-            {/* Bottom Actions */}
-            <div className="mt-5 pt-3 border-t border-stone-200 flex flex-col sm:flex-row items-center gap-2">
-              {/* Print Both Option */}
-              <button
-                type="button"
-                onClick={() => {
-                  openThermalReceipt({
-                    title: `Customer Slip - Token ${confirmedOrderData.tokenNumber}`,
-                    secondaryTitle: `Kitchen Ticket - Token ${confirmedOrderData.tokenNumber}`,
-                    text: confirmedOrderData.customerReceiptText,
-                    secondaryText: confirmedOrderData.kitchenReceiptText,
-                    paperWidth: '58mm',
-                    secondaryPaperWidth: '80mm',
-                    tokenNumber: confirmedOrderData.tokenNumber,
-                    jobType: 'DUAL_ORDER_RECEIPTS',
-                    initialTab: 'both',
-                  });
-                  setTimeout(() => window.print(), 150);
-                }}
-                className="w-full sm:flex-1 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors"
-              >
-                <SplitSquareVertical className="w-4 h-4 text-amber-400" />
-                <span>Print Both Receipts (Dual Print)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  openThermalReceipt({
-                    title: `Customer Slip - Token ${confirmedOrderData.tokenNumber}`,
-                    secondaryTitle: `Kitchen Ticket - Token ${confirmedOrderData.tokenNumber}`,
-                    text: confirmedOrderData.customerReceiptText,
-                    secondaryText: confirmedOrderData.kitchenReceiptText,
-                    paperWidth: '58mm',
-                    secondaryPaperWidth: '80mm',
-                    tokenNumber: confirmedOrderData.tokenNumber,
-                    jobType: 'DUAL_ORDER_RECEIPTS',
-                    initialTab: 'both',
-                  });
-                }}
-                className="w-full sm:w-auto px-4 py-2.5 border border-stone-300 hover:bg-stone-50 text-stone-700 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
-              >
-                <FileText className="w-3.5 h-3.5 text-stone-500" />
-                <span>View Full Preview</span>
-              </button>
-
+            {/* Modal Bottom Actions */}
+            <div className="mt-4 pt-3 border-t border-stone-200 flex items-center justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setConfirmedOrderData(null)}
-                className="w-full sm:w-auto px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors"
+                className="py-2.5 px-6 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xl transition-colors cursor-pointer shadow-xs"
               >
-                Next Customer Order
+                Close &amp; Next Order
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* RECENT ORDERS & RECEIPTS REPRINT MODAL */}
+      {/* ========================================================================= */}
+      {/* RECENT ORDERS & RECEIPTS REPRINT MODAL (For Order POS role) */}
+      {/* ========================================================================= */}
       {showRecentOrdersModal && (
-        <div className="fixed inset-0 z-50 bg-stone-900/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in duration-200 my-auto">
+        <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between pb-3 border-b border-stone-200">
-              <div className="flex items-center gap-2">
-                <History className="w-5 h-5 text-amber-600" />
-                <h3 className="text-base font-bold text-stone-900">
-                  Recent Orders &amp; Receipts
-                </h3>
+              <div>
+                <h3 className="text-base font-bold text-stone-900">Recent POS Orders &amp; Receipts</h3>
+                <p className="text-xs text-stone-500 font-mono">
+                  {orders.length} orders recorded · Sheetal Gajak Kulfi · 2-Inch (50.8mm) Queue Printing
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowRecentOrdersModal(false)}
-                className="p-1 text-stone-400 hover:text-stone-700 hover:bg-stone-100 rounded-md"
+                className="p-1.5 text-stone-400 hover:text-stone-700 hover:bg-stone-100 rounded-lg cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-stone-500 mt-2 mb-4">
-              Reprint the small Customer Waiting Slip, Kitchen Preparation Ticket, or Both for any recent token.
-            </p>
-
-            <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1">
+            <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1 mt-4">
               {orders.length === 0 ? (
-                <div className="text-center py-8 text-stone-400 text-xs">
+                <div className="text-center py-12 text-stone-400 text-xs">
                   No orders taken yet today.
                 </div>
               ) : (
@@ -969,11 +1165,11 @@ export const OrderPOS: React.FC = () => {
                     (pj) => pj.orderId === ord.id && pj.jobType === 'CUSTOMER_TOKEN'
                   );
                   const kitJob = printJobs.find(
-                    (pj) => pj.orderId === ord.id && pj.jobType === 'KITCHEN_TICKET'
+                    (pj) => pj.orderId === ord.id && (pj.jobType === 'KITCHEN_TICKET' || pj.jobType === 'COUNTER_RECEIPT')
                   );
 
-                  const customerText = tokenJob?.payload || `SHREE KRISHNA SWEETS\nCUSTOMER WAITING SLIP\nTOKEN: ${ord.tokenNumber}\nOrder: ${ord.id.slice(0, 10)}\nTotal: INR ${ord.finalAmount.toFixed(2)}\nPlease take a seat and wait for your token to be announced.\nThank you!`;
-                  const kitchenText = kitJob?.payload || `*** KITCHEN ORDER TICKET ***\nTOKEN: ${ord.tokenNumber}\nOrder: ${ord.id.slice(0, 10)}\nItems:\n${ord.items.map((i, idx) => `[ ] ${idx + 1}. ${i.productName} - ${i.quantity} ${i.unit}`).join('\n')}\n>>> PREPARE FRESH <<<`;
+                  const customerText = tokenJob?.payload || `SHEETAL GAJAK KULFI\nOpp. High Court, Shivaji Nagar\nIndore - 452003\n================================\n     CUSTOMER WAITING SLIP\n--------------------------------\n      *** TOKEN NUMBER ***\n           >>> ${ord.tokenNumber} <<<         \n--------------------------------\nOrder: ${ord.id.slice(0, 10)}\nDate: ${ord.businessDate}\nCounter: POS-1\n================================\n>> PLEASE WAIT FOR TOKEN CALL <<\nShow this token at billing counter\nThank You! Visit Again.\n`;
+                  const counterText = kitJob?.payload || `*** ORDER POS SLIP (2-INCH) ***\nSHEETAL GAJAK KULFI\nOpp. High Court, Shivaji Nagar\n================================\n*** TOKEN: ${ord.tokenNumber} ***\n================================\nOrder: ${ord.id.slice(0, 10)}\nItems:\n${ord.items.map((i, idx) => `${idx + 1}. ${i.productName} - ${i.quantity} ${i.unit} (INR ${i.totalPrice})`).join('\n')}\nTotal: INR ${ord.finalAmount.toFixed(2)}`;
 
                   return (
                     <div
@@ -989,13 +1185,11 @@ export const OrderPOS: React.FC = () => {
                             {new Date(ord.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                           </span>
                           <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                            ord.status === 'READY' || ord.status === 'COMPLETED'
+                            ord.paymentStatus === 'PAID'
                               ? 'bg-emerald-100 text-emerald-800'
-                              : ord.status === 'PREPARING'
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-stone-200 text-stone-700'
+                              : 'bg-amber-100 text-amber-800'
                           }`}>
-                            {ord.status}
+                            {ord.paymentStatus}
                           </span>
                         </div>
                         <span className="text-xs font-bold text-stone-900 font-mono">
@@ -1013,59 +1207,48 @@ export const OrderPOS: React.FC = () => {
                           type="button"
                           onClick={() => {
                             openThermalReceipt({
-                              title: `Customer Waiting Slip - Token ${ord.tokenNumber}`,
+                              title: `Customer Token Slip (2-Inch) - Token ${ord.tokenNumber}`,
                               text: customerText,
-                              secondaryText: kitchenText,
+                              secondaryText: counterText,
                               paperWidth: '58mm',
                               tokenNumber: ord.tokenNumber,
                               jobType: 'CUSTOMER_TOKEN',
                               initialTab: 'primary',
                             });
                           }}
-                          className="px-2.5 py-1.5 bg-white hover:bg-stone-100 text-stone-800 border border-stone-300 rounded text-xs font-medium flex items-center gap-1 transition-colors"
+                          className="px-2.5 py-1.5 bg-white hover:bg-stone-100 text-stone-800 border border-stone-300 rounded-lg text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
                         >
                           <Ticket className="w-3.5 h-3.5 text-stone-600" />
-                          <span>Customer Slip (58mm)</span>
+                          <span>Customer Slip (2")</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => {
                             openThermalReceipt({
-                              title: `Kitchen Order Ticket - Token ${ord.tokenNumber}`,
+                              title: `Order POS Slip (2-Inch) - Token ${ord.tokenNumber}`,
                               text: customerText,
-                              secondaryText: kitchenText,
-                              paperWidth: '80mm',
+                              secondaryText: counterText,
+                              paperWidth: '58mm',
                               tokenNumber: ord.tokenNumber,
-                              jobType: 'KITCHEN_TICKET',
+                              jobType: 'COUNTER_RECEIPT',
                               initialTab: 'secondary',
                             });
                           }}
-                          className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded text-xs font-medium flex items-center gap-1 transition-colors"
+                          className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-lg text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
                         >
-                          <ChefHat className="w-3.5 h-3.5 text-amber-700" />
-                          <span>Kitchen Ticket (80mm)</span>
+                          <Receipt className="w-3.5 h-3.5 text-amber-700" />
+                          <span>Order POS Slip (2")</span>
                         </button>
 
                         <button
                           type="button"
-                          onClick={() => {
-                            openThermalReceipt({
-                              title: `Customer Slip - Token ${ord.tokenNumber}`,
-                              secondaryTitle: `Kitchen Ticket - Token ${ord.tokenNumber}`,
-                              text: customerText,
-                              secondaryText: kitchenText,
-                              paperWidth: '58mm',
-                              secondaryPaperWidth: '80mm',
-                              tokenNumber: ord.tokenNumber,
-                              jobType: 'DUAL_ORDER_RECEIPTS',
-                              initialTab: 'both',
-                            });
-                          }}
-                          className="px-2.5 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded text-xs font-semibold flex items-center gap-1 transition-colors ml-auto"
+                          onClick={() => runSequentialPrintQueue(customerText, counterText, ord.tokenNumber)}
+                          className="px-2.5 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors ml-auto cursor-pointer"
+                          title="Print Customer Slip then Order Slip sequentially in a queue"
                         >
-                          <Printer className="w-3.5 h-3.5 text-amber-400" />
-                          <span>Print Both</span>
+                          <Play className="w-3.5 h-3.5 text-amber-400 fill-current" />
+                          <span>Print in Queue</span>
                         </button>
                       </div>
                     </div>
@@ -1078,7 +1261,7 @@ export const OrderPOS: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowRecentOrdersModal(false)}
-                className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded-lg"
+                className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
               >
                 Close
               </button>

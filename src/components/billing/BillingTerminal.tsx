@@ -122,8 +122,8 @@ export const BillingTerminal: React.FC = () => {
         amount: finalAmount,
         method: paymentMethod,
         splits,
-        cashierId: currentUser.id,
-        cashierName: currentUser.name,
+        cashierId: currentUser?.id || 'usr_cashier',
+        cashierName: currentUser?.name || 'Cashier',
         tenderedAmount: paymentMethod === 'CASH' && tenderedNum > 0 ? tenderedNum : undefined,
         transactionReference,
       });
@@ -150,8 +150,8 @@ export const BillingTerminal: React.FC = () => {
     if (!selectedOrder) return;
     try {
       await api.refundOrCancelOrder(selectedOrder.id, {
-        userId: currentUser.id,
-        userName: currentUser.name,
+        userId: currentUser?.id || 'usr_cashier',
+        userName: currentUser?.name || 'Cashier',
         reason: cancelReason.trim() || 'Cashier counter cancellation',
       });
       setShowCancelModal(false);
@@ -172,7 +172,8 @@ export const BillingTerminal: React.FC = () => {
             Cashier Billing Terminal
           </h1>
           <div className="flex items-center gap-2 text-xs text-stone-500 mt-1">
-            <span>Cashier: {currentUser.name}</span>
+            <span>Cashier: {currentUser?.name || 'Cashier'}</span>
+
             <span aria-hidden="true">·</span>
             <span>Billing Counter 1</span>
             <span aria-hidden="true">·</span>
@@ -330,7 +331,7 @@ export const BillingTerminal: React.FC = () => {
                     <div className="flex items-center gap-2 text-xs text-stone-500">
                       <span>Taken by {selectedOrder.createdByName}</span>
                       <span aria-hidden="true">·</span>
-                      <span>Kitchen Status: <strong>{selectedOrder.status}</strong></span>
+                      <span>Order Status: <strong>{selectedOrder.status}</strong></span>
                     </div>
                   </div>
                 </div>

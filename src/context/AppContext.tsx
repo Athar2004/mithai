@@ -12,7 +12,7 @@ import type {
 } from '../types/index.ts';
 import * as api from '../lib/api.ts';
 
-export type TerminalView = 'pos' | 'kitchen' | 'billing' | 'dashboard' | 'printers' | 'settings';
+export type TerminalView = 'pos' | 'billing' | 'dashboard' | 'printers' | 'settings';
 
 export interface CartItem {
   product: Product;
@@ -24,15 +24,18 @@ export interface CartItem {
 interface AppContextType {
   activeView: TerminalView;
   setActiveView: (view: TerminalView) => void;
-  currentUser: User;
+  currentUser: User | null;
   users: User[];
-  setCurrentUser: (user: User) => void;
+  setCurrentUser: (user: User | null) => void;
+  login: (email: string, password: string) => Promise<User>;
+  logout: () => void;
   categories: Category[];
   products: Product[];
   orders: Order[];
   printers: PrinterConfig[];
   printJobs: PrintJob[];
   settings: ShopSettings | null;
+
   analytics: DashboardMetrics | null;
   isRealtimeConnected: boolean;
   refreshData: () => Promise<void>;
@@ -116,11 +119,12 @@ function playBeep(frequency = 600, duration = 0.15, type: OscillatorType = 'sine
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeView, setActiveView] = useState<TerminalView>('pos');
   const [users, setUsers] = useState<User[]>([]);
-  const [currentUser, setCurrentUser] = useState<User>({
-    id: 'usr_pos1',
-    name: 'Rajesh Sharma',
-    role: 'pos_staff',
-    pin: '2222',
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    try {
+      const saved = localStorage.getItem('mithaiflow_auth_session');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return null;
   });
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -139,6 +143,71 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Modals
   const [activeThermalReceipt, setActiveThermalReceipt] = useState<AppContextType['activeThermalReceipt']>(null);
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+
+  // Role Based View Control
+  const handleSetActiveView = useCallback((view: TerminalView) => {
+    if (!currentUser) {
+      setActiveView('pos');
+      return;
+    }
+    const role = currentUser.role;
+    if (role === 'order_pos' || role === 'pos_staff') {
+      setActiveView('pos');
+      return;
+    }
+    if (role === 'cashier') {
+      if (view === 'pos' || view === 'billing') {
+        setActiveView(view);
+      } else {
+        setActiveView('billing');
+      }
+      return;
+    }
+    // Admin has full access
+    setActiveView(view);
+  }, [currentUser]);
+
+  // Keep view aligned with role
+  useEffect(() => {
+    if (!currentUser) return;
+    const role = currentUser.role;
+    if (role === 'order_pos' || role === 'pos_staff') {
+      if (activeView !== 'pos') {
+        setActiveView('pos');
+      }
+    } else if (role === 'cashier') {
+      if (activeView !== 'pos' && activeView !== 'billing') {
+        setActiveView('billing');
+      }
+    }
+  }, [currentUser, activeView]);
+
+  const login = useCallback(async (email: string, password: string): Promise<User> => {
+    const user = await api.loginUser(email, password);
+    setCurrentUser(user);
+    try {
+      localStorage.setItem('mithaiflow_auth_session', JSON.stringify(user));
+    } catch {}
+
+    const role = user.role;
+    if (role === 'order_pos' || role === 'pos_staff') {
+      setActiveView('pos');
+    } else if (role === 'cashier') {
+      setActiveView('billing');
+    } else if (role === 'admin') {
+      setActiveView('dashboard');
+    }
+    return user;
+  }, []);
+
+  const logout = useCallback(() => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem('mithaiflow_auth_session');
+    } catch {}
+    setActiveView('pos');
+    setCart([]);
+  }, []);
 
   const playChime = useCallback((type: 'order' | 'ready' | 'pay') => {
     if (!isAudioEnabled) return;
@@ -177,13 +246,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setAnalytics(anl);
       setUsers(usrs);
 
-      if (usrs.length > 0 && !currentUser.id) {
-        setCurrentUser(usrs[1] || usrs[0]);
+      if (currentUser?.email) {
+        const matched = usrs.find(u => u.email?.toLowerCase() === currentUser.email?.toLowerCase());
+        if (matched) {
+          setCurrentUser(matched);
+        }
       }
     } catch (err) {
       console.error('Failed to load application data:', err);
     }
-  }, [currentUser.id]);
+  }, [currentUser?.email]);
+
 
   useEffect(() => {
     refreshData();
@@ -311,10 +384,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     <AppContext.Provider
       value={{
         activeView,
-        setActiveView,
+        setActiveView: handleSetActiveView,
         currentUser,
         users,
         setCurrentUser,
+        login,
+        logout,
+
         categories,
         products,
         orders,

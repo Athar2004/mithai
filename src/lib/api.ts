@@ -64,8 +64,9 @@ function getClientStore(): ClientStore {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      // Ensure products have latest demo images
+      // Ensure products have latest demo images and users have latest credentials
       parsed.products = DEMO_PRODUCTS;
+      parsed.users = DEMO_USERS;
       return parsed;
     }
   } catch {
@@ -277,60 +278,48 @@ export async function createOrder(payload: {
 
     const customerSlipText = [
       '================================',
-      '     SHREE KRISHNA SWEETS       ',
-      ' Pure Ghee & Handcrafted Treats ',
-      '--------------------------------',
+      '      SHEETAL GAJAK KULFI       ',
+      '  Opp. High Court, Shivaji Nagar',
+      '        Indore - 452003         ',
+      '================================',
       '     CUSTOMER WAITING SLIP      ',
-      '    (Keep this slip with you)   ',
+      '  (Keep slip until token call)  ',
+      '--------------------------------',
       '',
       '      *** TOKEN NUMBER ***      ',
       `           >>> ${tokenNumber} <<<         `,
       '',
       '--------------------------------',
-      `Order No: ${newOrder.id.slice(0, 12)}`,
+      `Order No: ${newOrder.id.slice(0, 10)}`,
       `Date: ${todayStr}  Time: ${now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`,
       `Counter: POS-1`,
-      '--------------------------------',
-      'ITEM SUMMARY                 QTY',
-      '--------------------------------',
-      ...items.map(i => `${i.productName.slice(0, 20).padEnd(20)} ${i.quantity} ${i.unit}${i.specialInstructions ? `\n * Note: ${i.specialInstructions}` : ''}`),
-      '--------------------------------',
-      `EST. TOTAL:       INR ${finalAmount.toFixed(2)}`,
-      'PAYMENT:    UNPAID (Pay Cashier)',
       '================================',
-      ' >> PLEASE TAKE A SEAT & RELAX <<',
-      'WAIT FOR YOUR TOKEN NUMBER TO BE',
-      'ANNOUNCED ON DISPLAY / SPEAKER  ',
-      '',
-      '* Hand 2nd slip (KOT) to Kitchen *',
-      '* Keep this slip to claim order *',
-      '',
-      '     Thank You! Visit Again.    ',
+      '>> PLEASE WAIT FOR TOKEN CALL <<',
+      'Show this token at billing counter',
+      '    Thank You! Visit Again.     ',
       '================================',
     ].join('\n');
 
     const kitchenSlipText = [
-      '================================================',
-      '       *** KITCHEN ORDER TICKET (KOT) ***       ',
-      '              SHREE KRISHNA SWEETS              ',
-      '================================================',
-      `             *** TOKEN: ${tokenNumber} ***              `,
-      '================================================',
-      '      >> HAND OVER TO KITCHEN COUNTER <<        ',
-      '       (Customer copy to give to kitchen)       ',
-      '------------------------------------------------',
-      `Order ID: ${newOrder.id.slice(0, 12)}     Counter: POS-1`,
-      `Time: ${now.toLocaleTimeString('en-IN')}     Date: ${todayStr}`,
-      '------------------------------------------------',
-      'ITEM & SPECIFICATIONS                  EXACT QTY',
-      '------------------------------------------------',
-      ...items.map((i, idx) => `[ ] ${idx + 1}. ${i.productName.toUpperCase().padEnd(30)} ${i.quantity} ${i.unit}${i.hindiName ? `\n       (${i.hindiName})` : ''}${i.specialInstructions ? `\n    >>> NOTE: ${i.specialInstructions.toUpperCase()}` : ''}`),
-      '------------------------------------------------',
+      '================================',
+      '   *** ORDER POS SLIP (2 IN) ***',
+      '      SHEETAL GAJAK KULFI       ',
+      '  Opp. High Court, Shivaji Nagar',
+      '================================',
+      `      *** TOKEN: ${tokenNumber} ***      `,
+      '================================',
+      `Order: ${newOrder.id.slice(0, 10)}     POS-1`,
+      `Time: ${now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}  Date: ${todayStr}`,
+      '--------------------------------',
+      'ITEM & PACKING               QTY',
+      '--------------------------------',
+      ...items.map((i, idx) => `[ ] ${idx + 1}. ${i.productName.toUpperCase().slice(0, 20).padEnd(20)} ${i.quantity} ${i.unit}${i.hindiName ? `\n       (${i.hindiName})` : ''}`),
+      '--------------------------------',
       `TOTAL ITEMS: ${items.length} items`,
-      newOrder.notes ? `KITCHEN NOTE: ${newOrder.notes.toUpperCase()}` : '',
-      '================================================',
-      '      >>> PREPARE FRESH & PACK WITH CARE <<<    ',
-      '================================================',
+      `EST. TOTAL:   INR ${finalAmount.toFixed(2)}`,
+      '================================',
+      '    PACK FRESH & HAND OVER      ',
+      '================================',
     ].filter(Boolean).join('\n');
 
     const tokenJob: PrintJob = {
@@ -494,7 +483,7 @@ export async function processOrderPayment(orderId: string, payload: {
       printedAt: now.toISOString(),
       retryCount: 0,
       reprintCount: 0,
-      payload: `SHREE KRISHNA SWEETS\nTAX INVOICE #${invoiceNumber}\nToken: ${order.tokenNumber}\nAmount: ₹${order.finalAmount}\nPayment: ${payload.method}\nThank you for choosing pure taste!`,
+      payload: `SHEETAL GAJAK KULFI\nTAX INVOICE #${invoiceNumber}\nToken: ${order.tokenNumber}\nAmount: ₹${order.finalAmount}\nPayment: ${payload.method}\nOpposite High Court, Shivaji Nagar, Indore\nThank you for choosing Sheetal Gajak Kulfi!`,
     };
     store.printJobs.unshift(printJob);
 
@@ -650,6 +639,37 @@ export async function fetchUsers(): Promise<User[]> {
     return getClientStore().users;
   }
 }
+
+export async function loginUser(email: string, password: string): Promise<User> {
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.trim(), password: password.trim() }),
+    });
+    const data = await safeJson(res);
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || 'Invalid credentials');
+    }
+    return data.user;
+  } catch (err: unknown) {
+    // Client-side fallback for static Vercel deployment
+    const store = getClientStore();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+    const user = store.users.find(
+      u => u.email?.toLowerCase() === cleanEmail && u.password === cleanPassword
+    );
+    if (!user) {
+      const msg = err instanceof Error && err.message !== 'API unavailable' && err.message !== 'Failed to fetch'
+        ? err.message
+        : 'Invalid email or password';
+      throw new Error(msg);
+    }
+    return user;
+  }
+}
+
 
 export async function fetchAuditLogs(limit: number = 100): Promise<AuditLog[]> {
   try {

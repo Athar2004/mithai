@@ -50,7 +50,7 @@ export const SystemVerificationModal: React.FC = () => {
                 System Acceptance &amp; Integration Test Suite
               </h3>
               <p className="text-xs text-stone-500">
-                Automated end-to-end verification of POS, KDS, Cashier &amp; Thermal Printing
+                Automated end-to-end verification of POS, Cashier Billing &amp; Thermal Printing
               </p>
             </div>
           </div>

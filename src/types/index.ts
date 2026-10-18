@@ -1,10 +1,12 @@
-export type UserRole = 'admin' | 'pos_staff' | 'kitchen_staff' | 'cashier' | 'manager';
+export type UserRole = 'order_pos' | 'cashier' | 'admin' | 'pos_staff';
 
 export interface User {
   id: string;
   name: string;
+  email?: string;
+  password?: string;
   role: UserRole;
-  pin: string;
+  pin?: string;
 }
 
 export type UnitType = 'kg' | 'piece' | 'box' | 'portion';
@@ -125,7 +127,7 @@ export interface Invoice {
   cashierName: string;
 }
 
-export type PrintJobType = 'CUSTOMER_TOKEN' | 'KITCHEN_TICKET' | 'TAX_INVOICE';
+export type PrintJobType = 'CUSTOMER_TOKEN' | 'KITCHEN_TICKET' | 'TAX_INVOICE' | 'COUNTER_RECEIPT';
 export type PrintJobStatus = 'QUEUED' | 'PRINTING' | 'PRINTED' | 'FAILED';
 
 export interface PrintJob {

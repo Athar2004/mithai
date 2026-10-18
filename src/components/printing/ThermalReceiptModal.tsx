@@ -29,8 +29,8 @@ export const ThermalReceiptModal: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const primaryTitle = activeThermalReceipt.title || 'Customer Waiting Token';
-  const secondaryTitle = activeThermalReceipt.secondaryTitle || 'Kitchen Preparation Ticket';
+  const primaryTitle = activeThermalReceipt.title || 'Customer Waiting Token (2-Inch)';
+  const secondaryTitle = activeThermalReceipt.secondaryTitle || 'Order POS Dispatch Slip (2-Inch / 50.8mm)';
 
   return (
     <div className="fixed inset-0 z-50 bg-stone-900/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
@@ -91,7 +91,7 @@ export const ThermalReceiptModal: React.FC = () => {
               }`}
             >
               <SplitSquareVertical className="w-3.5 h-3.5 text-amber-600" />
-              <span>Both Receipts (Dual Print)</span>
+              <span>Both Receipts (Queue)</span>
             </button>
             <button
               onClick={() => setActiveTab('primary')}
@@ -99,7 +99,7 @@ export const ThermalReceiptModal: React.FC = () => {
                 activeTab === 'primary' ? 'bg-white text-stone-900 shadow-xs font-semibold' : 'text-stone-600 hover:text-stone-900'
               }`}
             >
-              Customer Waiting Slip (58mm)
+              Customer Slip (2-Inch)
             </button>
             <button
               onClick={() => setActiveTab('secondary')}
@@ -107,7 +107,7 @@ export const ThermalReceiptModal: React.FC = () => {
                 activeTab === 'secondary' ? 'bg-white text-stone-900 shadow-xs font-semibold' : 'text-stone-600 hover:text-stone-900'
               }`}
             >
-              Kitchen Order Ticket (80mm)
+              Order POS Slip (2-Inch)
             </button>
           </div>
         )}
@@ -119,7 +119,7 @@ export const ThermalReceiptModal: React.FC = () => {
             {(activeTab === 'both' || activeTab === 'primary') && (
               <div className="flex flex-col items-center thermal-slip-card">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-stone-600 mb-1 no-print">
-                  1. Small Customer Waiting Slip (58mm - Take &amp; Wait)
+                  1. Customer Token Slip (2-Inch / 50.8mm · Token Only)
                 </span>
                 <div
                   className="bg-[#fdfcf7] text-stone-900 shadow-md border-x border-stone-300 font-mono text-[11px] leading-tight p-4 select-text w-[280px]"
@@ -138,29 +138,29 @@ export const ThermalReceiptModal: React.FC = () => {
               </div>
             )}
 
-            {/* Print separator / cut line between slips */}
+            {/* Print separator / cut line between slips in queue */}
             {hasSecondary && activeTab === 'both' && (
               <div className="thermal-cut-separator hidden print:block" />
             )}
 
-            {/* Receipt 2: Kitchen Order Ticket */}
+            {/* Receipt 2: Order POS Slip */}
             {hasSecondary && (activeTab === 'both' || activeTab === 'secondary') && (
               <div className="flex flex-col items-center thermal-slip-card">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 mb-1 no-print">
-                  2. Detailed Kitchen Receipt (80mm - Give to Kitchen)
+                  2. Order POS Dispatch Slip (2-Inch / 50.8mm · Packing Slip)
                 </span>
                 <div
-                  className="bg-[#fdfcf7] text-stone-900 shadow-md border-x border-stone-300 font-mono text-[11px] leading-tight p-4 select-text w-[340px]"
+                  className="bg-[#fdfcf7] text-stone-900 shadow-md border-x border-stone-300 font-mono text-[11px] leading-tight p-4 select-text w-[280px]"
                   style={{ fontFamily: '"JetBrains Mono", Courier, monospace' }}
                 >
                   <div className="text-center text-stone-300 text-[8px] tracking-widest pb-2 select-none no-print">
-                    ▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼
+                    ▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼
                   </div>
                   <pre className="whitespace-pre-wrap font-inherit text-stone-900 break-words">
                     {activeThermalReceipt.secondaryText}
                   </pre>
                   <div className="text-center text-stone-300 text-[8px] tracking-widest pt-2 select-none no-print">
-                    ▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲
+                    ▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼
                   </div>
                 </div>
               </div>
@@ -173,7 +173,7 @@ export const ThermalReceiptModal: React.FC = () => {
           <button
             type="button"
             onClick={closeThermalReceipt}
-            className="sm:w-28 py-2.5 border border-stone-300 hover:bg-stone-50 text-stone-700 text-xs font-semibold rounded-lg transition-colors"
+            className="sm:w-28 py-2.5 border border-stone-300 hover:bg-stone-50 text-stone-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
           >
             Close
           </button>
@@ -186,10 +186,10 @@ export const ThermalReceiptModal: React.FC = () => {
                   setActiveTab('primary');
                   setTimeout(() => handlePrint(), 50);
                 }}
-                className="flex-1 min-w-[140px] py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-stone-200"
+                className="flex-1 min-w-[130px] py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-stone-200 cursor-pointer"
               >
                 <Printer className="w-3.5 h-3.5 text-stone-600" />
-                <span>Print Customer Slip</span>
+                <span>Print Slip #1 (2")</span>
               </button>
               <button
                 type="button"
@@ -197,10 +197,10 @@ export const ThermalReceiptModal: React.FC = () => {
                   setActiveTab('secondary');
                   setTimeout(() => handlePrint(), 50);
                 }}
-                className="flex-1 min-w-[140px] py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                className="flex-1 min-w-[130px] py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
                 <Printer className="w-3.5 h-3.5 text-amber-700" />
-                <span>Print Kitchen Ticket</span>
+                <span>Print Slip #2 (2")</span>
               </button>
               <button
                 type="button"
@@ -208,20 +208,20 @@ export const ThermalReceiptModal: React.FC = () => {
                   setActiveTab('both');
                   setTimeout(() => handlePrint(), 50);
                 }}
-                className="w-full sm:w-auto px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-lg shadow-sm flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full sm:w-auto px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-lg shadow-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
                 <Printer className="w-4 h-4 text-amber-400" />
-                <span>Print Both Receipts</span>
+                <span>Print Both in Queue</span>
               </button>
             </div>
           ) : (
             <button
               type="button"
               onClick={handlePrint}
-              className="flex-1 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-lg shadow-sm flex items-center justify-center gap-2 transition-colors"
+              className="flex-1 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-lg shadow-sm flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
               <Printer className="w-4 h-4 text-amber-400" />
-              <span>Print to Thermal Printer</span>
+              <span>Print to 2-Inch Thermal Printer</span>
             </button>
           )}
         </div>

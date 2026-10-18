@@ -49,21 +49,41 @@ export interface DatabaseSchema {
 }
 
 const DEFAULT_USERS: User[] = [
-  { id: 'usr_admin', name: 'Athar Khan (Admin)', role: 'admin', pin: '1111' },
-  { id: 'usr_pos1', name: 'Rajesh Sharma (POS Counter 1)', role: 'pos_staff', pin: '2222' },
-  { id: 'usr_kitchen', name: 'Master Chef Ramesh', role: 'kitchen_staff', pin: '3333' },
-  { id: 'usr_billing', name: 'Pooja Verma (Cashier)', role: 'cashier', pin: '4444' },
-  { id: 'usr_manager', name: 'Sunil Mehta (Store Manager)', role: 'manager', pin: '5555' },
+  {
+    id: 'usr_pos',
+    name: 'Order POS Staff',
+    email: 'pos@gmail.com',
+    password: 'pos@123',
+    role: 'order_pos',
+    pin: '1234',
+  },
+  {
+    id: 'usr_cashier',
+    name: 'Cashier & Biller',
+    email: 'cashier@gmail.com',
+    password: 'cashier@123',
+    role: 'cashier',
+    pin: '4321',
+  },
+  {
+    id: 'usr_admin',
+    name: 'Admin Manager',
+    email: 'admin@gmail.com',
+    password: 'admin@123',
+    role: 'admin',
+    pin: '9999',
+  },
 ];
 
+
 const DEFAULT_SETTINGS: ShopSettings = {
-  shopName: 'Shree Krishna Sweets & Namkeen',
-  tagline: 'Pure Desi Ghee Mithai & Artisan Snacks Since 1984',
-  address: 'Shop No. 14-16, Mithai Market, M.G. Road',
+  shopName: 'Sheetal Gajak Kulfi',
+  tagline: 'Famous Indore Gajak, Rabdi Kulfi & Traditional Sweets',
+  address: 'Opposite High Court, Shivaji Nagar',
   city: 'Indore',
   state: 'Madhya Pradesh',
-  pincode: '452001',
-  phone: '+91 98260 12345',
+  pincode: '452003',
+  phone: '+91 98260 54321',
   gstin: '23AAAAA0000A1Z5',
   fssaiNumber: '11418850000342',
   tokenPrefix: 'T-',
@@ -74,27 +94,17 @@ const DEFAULT_SETTINGS: ShopSettings = {
     cgstRate: 2.5,
     sgstRate: 2.5,
   },
-  footerMessage: 'Thank you for choosing pure taste! FSSAI Lic #11418850000342',
+  footerMessage: 'Thank you for choosing Sheetal Gajak Kulfi! Visit Again.',
 };
 
-const DEFAULT_CATEGORIES: Category[] = [
-  { id: 'dry-fruits', name: 'Dry Fruit Sweets', description: 'Premium cashew, pistachio, and almond sweets with silver vark', iconName: 'Sparkles', displayOrder: 1 },
-  { id: 'milk-sweets', name: 'Milk Sweets', description: 'Fresh khoya, mawa, and chenna sweets prepared daily', iconName: 'Milk', displayOrder: 2 },
-  { id: 'bengali-sweets', name: 'Bengali Sweets', description: 'Delicate sponge and chenna delicacies in aromatic syrup', iconName: 'HeartHandshake', displayOrder: 3 },
-  { id: 'traditional', name: 'Traditional Indian', description: 'Classic laddoos, halwas, and heritage regional sweets', iconName: 'Flame', displayOrder: 4 },
-  { id: 'namkeen', name: 'Namkeen & Farsan', description: 'Crispy sev, spiced mixtures, and savory snacks', iconName: 'Package', displayOrder: 5 },
-  { id: 'snacks', name: 'Samosa, Kachori & Snacks', description: 'Freshly fried hot snacks and chaat items from our kitchen', iconName: 'UtensilsCrossed', displayOrder: 6 },
-  { id: 'bakery', name: 'Bakery & Cookies', description: 'Desi ghee nan khatai, rusks, and dry cookies', iconName: 'Cookie', displayOrder: 7 },
-  { id: 'beverages', name: 'Beverages', description: 'Chilled lassi, badam milk, and aromatic masala chai', iconName: 'Coffee', displayOrder: 8 },
-];
+const DEFAULT_CATEGORIES: Category[] = DEMO_CATEGORIES;
 
 const DEFAULT_PRODUCTS: Product[] = DEMO_PRODUCTS;
-
 
 const DEFAULT_PRINTERS: PrinterConfig[] = [
   {
     id: 'prn_customer_token',
-    name: 'Token Counter Thermal Printer (POS-1)',
+    name: 'Customer Waiting Token Printer (2-Inch / 50.8mm)',
     targetRole: 'CUSTOMER_TOKEN',
     paperWidth: '58mm',
     interfaceType: 'SIMULATOR',
@@ -103,16 +113,16 @@ const DEFAULT_PRINTERS: PrinterConfig[] = [
   },
   {
     id: 'prn_kitchen_kds',
-    name: 'Kitchen Ticket Thermal Printer (KDS Room)',
+    name: 'Order POS Dispatch Slip Printer (2-Inch / 50.8mm)',
     targetRole: 'KITCHEN_TICKET',
-    paperWidth: '80mm',
+    paperWidth: '58mm',
     interfaceType: 'SIMULATOR',
     isConnected: true,
     autoPrint: true,
   },
   {
     id: 'prn_billing_invoice',
-    name: 'Billing Cashier Invoice Printer',
+    name: 'Billing Cashier Invoice Printer (80mm)',
     targetRole: 'BILLING_INVOICE',
     paperWidth: '80mm',
     interfaceType: 'SIMULATOR',

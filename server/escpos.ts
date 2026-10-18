@@ -40,58 +40,40 @@ export function formatQuantity(quantity: number, unit: string): string {
 }
 
 /**
- * Receipt 1: Customer Waiting Token (Small 58mm thermal slip)
- * Small receipt containing token no. or order no. that customer takes,
- * sits, and waits for their token number to be announced.
+ * Receipt 1: Customer Waiting Token Slip (2-Inch / 50.8mm / 58mm paper)
+ * Very short customer slip: mentions token number only, NO item details.
  */
 export function generateCustomerTokenReceipt(
   order: Order,
   settings: ShopSettings,
   paperWidth: '58mm' | '80mm' = '58mm'
 ): { text: string; escposHex: string } {
-  const width = paperWidth === '58mm' ? 32 : 48;
+  // 2-inch printable format (50.8mm = 32 character columns)
+  const width = paperWidth === '80mm' ? 48 : 32;
   const lines: string[] = [];
 
-  lines.push(centerText((settings.shopName || 'SHREE KRISHNA SWEETS').toUpperCase(), width));
-  if (settings.tagline) lines.push(centerText(settings.tagline, width));
+  const shop = (settings.shopName || 'SHEETAL GAJAK KULFI').toUpperCase();
+  lines.push(centerText(shop, width));
+  lines.push(centerText('Opp. High Court, Shivaji Nagar', width));
+  lines.push(centerText('Indore, MP - 452003', width));
   if (settings.phone) lines.push(centerText(`Ph: ${settings.phone}`, width));
   lines.push(doubleDivider(width));
   lines.push(centerText('CUSTOMER WAITING SLIP', width));
-  lines.push(centerText('(Keep this slip with you)', width));
+  lines.push(centerText('(Keep slip until token call)', width));
+  lines.push(divider(width, '-'));
   lines.push('');
   lines.push(centerText('*** TOKEN NUMBER ***', width));
   lines.push(centerText(`>>> ${order.tokenNumber} <<<`, width));
   lines.push('');
   lines.push(divider(width, '-'));
-  lines.push(formatLine(`Order No:`, order.id.slice(0, 12), width));
-  lines.push(formatLine(`Date: ${order.businessDate}`, new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }), width));
-  lines.push(formatLine(`Counter: ${order.counterId}`, `By: ${order.createdByName}`, width));
-  lines.push(divider(width, '-'));
-  lines.push(formatLine('ITEM SUMMARY', 'QTY', width));
-  lines.push(divider(width, '-'));
-
-  for (const item of order.items) {
-    const qtyStr = formatQuantity(item.quantity, item.unit);
-    lines.push(formatLine(item.productName.slice(0, width - 10), qtyStr, width));
-    if (item.specialInstructions) {
-      lines.push(` * Note: ${item.specialInstructions}`);
-    }
-  }
-
-  lines.push(divider(width, '-'));
-  lines.push(formatLine('EST. TOTAL:', `INR ${order.finalAmount.toFixed(2)}`, width));
-  lines.push(formatLine('PAYMENT:', 'UNPAID (Pay at Cashier)', width));
+  lines.push(formatLine('Order No:', order.id.slice(0, 10), width));
+  lines.push(formatLine('Date:', order.businessDate, width));
+  lines.push(formatLine('Time:', new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }), width));
+  lines.push(formatLine('Counter:', `${order.counterId} (${order.createdByName || 'POS'})`, width));
   lines.push(doubleDivider(width));
-  lines.push('');
-  lines.push(centerText('>> PLEASE TAKE A SEAT & RELAX <<', width));
-  lines.push(centerText('WAIT FOR YOUR TOKEN NUMBER TO BE', width));
-  lines.push(centerText('ANNOUNCED ON DISPLAY / SPEAKER', width));
-  lines.push('');
-  lines.push(centerText('* Hand 2nd slip (KOT) to Kitchen *', width));
-  lines.push(centerText('* Keep this slip to claim order *', width));
-  lines.push('');
+  lines.push(centerText('>> PLEASE WAIT FOR TOKEN CALL <<', width));
+  lines.push(centerText('Show this token at billing counter', width));
   lines.push(centerText('Thank You! Visit Again.', width));
-  lines.push(centerText(`[QR: ${order.tokenNumber}]`, width));
   lines.push('');
 
   const fullText = lines.filter(l => l !== undefined).join('\n');
@@ -101,29 +83,28 @@ export function generateCustomerTokenReceipt(
 }
 
 /**
- * Receipt 2: Detailed Kitchen Order Ticket (KOT / Preparation Ticket - 80mm or 58mm)
- * Kitchen receipt that customer will give to kitchen that includes all details of the order.
+ * Receipt 2: Order POS Slip / Counter Dispatch Ticket (2-Inch / 50.8mm / 58mm paper)
+ * Itemized slip for counter staff to pack and prepare order items.
  */
 export function generateKitchenTicketReceipt(
   order: Order,
   settings: ShopSettings,
-  paperWidth: '58mm' | '80mm' = '80mm'
+  paperWidth: '58mm' | '80mm' = '58mm'
 ): { text: string; escposHex: string } {
-  const width = paperWidth === '58mm' ? 32 : 48;
+  // 2-inch printable format (50.8mm = 32 characters)
+  const width = paperWidth === '80mm' ? 48 : 32;
   const lines: string[] = [];
 
-  lines.push(centerText('*** KITCHEN ORDER TICKET (KOT) ***', width));
-  lines.push(centerText((settings.shopName || 'SHREE KRISHNA SWEETS').toUpperCase(), width));
+  lines.push(centerText('*** ORDER POS SLIP (2-INCH) ***', width));
+  lines.push(centerText((settings.shopName || 'SHEETAL GAJAK KULFI').toUpperCase(), width));
+  lines.push(centerText('Opp. High Court, Shivaji Nagar, Indore', width));
   lines.push(doubleDivider(width));
   lines.push(centerText(`*** TOKEN: ${order.tokenNumber} ***`, width));
   lines.push(doubleDivider(width));
-  lines.push(centerText('>> HAND OVER TO KITCHEN COUNTER <<', width));
-  lines.push(centerText('(Customer copy to give to kitchen)', width));
+  lines.push(formatLine(`Order: ${order.id.slice(0, 10)}`, `Counter: ${order.counterId}`, width));
+  lines.push(formatLine(`Time: ${new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`, `Date: ${order.businessDate}`, width));
   lines.push(divider(width, '-'));
-  lines.push(formatLine(`Order ID: ${order.id.slice(0, 12)}`, `Counter: ${order.counterId}`, width));
-  lines.push(formatLine(`Time: ${new Date(order.createdAt).toLocaleTimeString('en-IN')}`, `Date: ${order.businessDate}`, width));
-  lines.push(divider(width, '-'));
-  lines.push(formatLine('ITEM & SPECIFICATIONS', 'EXACT QTY', width));
+  lines.push(formatLine('ITEM & PACKING', 'QTY', width));
   lines.push(divider(width, '-'));
 
   order.items.forEach((item, idx) => {
@@ -132,19 +113,13 @@ export function generateKitchenTicketReceipt(
     if (item.hindiName) {
       lines.push(`       (${item.hindiName})`);
     }
-    if (item.specialInstructions) {
-      lines.push(`    >>> NOTE: ${item.specialInstructions.toUpperCase()}`);
-    }
   });
 
   lines.push(divider(width, '-'));
   lines.push(formatLine('TOTAL ITEMS:', `${order.items.length} items`, width));
-  if (order.notes) {
-    lines.push(`KITCHEN NOTE: ${order.notes.toUpperCase()}`);
-  }
-
+  lines.push(formatLine('EST. TOTAL:', `INR ${order.finalAmount.toFixed(2)}`, width));
   lines.push(doubleDivider(width));
-  lines.push(centerText('>>> PREPARE FRESH & PACK WITH CARE <<<', width));
+  lines.push(centerText('>>> PACK FRESH & HAND OVER <<<', width));
   lines.push('');
 
   const fullText = lines.join('\n');

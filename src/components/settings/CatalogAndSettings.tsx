@@ -104,7 +104,7 @@ export const CatalogAndSettings: React.FC = () => {
   const handleSaveShopSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.updateSettings(shopForm, currentUser.name);
+      await api.updateSettings(shopForm, currentUser?.name || 'Admin');
       await refreshData();
       setSaveSuccessMessage('Shop settings saved successfully');
       setTimeout(() => setSaveSuccessMessage(null), 3000);

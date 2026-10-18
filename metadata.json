@@ -1,0 +1,6 @@
+{
+  "name": "MithaiFlow - Sweet Shop POS, Kitchen & Billing Platform",
+  "description": "Complete enterprise smart POS, kitchen preparation display (KDS), cashier billing terminal, thermal receipt printing agent, and real-time operations dashboard for Indian sweet and snack shops.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

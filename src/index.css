@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@layer base {
+  * {
+    border-color: var(--color-stone-200);
+  }
+
+  body {
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Thermal printer print styles */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  #printable-thermal-receipt,
+  #printable-thermal-receipt * {
+    visibility: visible !important;
+  }
+
+  #printable-thermal-receipt {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 80mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+    color: black !important;
+    font-size: 10pt !important;
+    line-height: 1.25 !important;
+  }
+
+  .thermal-slip-card {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin-bottom: 24px !important;
+    width: 100% !important;
+    background: white !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .thermal-cut-separator {
+    page-break-after: always !important;
+    break-after: page !important;
+    display: block !important;
+    height: 16px !important;
+    border-bottom: 2px dashed #000 !important;
+    margin-bottom: 16px !important;
+  }
+}

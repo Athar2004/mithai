@@ -337,6 +337,8 @@ export class Database {
     items: Array<{
       productId: string;
       quantity: number;
+      packWeightKg?: number;
+      packCount?: number;
       specialInstructions?: string;
     }>;
     notes?: string;
@@ -352,7 +354,6 @@ export class Database {
     const orderId = `ord_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
     let subtotal = 0;
-    let totalTax = 0;
     let hasKitchenItems = false;
 
     const validatedItems = orderData.items.map((raw, idx) => {
@@ -361,15 +362,16 @@ export class Database {
       if (!prod.isActive) throw new Error(`Product is not active: ${prod.name}`);
       if (raw.quantity <= 0) throw new Error(`Quantity must be positive for ${prod.name}`);
 
-      const qty = Number(raw.quantity);
-      // calculate line subtotal
-      const lineSubtotal = Math.round(qty * prod.pricePerUnit * 100) / 100;
-      const taxRate = prod.taxRatePercent || 5;
-      const lineTax = Math.round((lineSubtotal * (taxRate / 100)) * 100) / 100;
-      const lineTotal = lineSubtotal + lineTax;
+      const packCount = raw.packCount && raw.packCount > 0 ? Number(raw.packCount) : 1;
+      const packWeightKg = raw.packWeightKg ? Number(raw.packWeightKg) : undefined;
+      const qty = packWeightKg ? Math.round(packWeightKg * packCount * 1000) / 1000 : Number(raw.quantity);
 
-      subtotal += lineSubtotal;
-      totalTax += lineTax;
+      // All items are inclusive of GST in POS
+      const lineTotal = packWeightKg
+        ? Math.round(packCount * (packWeightKg * prod.pricePerUnit) * 100) / 100
+        : Math.round(qty * prod.pricePerUnit * 100) / 100;
+
+      subtotal += lineTotal;
 
       if (prod.requiresKitchen) {
         hasKitchenItems = true;
@@ -381,17 +383,19 @@ export class Database {
         productName: prod.name,
         hindiName: prod.hindiName,
         unit: prod.unit,
+        packWeightKg,
+        packCount,
         quantity: qty,
         unitPrice: prod.pricePerUnit,
-        taxRatePercent: taxRate,
-        taxAmount: lineTax,
+        taxRatePercent: prod.taxRatePercent || 5,
+        taxAmount: 0, // GST calculated exclusively on cashier bill
         discountAmount: 0,
         totalPrice: lineTotal,
         specialInstructions: raw.specialInstructions?.trim() || undefined,
       };
     });
 
-    const finalAmount = Math.round((subtotal + totalTax) * 100) / 100;
+    const finalAmount = Math.round(subtotal * 100) / 100;
 
     const newOrder: Order = {
       id: orderId,
@@ -412,8 +416,8 @@ export class Database {
         },
       ],
       items: validatedItems,
-      subtotal: Math.round(subtotal * 100) / 100,
-      totalTax: Math.round(totalTax * 100) / 100,
+      subtotal: finalAmount,
+      totalTax: 0, // Inclusive GST, broken down on cashier bill
       totalDiscount: 0,
       finalAmount,
       paymentStatus: 'UNPAID',
@@ -481,6 +485,7 @@ export class Database {
     cashierName: string;
     tenderedAmount?: number;
     transactionReference?: string;
+    discountAmount?: number;
   }): { payment: Payment; invoice: Invoice; order: Order } {
     const order = this.data.orders.find(o => o.id === params.orderId);
     if (!order) throw new Error('Order not found');
@@ -491,8 +496,14 @@ export class Database {
       throw new Error('Cannot pay for a cancelled order');
     }
 
-    if (params.amount < order.finalAmount) {
-      throw new Error(`Payment amount (₹${params.amount}) is less than order total (₹${order.finalAmount})`);
+    const discountAmount = params.discountAmount && params.discountAmount > 0
+      ? Math.round(Number(params.discountAmount) * 100) / 100
+      : 0;
+
+    const netPayable = Math.max(0, Math.round((order.subtotal - discountAmount) * 100) / 100);
+
+    if (params.amount < netPayable) {
+      throw new Error(`Payment amount (₹${params.amount}) is less than net payable (₹${netPayable})`);
     }
 
     let change = 0;
@@ -518,12 +529,15 @@ export class Database {
     };
     this.data.payments.unshift(payment);
 
-    // Generate Invoice
+    // Generate Invoice with 5% Inclusive GST Breakdown:
+    // Taxable Goods = Net Payable / 1.05
+    // Total Tax = Net Payable - Taxable Goods
+    // CGST = Total Tax / 2, SGST = Total Tax / 2
     const invoiceNumber = this.generateNextInvoiceNumber();
-    const cgstRate = this.data.settings.taxConfig.cgstRate;
-    const sgstRate = this.data.settings.taxConfig.sgstRate;
-    const cgstAmt = Math.round((order.subtotal * (cgstRate / 100)) * 100) / 100;
-    const sgstAmt = Math.round((order.subtotal * (sgstRate / 100)) * 100) / 100;
+    const taxableGoods = Math.round((netPayable / 1.05) * 100) / 100;
+    const totalGst = Math.round((netPayable - taxableGoods) * 100) / 100;
+    const cgstAmt = Math.round((totalGst / 2) * 100) / 100;
+    const sgstAmt = Math.round((totalGst - cgstAmt) * 100) / 100;
 
     const invoice: Invoice = {
       id: `inv_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -533,12 +547,12 @@ export class Database {
       businessDate: order.businessDate,
       timestamp: new Date().toISOString(),
       items: order.items,
-      subtotal: order.subtotal,
+      subtotal: taxableGoods,
       cgstAmount: cgstAmt,
       sgstAmount: sgstAmt,
-      totalTax: order.totalTax,
-      discountAmount: order.totalDiscount,
-      totalAmount: order.finalAmount,
+      totalTax: totalGst,
+      discountAmount,
+      totalAmount: netPayable,
       paymentMethod: params.method,
       paymentReference: params.transactionReference,
       cashierName: params.cashierName,
@@ -546,6 +560,8 @@ export class Database {
     this.data.invoices.unshift(invoice);
 
     // Update order
+    order.totalDiscount = discountAmount;
+    order.finalAmount = netPayable;
     order.paymentStatus = 'PAID';
     order.paymentId = payment.id;
     order.invoiceId = invoice.id;

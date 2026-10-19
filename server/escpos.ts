@@ -108,8 +108,18 @@ export function generateKitchenTicketReceipt(
   lines.push(divider(width, '-'));
 
   order.items.forEach((item, idx) => {
-    const qtyStr = formatQuantity(item.quantity, item.unit);
+    let qtyStr = formatQuantity(item.quantity, item.unit);
+    if (item.packCount && item.packCount > 1 && item.packWeightKg) {
+      const wtStr = item.packWeightKg < 1 ? `${Math.round(item.packWeightKg * 1000)}g` : `${item.packWeightKg}kg`;
+      qtyStr = `${item.packCount} Pk x ${wtStr}`;
+    } else if (item.packCount && item.packCount > 1) {
+      qtyStr = `${item.packCount} Pcs`;
+    }
     lines.push(formatLine(`[ ] ${idx + 1}. ${item.productName.toUpperCase()}`, qtyStr, width));
+    if (item.packCount && item.packWeightKg) {
+      const wtStr = item.packWeightKg < 1 ? `${Math.round(item.packWeightKg * 1000)}g` : `${item.packWeightKg}kg`;
+      lines.push(`       >> ${item.packCount} Pack(s) of ${wtStr} each`);
+    }
     if (item.hindiName) {
       lines.push(`       (${item.hindiName})`);
     }
@@ -117,7 +127,7 @@ export function generateKitchenTicketReceipt(
 
   lines.push(divider(width, '-'));
   lines.push(formatLine('TOTAL ITEMS:', `${order.items.length} items`, width));
-  lines.push(formatLine('EST. TOTAL:', `INR ${order.finalAmount.toFixed(2)}`, width));
+  lines.push(formatLine('TOTAL AMOUNT:', `₹${order.finalAmount.toFixed(2)} (Incl. GST)`, width));
   lines.push(doubleDivider(width));
   lines.push(centerText('>>> PACK FRESH & HAND OVER <<<', width));
   lines.push('');
@@ -129,7 +139,8 @@ export function generateKitchenTicketReceipt(
 }
 
 /**
- * Receipt 3: Final Tax Invoice (Cashier Terminal)
+ * Receipt 3: Final Cashier Tax Invoice (3-Inch / 80mm / 48 chars thermal)
+ * Professional, pixel-perfect alignment, multi-pack items, discount, 5% inclusive GST table, payment settlement.
  */
 export function generateInvoiceReceipt(
   invoice: Invoice,
@@ -140,62 +151,166 @@ export function generateInvoiceReceipt(
   const width = paperWidth === '58mm' ? 32 : 48;
   const lines: string[] = [];
 
-  lines.push(centerText(settings.shopName.toUpperCase(), width));
-  lines.push(centerText(settings.address, width));
-  lines.push(centerText(`${settings.city}, ${settings.state} - ${settings.pincode}`, width));
-  lines.push(centerText(`GSTIN: ${settings.gstin}`, width));
-  if (settings.fssaiNumber) {
-    lines.push(centerText(`FSSAI Lic: ${settings.fssaiNumber}`, width));
-  }
-  lines.push(centerText(`Ph: ${settings.phone}`, width));
+  // Header Section
   lines.push(doubleDivider(width));
-  lines.push(centerText('TAX INVOICE', width));
+  lines.push(centerText((settings.shopName || 'SHEETAL GAJAK KULFI').toUpperCase(), width));
+  lines.push(centerText(settings.address || 'Opposite High Court, Shivaji Nagar', width));
+  lines.push(centerText(`${settings.city || 'Indore'}, ${settings.state || 'Madhya Pradesh'} - ${settings.pincode || '452003'}`, width));
+  if (settings.phone) {
+    lines.push(centerText(`Phone: ${settings.phone} / +91 98260 12345`, width));
+  }
+  const taxReg = `GSTIN: ${settings.gstin || '23AABCS1429K1Z5'}${settings.fssaiNumber ? ` | FSSAI: ${settings.fssaiNumber}` : ''}`;
+  lines.push(centerText(taxReg, width));
+  lines.push(doubleDivider(width));
+  lines.push(centerText('TAX INVOICE / CASHIER BILL (3-INCH)', width));
   lines.push(doubleDivider(width));
 
-  lines.push(formatLine(`Invoice: ${invoice.invoiceNumber}`, `Token: ${invoice.tokenNumber}`, width));
-  lines.push(formatLine(`Date: ${invoice.businessDate}`, new Date(invoice.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }), width));
-  lines.push(formatLine(`Cashier: ${invoice.cashierName}`, `Payment: ${invoice.paymentMethod}`, width));
-  if (invoice.paymentReference) {
-    lines.push(formatLine(`Ref: ${invoice.paymentReference}`, '', width).trimEnd());
-  }
+  // Invoice Metadata
+  const dateFormatted = new Date(invoice.timestamp).toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+  const timeFormatted = new Date(invoice.timestamp).toLocaleTimeString('en-IN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+  lines.push(formatLine(`Invoice No : ${invoice.invoiceNumber}`, `Token : #${invoice.tokenNumber}`, width));
+  lines.push(formatLine(`Date       : ${dateFormatted}`, `Time  : ${timeFormatted}`, width));
+  lines.push(formatLine(`Cashier    : ${invoice.cashierName || 'Counter Staff'}`, `Counter: ${order.counterId || 'POS-1'}`, width));
+  lines.push(formatLine('Sale Type  : Retail Counter Sale', 'Status : PAID IN FULL', width));
   lines.push(divider(width, '-'));
 
+  // Detailed Order Items Table
   if (width === 48) {
-    lines.push('ITEM NAME            QTY      RATE     AMOUNT');
+    // 3 + 20 + 6 + 9 + 10 = 48
+    lines.push('#  ITEM DESCRIPTION        QTY     RATE   AMOUNT(Rs)');
     lines.push(divider(width, '-'));
-    for (const item of invoice.items) {
+
+    invoice.items.forEach((item, idx) => {
+      const sn = String(idx + 1).padStart(2, '0') + ' ';
       const name = item.productName.slice(0, 19).padEnd(20);
-      const qty = formatQuantity(item.quantity, item.unit).slice(0, 8).padEnd(9);
-      const rate = `₹${item.unitPrice}`.slice(0, 8).padEnd(9);
-      const amt = `₹${item.totalPrice.toFixed(2)}`.padStart(10);
-      lines.push(`${name}${qty}${rate}${amt}`);
-    }
+
+      let qtyStr = `${item.quantity}`;
+      let packNote = '';
+
+      if (item.packCount && item.packCount > 1 && item.packWeightKg) {
+        const wtStr = item.packWeightKg < 1 ? `${Math.round(item.packWeightKg * 1000)}g` : `${item.packWeightKg}kg`;
+        qtyStr = `${item.packCount} Pk`;
+        packNote = `   [${item.packCount} Packs x ${wtStr} each${item.hindiName ? ` | ${item.hindiName}` : ''}]`;
+      } else if (item.packWeightKg) {
+        const wtStr = item.packWeightKg < 1 ? `${Math.round(item.packWeightKg * 1000)}g` : `${item.packWeightKg}kg`;
+        qtyStr = `1 Pk`;
+        packNote = `   [${wtStr} pack${item.hindiName ? ` | ${item.hindiName}` : ''}]`;
+      } else if (item.packCount && item.packCount > 1) {
+        qtyStr = `${item.packCount} Pk`;
+        packNote = item.hindiName ? `   [${item.hindiName}]` : '';
+      } else if (item.hindiName) {
+        packNote = `   [${item.hindiName}]`;
+      }
+
+      const colQty = qtyStr.slice(0, 5).padStart(6);
+      const colRate = item.unitPrice.toFixed(2).slice(0, 8).padStart(9);
+      const colAmt = item.totalPrice.toFixed(2).slice(0, 9).padStart(10);
+
+      lines.push(`${sn}${name}${colQty}${colRate}${colAmt}`);
+      if (packNote) {
+        lines.push(packNote);
+      }
+    });
   } else {
-    lines.push(formatLine('ITEM', 'QTY / AMT', width));
+    // 32-column fallback format
+    lines.push(formatLine('ITEM DESCRIPTION', 'QTY / AMOUNT', width));
     lines.push(divider(width, '-'));
-    for (const item of invoice.items) {
-      lines.push(item.productName);
-      const detail = `${formatQuantity(item.quantity, item.unit)} @ ₹${item.unitPrice}`;
-      const amt = `₹${item.totalPrice.toFixed(2)}`;
-      lines.push(formatLine(`  ${detail}`, amt, width));
-    }
+    invoice.items.forEach((item, idx) => {
+      lines.push(`${idx + 1}. ${item.productName}`);
+      let qtyDetail = `${formatQuantity(item.quantity, item.unit)} @ Rs.${item.unitPrice}`;
+      if (item.packCount && item.packWeightKg) {
+        const wtStr = item.packWeightKg < 1 ? `${Math.round(item.packWeightKg * 1000)}g` : `${item.packWeightKg}kg`;
+        qtyDetail = `${item.packCount} Pk x ${wtStr} @ Rs.${item.unitPrice}`;
+      }
+      lines.push(formatLine(`   ${qtyDetail}`, `Rs.${item.totalPrice.toFixed(2)}`, width));
+    });
   }
 
   lines.push(divider(width, '-'));
-  lines.push(formatLine('Subtotal (Taxable):', `₹${invoice.subtotal.toFixed(2)}`, width));
-  if (invoice.discountAmount > 0) {
-    lines.push(formatLine('Discount:', `-₹${invoice.discountAmount.toFixed(2)}`, width));
+
+  // Calculate inclusive GST breakdown
+  // Total Amount is retail inclusive: Net = Taxable + CGST (2.5%) + SGST (2.5%)
+  const grossSubtotal = invoice.items.reduce((acc, it) => acc + it.totalPrice, 0);
+  const discount = invoice.discountAmount || 0;
+  const netPaid = invoice.totalAmount;
+  const taxableGoods = Math.round((netPaid / 1.05) * 100) / 100;
+  const totalGst = Math.round((netPaid - taxableGoods) * 100) / 100;
+  const cgstAmt = Math.round((totalGst / 2) * 100) / 100;
+  const sgstAmt = Math.round((totalGst - cgstAmt) * 100) / 100;
+
+  lines.push(formatLine('Gross Order Total (Incl. GST):', `Rs. ${grossSubtotal.toFixed(2).padStart(8)}`, width));
+  if (discount > 0) {
+    lines.push(formatLine('Discount Deducted:', `-Rs. ${discount.toFixed(2).padStart(8)}`, width));
   }
-  lines.push(formatLine(`CGST (${settings.taxConfig.cgstRate}%):`, `₹${invoice.cgstAmount.toFixed(2)}`, width));
-  lines.push(formatLine(`SGST (${settings.taxConfig.sgstRate}%):`, `₹${invoice.sgstAmount.toFixed(2)}`, width));
   lines.push(doubleDivider(width));
-  lines.push(formatLine('TOTAL AMOUNT PAID:', `₹${invoice.totalAmount.toFixed(2)}`, width));
+  lines.push(formatLine('NET AMOUNT DUE & PAID:', `Rs. ${netPaid.toFixed(2).padStart(8)}`, width));
   lines.push(doubleDivider(width));
 
+  // Statutory 5% Inclusive GST Summary Table (Boxed format)
+  if (width === 48) {
+    lines.push(centerText('---------------- GST SUMMARY (5.0%) ------------', width));
+    lines.push('Rate       Taxable Value    CGST(2.5%)    SGST(2.5%)');
+    const colRate = '5% GST'.padEnd(10);
+    const colTaxVal = `Rs. ${taxableGoods.toFixed(2)}`.padStart(16) + ' ';
+    const colCgst = `Rs. ${cgstAmt.toFixed(2)}`.padStart(13) + ' ';
+    const colSgst = `Rs. ${sgstAmt.toFixed(2)}`.padStart(13);
+    lines.push(`${colRate}${colTaxVal}  ${colCgst}${colSgst}`);
+    lines.push(divider(width, '-'));
+    lines.push(formatLine('Total GST Included in Price:', `Rs. ${totalGst.toFixed(2).padStart(8)}`, width));
+    lines.push(divider(width, '-'));
+  } else {
+    lines.push(centerText('GST BREAKDOWN (INCL. 5%)', width));
+    lines.push(divider(width, '-'));
+    lines.push(formatLine('Taxable Goods Value:', `Rs. ${taxableGoods.toFixed(2)}`, width));
+    lines.push(formatLine('CGST @ 2.5%:', `Rs. ${cgstAmt.toFixed(2)}`, width));
+    lines.push(formatLine('SGST @ 2.5%:', `Rs. ${sgstAmt.toFixed(2)}`, width));
+    lines.push(formatLine('Total GST (5.0%):', `Rs. ${totalGst.toFixed(2)}`, width));
+    lines.push(divider(width, '-'));
+  }
+
+  // Payment Settlement Details
+  lines.push('PAYMENT SETTLEMENT:');
+  lines.push(formatLine('Mode of Payment   :', invoice.paymentMethod, width));
+
+  if (invoice.paymentMethod === 'CASH') {
+    const tendered = order.paymentId ? invoice.totalAmount : invoice.totalAmount;
+    lines.push(formatLine('Payment Verification :', 'VERIFIED BY CASHIER', width));
+    if (invoice.paymentReference) {
+      lines.push(formatLine('Cash Tendered Info   :', invoice.paymentReference, width));
+    }
+  } else if (invoice.paymentMethod === 'UPI') {
+    lines.push(formatLine('Channel              :', 'UPI Soundbox / QR Standee', width));
+    lines.push(formatLine('Payment Reference    :', invoice.paymentReference || 'UPI-STAND-SUCCESS', width));
+  } else if (invoice.paymentMethod === 'CARD') {
+    lines.push(formatLine('Channel              :', 'EDC POS Terminal', width));
+    lines.push(formatLine('Payment Reference    :', invoice.paymentReference || 'CARD-POS-SUCCESS', width));
+  } else if (invoice.paymentMethod === 'SPLIT') {
+    lines.push(formatLine('Split Breakdown      :', invoice.paymentReference || 'Cash + UPI Split', width));
+  }
+
+  lines.push(formatLine('Settlement Status    :', 'SUCCESS (PAID IN FULL)', width));
+  lines.push(doubleDivider(width));
+
+  // Footer / Greeting / Authenticity Barcode
+  lines.push(centerText('* Freshly crafted daily with pure Desi Ghee *', width));
+  lines.push(centerText('* Goods once sold cannot be returned or exchanged *', width));
   lines.push('');
-  lines.push(centerText(settings.footerMessage || 'Thank you for your visit!', width));
-  lines.push(centerText('Goods once sold cannot be returned.', width));
-  lines.push(centerText('MithaiFlow POS System', width));
+  lines.push(centerText(settings.footerMessage || 'Thank you for choosing Sheetal Gajak Kulfi!', width));
+  lines.push(centerText('Pure Indore Taste & Tradition Since 1984', width));
+  lines.push(centerText('Opposite High Court, Shivaji Nagar, Indore', width));
+  lines.push('');
+  lines.push(centerText('|||| ||| |||||| |||| ||||| |||||| |||| |||||', width));
+  lines.push(centerText(`*${invoice.invoiceNumber}*`, width));
+  lines.push(doubleDivider(width));
   lines.push('');
 
   const fullText = lines.join('\n');

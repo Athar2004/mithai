@@ -16,9 +16,11 @@ export type TerminalView = 'pos' | 'billing' | 'dashboard' | 'printers' | 'setti
 
 export interface CartItem {
   product: Product;
-  quantity: number; // e.g. 0.25 (for 250g) or 2 (for 2 pcs)
+  packWeightKg?: number; // e.g. 0.25 (for 250g pack)
+  packCount: number; // e.g. 2 (for 2 packs of 250g)
+  quantity: number; // total quantity
   specialInstructions?: string;
-  lineTotal: number;
+  lineTotal: number; // GST inclusive total
 }
 
 interface AppContextType {
@@ -42,8 +44,12 @@ interface AppContextType {
 
   // Cart
   cart: CartItem[];
-  addToCart: (product: Product, quantity: number, instructions?: string) => void;
-  updateCartItemQuantity: (index: number, quantity: number) => void;
+  addToCart: (
+    product: Product,
+    optionsOrQty: { packWeightKg?: number; packCount?: number; quantity?: number; instructions?: string } | number,
+    instructions?: string
+  ) => void;
+  updateCartItemQuantity: (index: number, newPackCount: number) => void;
   removeCartItem: (index: number) => void;
   clearCart: () => void;
   cartSubtotal: number;
@@ -303,47 +309,86 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [refreshData, playChime]);
 
-  // Cart Management
-  const addToCart = (product: Product, quantity: number, instructions?: string) => {
+  // Cart Management - Multi-Pack Weight Model & GST Inclusive
+  const addToCart = (
+    product: Product,
+    optionsOrQty: { packWeightKg?: number; packCount?: number; quantity?: number; instructions?: string } | number,
+    instructions?: string
+  ) => {
+    let packWeightKg: number | undefined;
+    let packCount = 1;
+    let quantity = 1;
+    let specialInstructions = instructions;
+
+    if (typeof optionsOrQty === 'number') {
+      quantity = optionsOrQty;
+      packCount = quantity;
+      if (product.unit === 'kg') {
+        packWeightKg = quantity;
+        packCount = 1;
+      }
+    } else {
+      packWeightKg = optionsOrQty.packWeightKg;
+      packCount = optionsOrQty.packCount && optionsOrQty.packCount > 0 ? optionsOrQty.packCount : 1;
+      quantity = optionsOrQty.quantity || (packWeightKg ? Math.round(packWeightKg * packCount * 1000) / 1000 : packCount);
+      specialInstructions = optionsOrQty.instructions || instructions;
+    }
+
     if (quantity <= 0) return;
+
     setCart(prev => {
-      // Find if item already exists with matching instructions
+      // Find existing item with matching productId AND matching packWeightKg
       const existingIdx = prev.findIndex(
-        item => item.product.id === product.id && (item.specialInstructions || '') === (instructions || '')
+        item => item.product.id === product.id &&
+          ((item.packWeightKg === undefined && packWeightKg === undefined) ||
+           (item.packWeightKg !== undefined && packWeightKg !== undefined && Math.abs(item.packWeightKg - packWeightKg) < 0.001)) &&
+          (item.specialInstructions || '') === (specialInstructions || '')
       );
 
       const pricePerUnit = product.pricePerUnit;
-      const taxRate = product.taxRatePercent || 5;
 
       if (existingIdx !== -1) {
+        // Customer needs same weight 2 pack -> do NOT increase weight, increase pack count!
         const copy = [...prev];
-        const newQty = Math.round((copy[existingIdx].quantity + quantity) * 100) / 100;
-        const sub = Math.round(newQty * pricePerUnit * 100) / 100;
-        const tax = Math.round((sub * (taxRate / 100)) * 100) / 100;
+        const existing = copy[existingIdx];
+        const newPackCount = (existing.packCount || 1) + packCount;
+        const newTotalQty = packWeightKg
+          ? Math.round(packWeightKg * newPackCount * 1000) / 1000
+          : newPackCount;
+        const lineTotal = packWeightKg
+          ? Math.round(newPackCount * (packWeightKg * pricePerUnit) * 100) / 100
+          : Math.round(newPackCount * pricePerUnit * 100) / 100;
+
         copy[existingIdx] = {
-          ...copy[existingIdx],
-          quantity: newQty,
-          lineTotal: sub + tax,
+          ...existing,
+          packCount: newPackCount,
+          quantity: newTotalQty,
+          lineTotal,
         };
         return copy;
       }
 
-      const sub = Math.round(quantity * pricePerUnit * 100) / 100;
-      const tax = Math.round((sub * (taxRate / 100)) * 100) / 100;
+      // New line item
+      const lineTotal = packWeightKg
+        ? Math.round(packCount * (packWeightKg * pricePerUnit) * 100) / 100
+        : Math.round(packCount * pricePerUnit * 100) / 100;
+
       return [
         ...prev,
         {
           product,
+          packWeightKg,
+          packCount,
           quantity,
-          specialInstructions: instructions?.trim(),
-          lineTotal: sub + tax,
+          specialInstructions: specialInstructions?.trim(),
+          lineTotal,
         },
       ];
     });
   };
 
-  const updateCartItemQuantity = (index: number, quantity: number) => {
-    if (quantity <= 0) {
+  const updateCartItemQuantity = (index: number, newPackCount: number) => {
+    if (newPackCount <= 0) {
       removeCartItem(index);
       return;
     }
@@ -351,12 +396,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const copy = [...prev];
       const item = copy[index];
       if (!item) return prev;
-      const sub = Math.round(quantity * item.product.pricePerUnit * 100) / 100;
-      const tax = Math.round((sub * ((item.product.taxRatePercent || 5) / 100)) * 100) / 100;
+      const packWeightKg = item.packWeightKg;
+      const newTotalQty = packWeightKg
+        ? Math.round(packWeightKg * newPackCount * 1000) / 1000
+        : newPackCount;
+      const lineTotal = packWeightKg
+        ? Math.round(newPackCount * (packWeightKg * item.product.pricePerUnit) * 100) / 100
+        : Math.round(newPackCount * item.product.pricePerUnit * 100) / 100;
+
       copy[index] = {
         ...item,
-        quantity,
-        lineTotal: sub + tax,
+        packCount: newPackCount,
+        quantity: newTotalQty,
+        lineTotal,
       };
       return copy;
     });
@@ -368,12 +420,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const clearCart = () => setCart([]);
 
-  const cartSubtotal = cart.reduce((sum, item) => sum + Math.round(item.quantity * item.product.pricePerUnit * 100) / 100, 0);
-  const cartTax = cart.reduce((sum, item) => {
-    const sub = Math.round(item.quantity * item.product.pricePerUnit * 100) / 100;
-    return sum + Math.round((sub * ((item.product.taxRatePercent || 5) / 100)) * 100) / 100;
-  }, 0);
-  const cartTotal = Math.round((cartSubtotal + cartTax) * 100) / 100;
+  // All prices are inclusive of GST. Tax is broken down ONLY on Cashier Bill
+  const cartSubtotal = cart.reduce((sum, item) => sum + item.lineTotal, 0);
+  const cartTax = 0;
+  const cartTotal = cartSubtotal;
 
   const handleResetDemoData = async () => {
     await api.resetDemoData();

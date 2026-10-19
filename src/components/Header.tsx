@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp, TerminalView } from '../context/AppContext.tsx';
-import { Volume2, VolumeX, ShieldCheck, Sparkles, LogOut, User as UserIcon } from 'lucide-react';
+import { Volume2, VolumeX, ShieldCheck, Sparkles, LogOut, User as UserIcon, BookOpen } from 'lucide-react';
+import { ProductOverviewModal } from './ProductOverviewModal.tsx';
 
 export const Header: React.FC = () => {
+  const [showOverviewModal, setShowOverviewModal] = useState(false);
   const {
     activeView,
     setActiveView,
@@ -140,6 +142,16 @@ export const Header: React.FC = () => {
             </button>
           )}
 
+          {/* Product & Architecture Overview Button */}
+          <button
+            onClick={() => setShowOverviewModal(true)}
+            className="px-2.5 py-1.5 bg-amber-600/90 hover:bg-amber-600 text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 shadow-sm whitespace-nowrap cursor-pointer"
+            title="Open Complete Product Overview & Architecture Spec"
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>Product Overview</span>
+          </button>
+
           {/* Reload Demo Data Button (Admin or Cashier) */}
           {role === 'admin' && (
             <button
@@ -167,6 +179,12 @@ export const Header: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Product Overview Modal */}
+      <ProductOverviewModal
+        isOpen={showOverviewModal}
+        onClose={() => setShowOverviewModal(false)}
+      />
     </header>
   );
 };

@@ -21,6 +21,8 @@ import {
   Play,
   Check,
   ListOrdered,
+  Info,
+  Package,
 } from 'lucide-react';
 
 export const OrderPOS: React.FC = () => {
@@ -46,13 +48,15 @@ export const OrderPOS: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
   const [showRecentOrdersModal, setShowRecentOrdersModal] = useState<boolean>(false);
+  const [showOverviewModal, setShowOverviewModal] = useState<boolean>(false);
 
   // Order Summary Popup State (Toggle on side for mobile & POS)
   const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState<boolean>(false);
 
-  // Variable-weight selection modal state
+  // Variable-weight selection modal state with Multi-Pack Counter
   const [weightModalProduct, setWeightModalProduct] = useState<Product | null>(null);
   const [selectedWeightKg, setSelectedWeightKg] = useState<number>(0.25);
+  const [selectedPackCount, setSelectedPackCount] = useState<number>(1);
   const [customWeightGrams, setCustomWeightGrams] = useState<string>('');
 
   // Count selection modal state
@@ -166,6 +170,7 @@ export const OrderPOS: React.FC = () => {
     if (product.unit === 'kg') {
       setWeightModalProduct(product);
       setSelectedWeightKg(0.25); // Default to 250 grams
+      setSelectedPackCount(1);
       setCustomWeightGrams('');
     } else {
       setCountModalProduct(product);
@@ -180,15 +185,21 @@ export const OrderPOS: React.FC = () => {
       : selectedWeightKg;
 
     if (finalKg <= 0) return;
-    // Special instruction removed from order taking as requested
-    addToCart(weightModalProduct, finalKg);
+    addToCart(weightModalProduct, {
+      packWeightKg: finalKg,
+      packCount: selectedPackCount,
+      quantity: Math.round(finalKg * selectedPackCount * 1000) / 1000,
+    });
     setWeightModalProduct(null);
+    setSelectedPackCount(1);
   };
 
   const handleConfirmCount = () => {
     if (!countModalProduct || selectedCount <= 0) return;
-    // Special instruction removed from order taking as requested
-    addToCart(countModalProduct, selectedCount);
+    addToCart(countModalProduct, {
+      packCount: selectedCount,
+      quantity: selectedCount,
+    });
     setCountModalProduct(null);
   };
 
@@ -202,6 +213,8 @@ export const OrderPOS: React.FC = () => {
         items: cart.map(item => ({
           productId: item.product.id,
           quantity: item.quantity,
+          packWeightKg: item.packWeightKg,
+          packCount: item.packCount,
         })),
         userId: currentUser?.id || 'usr_pos',
         userName: currentUser?.name || 'Order POS Staff',
@@ -246,6 +259,18 @@ export const OrderPOS: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2.5 w-full md:w-auto">
+          {/* Product Overview Button */}
+          <button
+            type="button"
+            onClick={() => setShowOverviewModal(true)}
+            className="px-3 py-2 bg-stone-900 hover:bg-stone-800 text-amber-300 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors shadow-2xs shrink-0 cursor-pointer"
+            title="View Sheetal Gajak Kulfi product overview & architecture"
+          >
+            <Info className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">Product Overview</span>
+            <span className="sm:hidden">Overview</span>
+          </button>
+
           {/* Recent Orders & Receipts Button */}
           <button
             type="button"
@@ -533,14 +558,15 @@ export const OrderPOS: React.FC = () => {
               ) : (
                 cart.map((item, idx) => {
                   const isKg = item.product.unit === 'kg';
-                  const formattedQty = isKg
-                    ? item.quantity < 1
-                      ? `${Math.round(item.quantity * 1000)}g`
-                      : `${item.quantity.toFixed(2)}kg`
-                    : `${item.quantity} ${item.product.unit}`;
+                  const packCount = item.packCount || 1;
+                  const packWeightStr = item.packWeightKg
+                    ? item.packWeightKg < 1
+                      ? `${Math.round(item.packWeightKg * 1000)}g`
+                      : `${item.packWeightKg}kg`
+                    : null;
 
                   return (
-                    <div key={idx} className="py-3 flex items-start justify-between gap-3">
+                    <div key={idx} className="py-3 flex items-start justify-between gap-3 border-b border-stone-100 last:border-0">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
                           <span className="text-xs font-semibold text-stone-900 truncate">
@@ -550,35 +576,42 @@ export const OrderPOS: React.FC = () => {
                         {item.product.hindiName && (
                           <div className="text-[11px] text-stone-400">{item.product.hindiName}</div>
                         )}
-                        <div className="text-[11px] text-stone-500 flex items-center gap-2 mt-0.5 font-mono tabular-nums">
-                          <span>{formattedQty}</span>
-                          <span>@ ₹{item.product.pricePerUnit}/{item.product.unit}</span>
+                        <div className="text-[11px] text-stone-500 flex flex-wrap items-center gap-1.5 mt-0.5 font-mono tabular-nums">
+                          {packWeightStr ? (
+                            <span className="text-amber-800 font-semibold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                              {packCount} Pack{packCount > 1 ? 's' : ''} × {packWeightStr}
+                            </span>
+                          ) : (
+                            <span className="text-stone-700 font-medium">
+                              {packCount} {item.product.unit}{packCount > 1 ? 's' : ''}
+                            </span>
+                          )}
+                          <span>·</span>
+                          <span>@ ₹{item.product.pricePerUnit}/{item.product.unit} (Incl. GST)</span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2.5 shrink-0">
-                        {/* Stepper */}
+                        {/* Stepper modifies Pack Count directly (Weight stays fixed!) */}
                         <div className="flex items-center border border-stone-200 rounded-lg overflow-hidden bg-stone-50">
                           <button
                             onClick={() => {
-                              const step = isKg ? 0.25 : 1;
-                              updateCartItemQuantity(idx, Math.max(0, Math.round((item.quantity - step) * 100) / 100));
+                              updateCartItemQuantity(idx, packCount - 1);
                             }}
                             className="px-2 py-1 text-stone-500 hover:text-stone-900 hover:bg-stone-200 transition-colors cursor-pointer"
-                            title="Decrease"
+                            title="Decrease pack count"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
-                          <span className="px-2 text-xs font-mono font-medium text-stone-800 min-w-[42px] text-center">
-                            {formattedQty}
+                          <span className="px-2 text-xs font-mono font-bold text-stone-800 min-w-[36px] text-center" title="Pack quantity">
+                            {packCount}
                           </span>
                           <button
                             onClick={() => {
-                              const step = isKg ? 0.25 : 1;
-                              updateCartItemQuantity(idx, Math.round((item.quantity + step) * 100) / 100);
+                              updateCartItemQuantity(idx, packCount + 1);
                             }}
                             className="px-2 py-1 text-stone-500 hover:text-stone-900 hover:bg-stone-200 transition-colors cursor-pointer"
-                            title="Increase"
+                            title="Increase pack count (same weight)"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
@@ -608,17 +641,13 @@ export const OrderPOS: React.FC = () => {
             {cart.length > 0 && (
               <div className="p-4 border-t border-stone-200 bg-stone-50 space-y-3">
                 <div className="space-y-1.5 text-xs text-stone-600">
-                  <div className="flex justify-between">
-                    <span>Subtotal (Taxable)</span>
-                    <span className="font-mono tabular-nums text-stone-900">₹{cartSubtotal.toFixed(2)}</span>
+                  <div className="flex justify-between items-center text-sm font-bold text-stone-900 pt-1">
+                    <span>Total Order Amount (Incl. of GST)</span>
+                    <span className="font-mono tabular-nums text-amber-800 text-lg">₹{cartTotal.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>GST (5% — CGST 2.5% + SGST 2.5%)</span>
-                    <span className="font-mono tabular-nums text-stone-900">₹{cartTax.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-base font-bold text-stone-900 pt-2 border-t border-stone-200">
-                    <span>Amount Payable</span>
-                    <span className="font-mono tabular-nums text-amber-700 text-lg">₹{cartTotal.toFixed(2)}</span>
+                  <div className="flex items-center justify-between text-[11px] text-stone-400 pt-0.5 border-t border-stone-100">
+                    <span>* All items inclusive of 5% GST</span>
+                    <span className="text-stone-500">GST breakdown printed on Cashier Bill</span>
                   </div>
                 </div>
 
@@ -726,26 +755,85 @@ export const OrderPOS: React.FC = () => {
               </div>
             </div>
 
-            {/* Live Price Calculator */}
+            {/* Multi-Pack Counter (Customer needs same weight 2 pack -> keep weight, increase quantity/pack count) */}
+            <div className="mt-4 p-3 bg-amber-50/70 border border-amber-200/90 rounded-xl">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-semibold text-stone-900 flex items-center gap-1.5">
+                  <Package className="w-3.5 h-3.5 text-amber-700" />
+                  <span>Number of Packs (Same Weight):</span>
+                </label>
+                <span className="text-[11px] text-amber-900 font-bold">
+                  {selectedPackCount} Pack{selectedPackCount > 1 ? 's' : ''}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-2">
+                {/* Stepper */}
+                <div className="flex items-center border border-stone-300 rounded-lg overflow-hidden bg-white shadow-2xs">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPackCount(prev => Math.max(1, prev - 1))}
+                    className="px-3 py-1.5 text-stone-700 hover:bg-stone-100 font-bold text-sm cursor-pointer"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="px-3 text-xs font-mono font-bold text-stone-900 min-w-[36px] text-center">
+                    {selectedPackCount}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPackCount(prev => prev + 1)}
+                    className="px-3 py-1.5 text-stone-700 hover:bg-stone-100 font-bold text-sm cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Quick Presets */}
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4].map(num => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => setSelectedPackCount(num)}
+                      className={`px-2.5 py-1 text-xs rounded-md font-mono font-semibold transition-colors cursor-pointer border ${
+                        selectedPackCount === num
+                          ? 'bg-amber-600 text-white border-amber-600 shadow-2xs'
+                          : 'bg-white text-stone-700 border-stone-200 hover:border-amber-400'
+                      }`}
+                    >
+                      {num} {num === 1 ? 'Pack' : 'Pks'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Live Price Calculator (GST Inclusive) */}
             {(() => {
               const weightKg = customWeightGrams && Number(customWeightGrams) > 0
                 ? Number(customWeightGrams) / 1000
                 : selectedWeightKg;
-              const subtotal = Math.round(weightKg * weightModalProduct.pricePerUnit * 100) / 100;
-              const tax = Math.round((subtotal * ((weightModalProduct.taxRatePercent || 5) / 100)) * 100) / 100;
-              const total = subtotal + tax;
+              const packPrice = Math.round(weightKg * weightModalProduct.pricePerUnit * 100) / 100;
+              const totalAmount = Math.round(selectedPackCount * packPrice * 100) / 100;
+              const wtLabel = weightKg < 1 ? `${Math.round(weightKg * 1000)}g` : `${weightKg}kg`;
 
               return (
-                <div className="mt-4 p-3 bg-stone-50 rounded-xl flex items-center justify-between text-xs border border-stone-200">
-                  <div>
-                    <span className="text-stone-500">Total Price: </span>
-                    <span className="font-bold text-stone-900 font-mono text-sm">
-                      ₹{total.toFixed(2)}
+                <div className="mt-4 p-3 bg-stone-50 rounded-xl space-y-1 text-xs border border-stone-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-stone-600">Selected Packing:</span>
+                    <span className="font-bold text-stone-900 font-mono">
+                      {selectedPackCount} Pack{selectedPackCount > 1 ? 's' : ''} × {wtLabel} each
                     </span>
                   </div>
-                  <span className="text-stone-500 font-mono">
-                    ({weightKg < 1 ? `${Math.round(weightKg * 1000)}g` : `${weightKg}kg`})
-                  </span>
+                  <div className="flex items-center justify-between text-stone-500 font-mono text-[11px]">
+                    <span>Rate per pack:</span>
+                    <span>₹{packPrice.toFixed(2)} / pack</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm font-bold text-stone-900 pt-1.5 border-t border-stone-200">
+                    <span>Total Amount (Incl. GST):</span>
+                    <span className="font-mono text-amber-800 text-base">₹{totalAmount.toFixed(2)}</span>
+                  </div>
                 </div>
               );
             })()}
@@ -1264,6 +1352,130 @@ export const OrderPOS: React.FC = () => {
                 className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* WHOLE PRODUCT OVERVIEW MODAL */}
+      {/* ========================================================================= */}
+      {showOverviewModal && (
+        <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-stone-200 my-8">
+            <div className="flex items-start justify-between pb-4 border-b border-stone-200">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-stone-900">Sheetal Gajak Kulfi POS</h3>
+                  <span className="text-[11px] font-mono bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-semibold">
+                    Indore Counter System
+                  </span>
+                </div>
+                <p className="text-xs text-stone-500 mt-1">
+                  Opposite High Court, Shivaji Nagar, Indore, Madhya Pradesh - 452003
+                </p>
+              </div>
+              <button
+                onClick={() => setShowOverviewModal(false)}
+                className="text-stone-400 hover:text-stone-700 p-1 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4 text-xs text-stone-700 max-h-[68vh] overflow-y-auto pr-1">
+              {/* Architecture 2-Station Workflow */}
+              <div className="p-3.5 bg-stone-50 rounded-xl border border-stone-200">
+                <h4 className="font-bold text-stone-900 text-sm mb-2 flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center text-xs">1</span>
+                  Two-Station Counter Workflow
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2 text-stone-600">
+                  <div className="bg-white p-3 rounded-lg border border-stone-200">
+                    <p className="font-semibold text-stone-900 mb-1">Counter 1: Order POS Terminal</p>
+                    <p className="text-[11px] leading-relaxed">
+                      Fast item selection, weight pack steppers, token generation, and sequential printing of dual 2-inch slips.
+                    </p>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg border border-stone-200">
+                    <p className="font-semibold text-stone-900 mb-1">Counter 2: Cashier Billing Terminal</p>
+                    <p className="text-[11px] leading-relaxed">
+                      Token lookup, dual discounts (% &amp; ₹), 1-tap payment modes, auto-filling split tender, and 3-inch Cashier Tax Bill.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Multi-Pack Weight Modeling */}
+              <div className="p-3.5 bg-amber-50/70 rounded-xl border border-amber-200">
+                <h4 className="font-bold text-stone-900 text-sm mb-1.5 flex items-center gap-2">
+                  <Package className="w-4 h-4 text-amber-700" />
+                  Multi-Pack Weight Handling (Customer Order Packs)
+                </h4>
+                <p className="leading-relaxed text-stone-600">
+                  When a customer requests <strong>multiple packs of the same weight</strong> (e.g., two 500g gift boxes of Gajak), the system does <strong>not</strong> double the weight to 1000g. Instead, it increments the pack count to <strong>2 Packs × 500g</strong>. This ensures packing staff package two separate 500g boxes rather than a single bulk 1kg pack.
+                </p>
+              </div>
+
+              {/* GST Inclusive Policy */}
+              <div className="p-3.5 bg-stone-50 rounded-xl border border-stone-200">
+                <h4 className="font-bold text-stone-900 text-sm mb-1.5 flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-emerald-700 text-white flex items-center justify-center text-xs">%</span>
+                  GST-Inclusive Pricing &amp; Cashier Breakdown
+                </h4>
+                <ul className="space-y-1.5 text-stone-600 list-disc list-inside">
+                  <li><strong>All POS items are GST Inclusive:</strong> Shelf prices include tax. POS cart and 2-inch slips omit tax lines to keep counter operations speedy.</li>
+                  <li><strong>GST ONLY in Cashier Bill:</strong> 5% GST is reverse-calculated exclusively on the 3-inch Cashier Tax Invoice (Taxable Value = Total / 1.05, split into 2.5% CGST + 2.5% SGST).</li>
+                </ul>
+              </div>
+
+              {/* Cashier Billing Features */}
+              <div className="p-3.5 bg-stone-50 rounded-xl border border-stone-200">
+                <h4 className="font-bold text-stone-900 text-sm mb-2">Cashier Settlement Engine</h4>
+                <div className="space-y-2 text-stone-600">
+                  <div>
+                    <span className="font-semibold text-stone-800">1-Tap Payment Recording:</span> Instant recording via Cash, UPI, Card, or Split without requiring card numbers or QR code scans.
+                  </div>
+                  <div>
+                    <span className="font-semibold text-stone-800">Auto-Balancing Split Payment:</span> When customer splits payment across Cash and UPI, entering the cash amount automatically calculates and fills the remaining balance in the UPI column.
+                  </div>
+                  <div>
+                    <span className="font-semibold text-stone-800">Dual Discount Engine:</span> Instant toggle between Percentage (%) and Flat Rupee Amount (₹) with real-time recalculation of GST taxable value.
+                  </div>
+                </div>
+              </div>
+
+              {/* Thermal Printer Slips Specifications */}
+              <div className="p-3.5 bg-stone-50 rounded-xl border border-stone-200">
+                <h4 className="font-bold text-stone-900 text-sm mb-2 flex items-center gap-2">
+                  <Printer className="w-4 h-4 text-stone-700" />
+                  Thermal Printer Slip Sizes &amp; Specifications
+                </h4>
+                <div className="space-y-2 text-stone-600 font-mono text-[11px]">
+                  <div className="p-2 bg-white rounded border border-stone-200">
+                    <span className="font-bold text-stone-900 font-sans">1. Customer Waiting Slip (2-Inch / 50.8mm / 58mm Paper):</span>
+                    <p className="font-sans text-stone-500 mt-0.5">Very short slip. Contains only Shop Name, Token Number (#TK-XXX), Date/Time, and instructions. NO item details.</p>
+                  </div>
+                  <div className="p-2 bg-white rounded border border-stone-200">
+                    <span className="font-bold text-stone-900 font-sans">2. Order POS Slip / Counter Ticket (2-Inch / 50.8mm / 58mm Paper):</span>
+                    <p className="font-sans text-stone-500 mt-0.5">Itemized packing slip for counter staff with pack quantities, units, and token number. Printed consecutively in a queue with the customer slip.</p>
+                  </div>
+                  <div className="p-2 bg-white rounded border border-stone-200">
+                    <span className="font-bold text-stone-900 font-sans">3. Cashier Tax Invoice (3-Inch / 80mm / 48 Chars Paper):</span>
+                    <p className="font-sans text-stone-500 mt-0.5">Full commercial receipt with complete itemization, pack breakdown, discount, 5% inclusive GST table (Taxable + CGST 2.5% + SGST 2.5%), payment mode, and shop GSTIN.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 pt-3 border-t border-stone-200 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowOverviewModal(false)}
+                className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+              >
+                Got It, Back to POS
               </button>
             </div>
           </div>

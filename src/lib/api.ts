@@ -399,6 +399,7 @@ export async function processOrderPayment(orderId: string, payload: {
   cashierName?: string;
   tenderedAmount?: number;
   transactionReference?: string;
+  discountAmount?: number;
 }): Promise<{ payment: Payment; invoice: Invoice; order: Order; printJob: PrintJob }> {
   try {
     const res = await fetch(`/api/orders/${orderId}/pay`, {
@@ -420,6 +421,12 @@ export async function processOrderPayment(orderId: string, payload: {
     const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
     const invoiceNumber = `INV-${dateStr}-${String(store.lastInvoiceNum).padStart(4, '0')}`;
 
+    const discountAmount = payload.discountAmount && payload.discountAmount > 0
+      ? Math.round(Number(payload.discountAmount) * 100) / 100
+      : 0;
+
+    const netPayable = Math.max(0, Math.round((order.subtotal - discountAmount) * 100) / 100);
+
     const change = payload.tenderedAmount && payload.tenderedAmount > payload.amount
       ? Math.round((payload.tenderedAmount - payload.amount) * 100) / 100
       : 0;
@@ -433,13 +440,19 @@ export async function processOrderPayment(orderId: string, payload: {
       splits: payload.splits,
       status: 'SUCCESS',
       cashierId: payload.cashierId || 'usr_billing',
-      cashierName: payload.cashierName || 'Pooja Verma',
+      cashierName: payload.cashierName || 'Cashier Counter',
       timestamp: now.toISOString(),
       tenderedAmount: payload.tenderedAmount,
       changeReturned: change,
       transactionReference: payload.transactionReference,
     };
     store.payments.unshift(payment);
+
+    // 5% Inclusive GST calculation for Cashier Tax Invoice
+    const taxableGoods = Math.round((netPayable / 1.05) * 100) / 100;
+    const totalGst = Math.round((netPayable - taxableGoods) * 100) / 100;
+    const cgstAmt = Math.round((totalGst / 2) * 100) / 100;
+    const sgstAmt = Math.round((totalGst - cgstAmt) * 100) / 100;
 
     const invoice: Invoice = {
       id: `inv_${Date.now()}`,
@@ -449,26 +462,146 @@ export async function processOrderPayment(orderId: string, payload: {
       businessDate: order.businessDate,
       timestamp: now.toISOString(),
       items: order.items,
-      subtotal: order.subtotal,
-      cgstAmount: Math.round(order.subtotal * 0.025 * 100) / 100,
-      sgstAmount: Math.round(order.subtotal * 0.025 * 100) / 100,
-      totalTax: order.totalTax,
-      discountAmount: 0,
-      totalAmount: order.finalAmount,
+      subtotal: taxableGoods,
+      cgstAmount: cgstAmt,
+      sgstAmount: sgstAmt,
+      totalTax: totalGst,
+      discountAmount,
+      totalAmount: netPayable,
       paymentMethod: payload.method,
       paymentReference: payload.transactionReference,
-      cashierName: payload.cashierName || 'Pooja Verma',
+      cashierName: payload.cashierName || 'Cashier Counter',
     };
     store.invoices.unshift(invoice);
 
     order.paymentStatus = 'PAID';
     order.paymentId = payment.id;
     order.invoiceId = invoice.id;
+    order.totalDiscount = discountAmount;
+    order.finalAmount = netPayable;
     order.updatedAt = now.toISOString();
     if (order.status === 'READY') {
       order.status = 'COMPLETED';
       order.completedAt = now.toISOString();
     }
+
+    // 3-Inch Cashier Bill Payload with strict 48-column alignment
+    const formatLine48 = (left: string, right: string) => {
+      const spaceNeeded = 48 - (left.length + right.length);
+      if (spaceNeeded <= 0) return left.slice(0, 48 - right.length - 1) + ' ' + right;
+      return left + ' '.repeat(spaceNeeded) + right;
+    };
+    const center48 = (text: string) => {
+      if (text.length >= 48) return text.slice(0, 48);
+      const leftPad = Math.floor((48 - text.length) / 2);
+      return ' '.repeat(leftPad) + text;
+    };
+
+    const dateFormatted = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const timeFormatted = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    const cashierBillLines = [
+      '================================================',
+      center48('SHEETAL GAJAK KULFI'),
+      center48('Opposite High Court, Shivaji Nagar'),
+      center48('Indore, Madhya Pradesh - 452003'),
+      center48('Phone: 0731-2524890 / +91 98260 12345'),
+      center48('GSTIN: 23AABCS1429K1Z5 | FSSAI: 11421850000123'),
+      '================================================',
+      center48('TAX INVOICE / CASHIER BILL (3-INCH)'),
+      '================================================',
+      formatLine48(`Invoice No : ${invoiceNumber}`, `Token : #${order.tokenNumber}`),
+      formatLine48(`Date       : ${dateFormatted}`, `Time  : ${timeFormatted}`),
+      formatLine48(`Cashier    : ${invoice.cashierName || 'Counter Staff'}`, `Counter: ${order.counterId || 'POS-1'}`),
+      formatLine48('Sale Type  : Retail Counter Sale', 'Status : PAID IN FULL'),
+      '------------------------------------------------',
+      '#  ITEM DESCRIPTION        QTY     RATE   AMOUNT(Rs)',
+      '------------------------------------------------',
+    ];
+
+    order.items.forEach((it, idx) => {
+      const sn = String(idx + 1).padStart(2, '0') + ' ';
+      const name = it.productName.slice(0, 19).padEnd(20);
+
+      let qtyStr = `${it.quantity}`;
+      let packNote = '';
+
+      if (it.packCount && it.packCount > 1 && it.packWeightKg) {
+        const wtStr = it.packWeightKg < 1 ? `${Math.round(it.packWeightKg * 1000)}g` : `${it.packWeightKg}kg`;
+        qtyStr = `${it.packCount} Pk`;
+        packNote = `   [${it.packCount} Packs x ${wtStr} each${it.hindiName ? ` | ${it.hindiName}` : ''}]`;
+      } else if (it.packWeightKg) {
+        const wtStr = it.packWeightKg < 1 ? `${Math.round(it.packWeightKg * 1000)}g` : `${it.packWeightKg}kg`;
+        qtyStr = `1 Pk`;
+        packNote = `   [${wtStr} pack${it.hindiName ? ` | ${it.hindiName}` : ''}]`;
+      } else if (it.packCount && it.packCount > 1) {
+        qtyStr = `${it.packCount} Pk`;
+        packNote = it.hindiName ? `   [${it.hindiName}]` : '';
+      } else if (it.hindiName) {
+        packNote = `   [${it.hindiName}]`;
+      }
+
+      const colQty = qtyStr.slice(0, 5).padStart(6);
+      const colRate = it.unitPrice.toFixed(2).slice(0, 8).padStart(9);
+      const colAmt = it.totalPrice.toFixed(2).slice(0, 9).padStart(10);
+
+      cashierBillLines.push(`${sn}${name}${colQty}${colRate}${colAmt}`);
+      if (packNote) cashierBillLines.push(packNote);
+    });
+
+    cashierBillLines.push('------------------------------------------------');
+    cashierBillLines.push(formatLine48('Gross Order Total (Incl. GST):', `Rs. ${order.subtotal.toFixed(2).padStart(8)}`));
+    if (discountAmount > 0) {
+      cashierBillLines.push(formatLine48('Discount Deducted:', `-Rs. ${discountAmount.toFixed(2).padStart(8)}`));
+    }
+    cashierBillLines.push('================================================');
+    cashierBillLines.push(formatLine48('NET AMOUNT DUE & PAID:', `Rs. ${netPayable.toFixed(2).padStart(8)}`));
+    cashierBillLines.push('================================================');
+
+    // Statutory 5% Inclusive GST Summary Table
+    cashierBillLines.push(center48('---------------- GST SUMMARY (5.0%) ------------'));
+    cashierBillLines.push('Rate       Taxable Value    CGST(2.5%)    SGST(2.5%)');
+    const colRate = '5% GST'.padEnd(10);
+    const colTaxVal = `Rs. ${taxableGoods.toFixed(2)}`.padStart(16) + ' ';
+    const colCgst = `Rs. ${cgstAmt.toFixed(2)}`.padStart(13) + ' ';
+    const colSgst = `Rs. ${sgstAmt.toFixed(2)}`.padStart(13);
+    cashierBillLines.push(`${colRate}${colTaxVal}  ${colCgst}${colSgst}`);
+    cashierBillLines.push('------------------------------------------------');
+    cashierBillLines.push(formatLine48('Total GST Included in Price:', `Rs. ${totalGst.toFixed(2).padStart(8)}`));
+    cashierBillLines.push('------------------------------------------------');
+
+    // Payment Settlement
+    cashierBillLines.push('PAYMENT SETTLEMENT:');
+    cashierBillLines.push(formatLine48('Mode of Payment   :', payload.method));
+    if (payload.method === 'CASH') {
+      cashierBillLines.push(formatLine48('Payment Verification :', 'VERIFIED BY CASHIER'));
+      if (payload.tenderedAmount && payload.tenderedAmount > 0) {
+        cashierBillLines.push(formatLine48('Cash Tendered Info   :', `Tendered: Rs. ${payload.tenderedAmount.toFixed(2)} | Change: Rs. ${change.toFixed(2)}`));
+      }
+    } else if (payload.method === 'UPI') {
+      cashierBillLines.push(formatLine48('Channel              :', 'UPI Soundbox / QR Standee'));
+      cashierBillLines.push(formatLine48('Payment Reference    :', payload.transactionReference || 'UPI-STAND-SUCCESS'));
+    } else if (payload.method === 'CARD') {
+      cashierBillLines.push(formatLine48('Channel              :', 'EDC POS Terminal'));
+      cashierBillLines.push(formatLine48('Payment Reference    :', payload.transactionReference || 'CARD-POS-SUCCESS'));
+    } else if (payload.method === 'SPLIT' && payload.splits) {
+      const splitDesc = payload.splits.map(s => `${s.method}: Rs. ${s.amount.toFixed(2)}`).join(' + ');
+      cashierBillLines.push(formatLine48('Split Breakdown      :', splitDesc));
+    }
+    cashierBillLines.push(formatLine48('Settlement Status    :', 'SUCCESS (PAID IN FULL)'));
+    cashierBillLines.push('================================================');
+
+    // Footer
+    cashierBillLines.push(center48('* Freshly crafted daily with pure Desi Ghee *'));
+    cashierBillLines.push(center48('* Goods once sold cannot be returned or exchanged *'));
+    cashierBillLines.push('');
+    cashierBillLines.push(center48('Thank you for choosing Sheetal Gajak Kulfi!'));
+    cashierBillLines.push(center48('Pure Indore Taste & Tradition Since 1984'));
+    cashierBillLines.push(center48('Opposite High Court, Shivaji Nagar, Indore'));
+    cashierBillLines.push('');
+    cashierBillLines.push(center48('|||| ||| |||||| |||| ||||| |||||| |||| |||||'));
+    cashierBillLines.push(center48(`*${invoiceNumber}*`));
+    cashierBillLines.push('================================================');
 
     const printJob: PrintJob = {
       id: `PJ-${Date.now().toString().slice(-5)}`,
@@ -476,14 +609,14 @@ export async function processOrderPayment(orderId: string, payload: {
       orderId: order.id,
       tokenNumber: order.tokenNumber,
       printerId: 'prn_billing_invoice',
-      printerName: 'Billing Cashier Invoice Printer',
+      printerName: 'Billing Cashier Invoice Printer (3-Inch)',
       paperWidth: '80mm',
       status: 'PRINTED',
       createdAt: now.toISOString(),
       printedAt: now.toISOString(),
       retryCount: 0,
       reprintCount: 0,
-      payload: `SHEETAL GAJAK KULFI\nTAX INVOICE #${invoiceNumber}\nToken: ${order.tokenNumber}\nAmount: ₹${order.finalAmount}\nPayment: ${payload.method}\nOpposite High Court, Shivaji Nagar, Indore\nThank you for choosing Sheetal Gajak Kulfi!`,
+      payload: cashierBillLines.join('\n'),
     };
     store.printJobs.unshift(printJob);
 

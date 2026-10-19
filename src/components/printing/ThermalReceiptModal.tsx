@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext.tsx';
-import { Printer, X, Copy, Check, SplitSquareVertical } from 'lucide-react';
+import { Printer, X, Copy, Check, SplitSquareVertical, Download, FileText } from 'lucide-react';
 
 export const ThermalReceiptModal: React.FC = () => {
   const { activeThermalReceipt, closeThermalReceipt } = useApp();
@@ -18,6 +18,7 @@ export const ThermalReceiptModal: React.FC = () => {
   if (!activeThermalReceipt) return null;
 
   const hasSecondary = Boolean(activeThermalReceipt.secondaryText);
+  const is80mm = activeThermalReceipt.paperWidth === '80mm' || activeThermalReceipt.jobType === 'TAX_INVOICE';
 
   const handlePrint = () => {
     window.print();
@@ -29,52 +30,94 @@ export const ThermalReceiptModal: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const primaryTitle = activeThermalReceipt.title || 'Customer Waiting Token (2-Inch)';
-  const secondaryTitle = activeThermalReceipt.secondaryTitle || 'Order POS Dispatch Slip (2-Inch / 50.8mm)';
+  const handleDownload = (text: string, filename: string) => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const currentText =
+    activeTab === 'secondary' && activeThermalReceipt.secondaryText
+      ? activeThermalReceipt.secondaryText
+      : activeThermalReceipt.text;
+
+  const primaryTitle =
+    activeThermalReceipt.title ||
+    (is80mm ? 'Cashier Tax Invoice (3-Inch / 80mm)' : 'Customer Waiting Token (2-Inch)');
+  const secondaryTitle =
+    activeThermalReceipt.secondaryTitle || 'Order POS Dispatch Slip (2-Inch / 50.8mm)';
 
   return (
-    <div className="fixed inset-0 z-50 bg-stone-900/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className={`bg-white rounded-2xl w-full p-5 sm:p-6 shadow-2xl border border-stone-200 relative my-6 transition-all ${
-        hasSecondary && activeTab === 'both' ? 'max-w-3xl' : 'max-w-lg'
-      }`}>
+    <div className="fixed inset-0 z-50 bg-stone-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div
+        className={`bg-white rounded-2xl w-full p-4 sm:p-6 shadow-2xl border border-stone-200 relative my-6 transition-all ${
+          hasSecondary && activeTab === 'both' ? 'max-w-4xl' : is80mm ? 'max-w-xl' : 'max-w-lg'
+        }`}
+      >
         {/* Top Control Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-200 gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-stone-200 gap-2">
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-stone-900">
-                {hasSecondary && activeTab === 'both'
-                  ? `Dual Receipts — Token ${activeThermalReceipt.tokenNumber || ''}`
-                  : activeTab === 'secondary'
-                  ? secondaryTitle
-                  : primaryTitle}
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-base font-bold text-stone-900 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-amber-600" />
+                <span>
+                  {hasSecondary && activeTab === 'both'
+                    ? `Dual Print Queue — Token #${activeThermalReceipt.tokenNumber || ''}`
+                    : activeTab === 'secondary'
+                    ? secondaryTitle
+                    : primaryTitle}
+                </span>
               </h3>
               {activeThermalReceipt.tokenNumber && (
                 <span className="px-2 py-0.5 bg-stone-900 text-amber-400 font-mono text-xs font-bold rounded">
-                  {activeThermalReceipt.tokenNumber}
+                  #{activeThermalReceipt.tokenNumber}
                 </span>
               )}
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                is80mm
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                  : 'bg-blue-50 text-blue-800 border-blue-300'
+              }`}>
+                {is80mm ? '3-INCH (80MM / 48 COLS)' : '2-INCH (58MM / 32 COLS)'}
+              </span>
             </div>
-            <span className="text-[11px] text-stone-500 font-mono">
-              ESC/POS Thermal Formatter · 58mm &amp; 80mm Compatible
-            </span>
+            <p className="text-[11px] text-stone-500 font-mono mt-0.5">
+              Sheetal Gajak Kulfi · Thermal ESC/POS Printable Output
+            </p>
           </div>
 
           <div className="flex items-center gap-1.5 self-end sm:self-auto">
             <button
-              onClick={() => handleCopy(
-                activeTab === 'secondary' && activeThermalReceipt.secondaryText
-                  ? activeThermalReceipt.secondaryText
-                  : activeThermalReceipt.text
-              )}
-              className="p-1.5 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded text-xs transition-colors flex items-center gap-1"
-              title="Copy receipt text"
+              onClick={() => handleCopy(currentText)}
+              className="p-1.5 px-2.5 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg text-xs transition-colors flex items-center gap-1 border border-stone-200 cursor-pointer shadow-2xs"
+              title="Copy receipt text to clipboard"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-              <span className="text-[11px] hidden sm:inline">{copied ? 'Copied' : 'Copy'}</span>
+              <span className="text-[11px]">{copied ? 'Copied' : 'Copy'}</span>
+            </button>
+            <button
+              onClick={() =>
+                handleDownload(
+                  currentText,
+                  `${is80mm ? 'cashier_invoice' : 'order_slip'}_${activeThermalReceipt.tokenNumber || 'receipt'}.txt`
+                )
+              }
+              className="p-1.5 px-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg text-xs transition-colors flex items-center gap-1 border border-stone-200 cursor-pointer shadow-2xs"
+              title="Download raw receipt text"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="text-[11px] hidden sm:inline">Export</span>
             </button>
             <button
               onClick={closeThermalReceipt}
-              className="text-stone-400 hover:text-stone-700 p-1 rounded-md hover:bg-stone-100"
+              className="text-stone-400 hover:text-stone-700 p-1.5 rounded-lg hover:bg-stone-100 transition-colors cursor-pointer"
+              title="Close modal"
             >
               <X className="w-5 h-5" />
             </button>
@@ -86,59 +129,74 @@ export const ThermalReceiptModal: React.FC = () => {
           <div className="flex items-center justify-center p-1 bg-stone-100 rounded-lg mt-3 text-xs font-medium">
             <button
               onClick={() => setActiveTab('both')}
-              className={`flex-1 py-1.5 rounded-md transition-colors flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-1.5 rounded-md transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'both' ? 'bg-white text-stone-900 shadow-xs font-semibold' : 'text-stone-600 hover:text-stone-900'
               }`}
             >
               <SplitSquareVertical className="w-3.5 h-3.5 text-amber-600" />
-              <span>Both Receipts (Queue)</span>
+              <span>Queue View (Both Slips)</span>
             </button>
             <button
               onClick={() => setActiveTab('primary')}
-              className={`flex-1 py-1.5 rounded-md transition-colors ${
+              className={`flex-1 py-1.5 rounded-md transition-colors cursor-pointer ${
                 activeTab === 'primary' ? 'bg-white text-stone-900 shadow-xs font-semibold' : 'text-stone-600 hover:text-stone-900'
               }`}
             >
-              Customer Slip (2-Inch)
+              Customer Slip (2")
             </button>
             <button
               onClick={() => setActiveTab('secondary')}
-              className={`flex-1 py-1.5 rounded-md transition-colors ${
+              className={`flex-1 py-1.5 rounded-md transition-colors cursor-pointer ${
                 activeTab === 'secondary' ? 'bg-white text-stone-900 shadow-xs font-semibold' : 'text-stone-600 hover:text-stone-900'
               }`}
             >
-              Order POS Slip (2-Inch)
+              Dispatch Slip (2")
             </button>
           </div>
         )}
 
         {/* Realistic Thermal Paper Simulation Container */}
-        <div className="my-4 bg-stone-100 p-3 sm:p-5 rounded-xl border border-stone-200 overflow-x-auto max-h-[500px]">
-          <div id="printable-thermal-receipt" className="flex flex-col md:flex-row justify-center items-start gap-4 mx-auto w-fit">
-            {/* Receipt 1: Customer Token Slip */}
+        <div className="my-4 bg-stone-200/70 p-3 sm:p-5 rounded-xl border border-stone-300/80 overflow-x-auto max-h-[520px]">
+          <div id="printable-thermal-receipt" className="flex flex-col md:flex-row justify-center items-start gap-5 mx-auto w-fit">
+            {/* Receipt 1: Customer Token Slip OR 3-Inch Cashier Bill */}
             {(activeTab === 'both' || activeTab === 'primary') && (
               <div className="flex flex-col items-center thermal-slip-card">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-600 mb-1 no-print">
-                  1. Customer Token Slip (2-Inch / 50.8mm · Token Only)
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-600 mb-1.5 no-print">
+                  {is80mm
+                    ? '3-Inch (80mm / 48 cols) Cashier Tax Invoice'
+                    : '1. Customer Token Slip (2-Inch / 58mm · Token Only)'}
                 </span>
+
+                {/* Thermal Receipt Paper Sheet */}
                 <div
-                  className="bg-[#fdfcf7] text-stone-900 shadow-md border-x border-stone-300 font-mono text-[11px] leading-tight p-4 select-text w-[280px]"
-                  style={{ fontFamily: '"JetBrains Mono", Courier, monospace' }}
+                  className={`bg-[#fefdfb] text-stone-900 shadow-lg border-x border-stone-300/80 font-mono p-4 sm:p-5 select-text rounded-xs transition-all ${
+                    is80mm ? 'w-[390px] sm:w-[430px]' : 'w-[285px] sm:w-[295px]'
+                  }`}
+                  style={{
+                    fontFamily: '"JetBrains Mono", "Courier New", Courier, monospace',
+                    fontSize: is80mm ? '11px' : '11px',
+                    lineHeight: '1.32',
+                    boxShadow: '0 4px 14px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.08)',
+                  }}
                 >
-                  <div className="text-center text-stone-300 text-[8px] tracking-widest pb-2 select-none no-print">
-                    ▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼
+                  {/* Top Perforated Serration Line */}
+                  <div className="text-center text-stone-300 text-[8px] tracking-[3px] pb-2.5 select-none no-print border-b border-stone-200 mb-2">
+                    - - - - - - - - CUT HERE - - - - - - - -
                   </div>
-                  <pre className="whitespace-pre-wrap font-inherit text-stone-900 break-words">
+
+                  <pre className="whitespace-pre font-mono text-stone-900 overflow-x-auto scrollbar-none">
                     {activeThermalReceipt.text}
                   </pre>
-                  <div className="text-center text-stone-300 text-[8px] tracking-widest pt-2 select-none no-print">
-                    ▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼
+
+                  {/* Bottom Perforated Serration Line */}
+                  <div className="text-center text-stone-300 text-[8px] tracking-[3px] pt-3 select-none no-print border-t border-stone-200 mt-2">
+                    - - - - - - - - TEAR HERE - - - - - - - -
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Print separator / cut line between slips in queue */}
+            {/* Print separator between slips in queue */}
             {hasSecondary && activeTab === 'both' && (
               <div className="thermal-cut-separator hidden print:block" />
             )}
@@ -146,21 +204,29 @@ export const ThermalReceiptModal: React.FC = () => {
             {/* Receipt 2: Order POS Slip */}
             {hasSecondary && (activeTab === 'both' || activeTab === 'secondary') && (
               <div className="flex flex-col items-center thermal-slip-card">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 mb-1 no-print">
-                  2. Order POS Dispatch Slip (2-Inch / 50.8mm · Packing Slip)
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 mb-1.5 no-print">
+                  2. Order POS Dispatch Slip (2-Inch / 58mm · Packing Slip)
                 </span>
+
                 <div
-                  className="bg-[#fdfcf7] text-stone-900 shadow-md border-x border-stone-300 font-mono text-[11px] leading-tight p-4 select-text w-[280px]"
-                  style={{ fontFamily: '"JetBrains Mono", Courier, monospace' }}
+                  className="bg-[#fefdfb] text-stone-900 shadow-lg border-x border-stone-300/80 font-mono p-4 sm:p-5 select-text rounded-xs w-[285px] sm:w-[295px]"
+                  style={{
+                    fontFamily: '"JetBrains Mono", "Courier New", Courier, monospace',
+                    fontSize: '11px',
+                    lineHeight: '1.32',
+                    boxShadow: '0 4px 14px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.08)',
+                  }}
                 >
-                  <div className="text-center text-stone-300 text-[8px] tracking-widest pb-2 select-none no-print">
-                    ▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼
+                  <div className="text-center text-stone-300 text-[8px] tracking-[3px] pb-2.5 select-none no-print border-b border-stone-200 mb-2">
+                    - - - - - - - - CUT HERE - - - - - - - -
                   </div>
-                  <pre className="whitespace-pre-wrap font-inherit text-stone-900 break-words">
+
+                  <pre className="whitespace-pre font-mono text-stone-900 overflow-x-auto scrollbar-none">
                     {activeThermalReceipt.secondaryText}
                   </pre>
-                  <div className="text-center text-stone-300 text-[8px] tracking-widest pt-2 select-none no-print">
-                    ▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼▲▼
+
+                  <div className="text-center text-stone-300 text-[8px] tracking-[3px] pt-3 select-none no-print border-t border-stone-200 mt-2">
+                    - - - - - - - - TEAR HERE - - - - - - - -
                   </div>
                 </div>
               </div>
@@ -169,7 +235,7 @@ export const ThermalReceiptModal: React.FC = () => {
         </div>
 
         {/* Modal Actions */}
-        <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-stone-100">
+        <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-stone-200">
           <button
             type="button"
             onClick={closeThermalReceipt}
@@ -221,7 +287,11 @@ export const ThermalReceiptModal: React.FC = () => {
               className="flex-1 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-lg shadow-sm flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
               <Printer className="w-4 h-4 text-amber-400" />
-              <span>Print to 2-Inch Thermal Printer</span>
+              <span>
+                {is80mm
+                  ? 'Print to 3-Inch Thermal Printer (80mm)'
+                  : 'Print to 2-Inch Thermal Printer (58mm)'}
+              </span>
             </button>
           )}
         </div>

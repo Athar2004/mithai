@@ -47,7 +47,9 @@ export interface OrderItem {
   productName: string;
   hindiName?: string;
   unit: UnitType;
-  quantity: number; // e.g., 0.25 for 250g, or 4 for 4 pieces
+  packWeightKg?: number; // e.g. 0.25 (for 250g pack)
+  packCount?: number; // e.g. 2 (for 2 packs of 250g)
+  quantity: number; // e.g., 0.50 (total kg) or 4 (for 4 pieces)
   unitPrice: number;
   taxRatePercent: number;
   taxAmount: number;

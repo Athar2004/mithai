@@ -14,6 +14,9 @@ import {
   X,
   FileText,
   RotateCcw,
+  Percent,
+  Check,
+  Smartphone,
 } from 'lucide-react';
 
 export const BillingTerminal: React.FC = () => {
@@ -23,11 +26,13 @@ export const BillingTerminal: React.FC = () => {
   const [filterTab, setFilterTab] = useState<'UNPAID' | 'PAID' | 'ALL'>('UNPAID');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
+  // Discount States (Percent % or Direct Amount ₹)
+  const [discountType, setDiscountType] = useState<'PERCENT' | 'FLAT'>('PERCENT');
+  const [discountInput, setDiscountInput] = useState<string>('');
+
   // Payment Form States
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH');
   const [cashTendered, setCashTendered] = useState<string>('');
-  const [upiRef, setUpiRef] = useState<string>('');
-  const [cardAuth, setCardAuth] = useState<string>('');
   const [splitCashAmount, setSplitCashAmount] = useState<string>('');
   const [splitUpiAmount, setSplitUpiAmount] = useState<string>('');
 
@@ -68,26 +73,78 @@ export const BillingTerminal: React.FC = () => {
     if (selectedOrderId) {
       return orders.find(o => o.id === selectedOrderId) || null;
     }
-    // Default to first unpaid order if available
     const firstUnpaid = orders.find(o => o.paymentStatus === 'UNPAID' && o.status !== 'CANCELLED');
     return firstUnpaid || null;
   }, [orders, selectedOrderId]);
+
+  // Gross Amount (Inclusive of GST)
+  const grossSubtotal = selectedOrder?.subtotal ?? selectedOrder?.finalAmount ?? 0;
+
+  // Discount Calculation
+  const discountValue = Number(discountInput) || 0;
+  const discountAmount = useMemo(() => {
+    if (discountValue <= 0 || !selectedOrder) return 0;
+    if (discountType === 'PERCENT') {
+      const pct = Math.min(100, Math.max(0, discountValue));
+      return Math.round((grossSubtotal * (pct / 100)) * 100) / 100;
+    } else {
+      return Math.min(grossSubtotal, Math.round(discountValue * 100) / 100);
+    }
+  }, [discountValue, discountType, grossSubtotal, selectedOrder]);
+
+  // Net Payable Amount
+  const netPayable = useMemo(() => {
+    if (!selectedOrder) return 0;
+    return Math.max(0, Math.round((grossSubtotal - discountAmount) * 100) / 100);
+  }, [grossSubtotal, discountAmount, selectedOrder]);
+
+  // Reverse 5% Inclusive GST Calculation (GST ONLY IN CASHIER BILL)
+  const taxableGoods = Math.round((netPayable / 1.05) * 100) / 100;
+  const totalGst = Math.round((netPayable - taxableGoods) * 100) / 100;
+  const cgstAmt = Math.round((totalGst / 2) * 100) / 100;
+  const sgstAmt = Math.round((totalGst - cgstAmt) * 100) / 100;
+
+  // Change Calculation for Cash
+  const tenderedNum = Number(cashTendered) || 0;
+  const changeReturned = (paymentMethod === 'CASH' && tenderedNum > netPayable)
+    ? Math.round((tenderedNum - netPayable) * 100) / 100
+    : 0;
 
   // Auto set cash tendered to exact amount when selected
   const handleSelectOrder = (order: Order) => {
     setSelectedOrderId(order.id);
     setCashTendered('');
     setPaymentError(null);
-    setUpiRef('');
-    setCardAuth('');
+    setDiscountInput('');
+    setDiscountType('PERCENT');
     setSplitCashAmount('');
     setSplitUpiAmount('');
   };
 
-  // Change Calculation for Cash
-  const finalAmount = selectedOrder?.finalAmount ?? 0;
-  const tenderedNum = Number(cashTendered) || 0;
-  const changeReturned = tenderedNum > finalAmount ? Math.round((tenderedNum - finalAmount) * 100) / 100 : 0;
+  // Split payment auto-calculating columns:
+  // When user types in Cash, UPI auto-fills with remaining balance
+  const handleSplitCashChange = (val: string) => {
+    setSplitCashAmount(val);
+    if (val === '') {
+      setSplitUpiAmount(String(netPayable));
+    } else {
+      const num = Number(val) || 0;
+      const rem = Math.max(0, Math.round((netPayable - num) * 100) / 100);
+      setSplitUpiAmount(String(rem));
+    }
+  };
+
+  // When user types in UPI, Cash auto-fills with remaining balance
+  const handleSplitUpiChange = (val: string) => {
+    setSplitUpiAmount(val);
+    if (val === '') {
+      setSplitCashAmount(String(netPayable));
+    } else {
+      const num = Number(val) || 0;
+      const rem = Math.max(0, Math.round((netPayable - num) * 100) / 100);
+      setSplitCashAmount(String(rem));
+    }
+  };
 
   const handleProcessPayment = async () => {
     if (!selectedOrder) return;
@@ -99,31 +156,36 @@ export const BillingTerminal: React.FC = () => {
       let transactionReference = undefined;
 
       if (paymentMethod === 'CASH') {
-        if (tenderedNum > 0 && tenderedNum < finalAmount) {
-          throw new Error(`Tendered cash (₹${tenderedNum}) is less than total amount (₹${finalAmount})`);
+        if (tenderedNum > 0 && tenderedNum < netPayable) {
+          throw new Error(`Tendered cash (₹${tenderedNum}) is less than net payable (₹${netPayable})`);
         }
+        transactionReference = tenderedNum > 0
+          ? `Tendered: ₹${tenderedNum.toFixed(2)}, Change: ₹${changeReturned.toFixed(2)}`
+          : 'Exact Cash';
       } else if (paymentMethod === 'UPI') {
-        transactionReference = upiRef.trim() || `UPI/${Math.random().toString().slice(2, 14)}`;
+        transactionReference = 'UPI Store Standee Scan';
       } else if (paymentMethod === 'CARD') {
-        transactionReference = cardAuth.trim() || `CARD/AUTH-${Math.random().toString().slice(2, 8)}`;
+        transactionReference = 'EDC Card Terminal POS';
       } else if (paymentMethod === 'SPLIT') {
         const cVal = Number(splitCashAmount) || 0;
         const uVal = Number(splitUpiAmount) || 0;
-        if (Math.abs(cVal + uVal - finalAmount) > 0.05) {
-          throw new Error(`Split sum (₹${cVal + uVal}) does not equal total amount (₹${finalAmount})`);
+        if (Math.abs(cVal + uVal - netPayable) > 0.05) {
+          throw new Error(`Split sum (₹${cVal + uVal}) does not equal net amount (₹${netPayable})`);
         }
         splits = [
           { method: 'CASH' as const, amount: cVal },
-          { method: 'UPI' as const, amount: uVal, reference: upiRef || 'UPI/SPLIT' },
+          { method: 'UPI' as const, amount: uVal },
         ];
+        transactionReference = `Cash ₹${cVal.toFixed(2)} + UPI ₹${uVal.toFixed(2)}`;
       }
 
       const res = await api.processOrderPayment(selectedOrder.id, {
-        amount: finalAmount,
+        amount: netPayable,
+        discountAmount,
         method: paymentMethod,
         splits,
         cashierId: currentUser?.id || 'usr_cashier',
-        cashierName: currentUser?.name || 'Cashier',
+        cashierName: currentUser?.name || 'Cashier Counter',
         tenderedAmount: paymentMethod === 'CASH' && tenderedNum > 0 ? tenderedNum : undefined,
         transactionReference,
       });
@@ -357,34 +419,47 @@ export const BillingTerminal: React.FC = () => {
                   <table className="w-full text-xs text-left">
                     <thead className="bg-stone-50 border-b border-stone-200 text-stone-600">
                       <tr>
-                        <th className="p-2.5">Item</th>
-                        <th className="p-2.5 text-right">Qty/Weight</th>
+                        <th className="p-2.5">Item Description</th>
+                        <th className="p-2.5 text-right">Packing / Qty</th>
                         <th className="p-2.5 text-right">Rate</th>
-                        <th className="p-2.5 text-right">Amount</th>
+                        <th className="p-2.5 text-right">Amount (₹)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-stone-100 text-stone-800 font-mono tabular-nums">
                       {selectedOrder.items.map(item => {
-                        const isWeight = item.unit === 'kg';
-                        const qtyStr = isWeight
-                          ? item.quantity < 1
-                            ? `${Math.round(item.quantity * 1000)}g`
-                            : `${item.quantity}kg`
-                          : `${item.quantity} ${item.unit}`;
+                        let qtyStr = `${item.quantity} ${item.unit}`;
+                        let packNote = '';
+
+                        if (item.packCount && item.packCount > 1 && item.packWeightKg) {
+                          const wtStr = item.packWeightKg < 1 ? `${Math.round(item.packWeightKg * 1000)}g` : `${item.packWeightKg}kg`;
+                          qtyStr = `${item.packCount} Pk`;
+                          packNote = `${item.packCount} Packs × ${wtStr} each`;
+                        } else if (item.packWeightKg) {
+                          const wtStr = item.packWeightKg < 1 ? `${Math.round(item.packWeightKg * 1000)}g` : `${item.packWeightKg}kg`;
+                          qtyStr = `1 Pk`;
+                          packNote = `${wtStr} pack`;
+                        } else if (item.packCount && item.packCount > 1) {
+                          qtyStr = `${item.packCount} Pcs`;
+                        }
 
                         return (
                           <tr key={item.id} className="hover:bg-stone-50">
                             <td className="p-2.5 font-sans">
-                              <span className="font-medium text-stone-900">{item.productName}</span>
-                              {item.specialInstructions && (
-                                <p className="text-[10px] text-amber-700 font-sans mt-0.5">
-                                  {item.specialInstructions}
-                                </p>
+                              <span className="font-semibold text-stone-900">{item.productName}</span>
+                              {item.hindiName && (
+                                <span className="text-[11px] text-stone-400 block font-normal">
+                                  {item.hindiName}
+                                </span>
+                              )}
+                              {packNote && (
+                                <span className="text-[10px] text-amber-800 bg-amber-50 px-1 py-0.2 rounded border border-amber-200 inline-block font-mono mt-0.5">
+                                  {packNote}
+                                </span>
                               )}
                             </td>
-                            <td className="p-2.5 text-right">{qtyStr}</td>
-                            <td className="p-2.5 text-right">₹{item.unitPrice}</td>
-                            <td className="p-2.5 text-right font-bold">₹{item.totalPrice.toFixed(2)}</td>
+                            <td className="p-2.5 text-right font-medium">{qtyStr}</td>
+                            <td className="p-2.5 text-right text-stone-600">₹{item.unitPrice}</td>
+                            <td className="p-2.5 text-right font-bold text-stone-900">₹{item.totalPrice.toFixed(2)}</td>
                           </tr>
                         );
                       })}
@@ -392,25 +467,141 @@ export const BillingTerminal: React.FC = () => {
                   </table>
                 </div>
 
-                {/* Subtotal, Tax, Final Amount */}
-                <div className="mt-3 p-3 bg-stone-50 rounded-lg space-y-1.5 text-xs text-stone-600">
-                  <div className="flex justify-between">
-                    <span>Taxable Subtotal</span>
-                    <span className="font-mono tabular-nums text-stone-900">₹{selectedOrder.subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>CGST (2.5%)</span>
-                    <span className="font-mono tabular-nums text-stone-900">₹{(selectedOrder.totalTax / 2).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>SGST (2.5%)</span>
-                    <span className="font-mono tabular-nums text-stone-900">₹{(selectedOrder.totalTax / 2).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-base font-bold text-stone-900 pt-2 border-t border-stone-200">
-                    <span>Net Amount Due</span>
-                    <span className="font-mono tabular-nums text-amber-800 text-lg">
-                      ₹{selectedOrder.finalAmount.toFixed(2)}
+                {/* Discount Option - Percent (%) or Direct Amount (₹) Entry */}
+                <div className="mt-3 p-3 bg-amber-50/70 border border-amber-200/90 rounded-xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                      <Percent className="w-3.5 h-3.5 text-amber-700" />
+                      <span>Discount Option:</span>
                     </span>
+                    {discountAmount > 0 && (
+                      <span className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        -₹{discountAmount.toFixed(2)} Discount Applied
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {/* Mode Toggle Button */}
+                    <div className="inline-flex rounded-lg border border-stone-200 p-0.5 bg-white shrink-0 shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() => setDiscountType('PERCENT')}
+                        className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
+                          discountType === 'PERCENT'
+                            ? 'bg-amber-600 text-white shadow-2xs'
+                            : 'text-stone-600 hover:text-stone-900'
+                        }`}
+                      >
+                        Percent (%)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDiscountType('FLAT')}
+                        className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
+                          discountType === 'FLAT'
+                            ? 'bg-amber-600 text-white shadow-2xs'
+                            : 'text-stone-600 hover:text-stone-900'
+                        }`}
+                      >
+                        Direct Amount (₹)
+                      </button>
+                    </div>
+
+                    {/* Discount Input Field */}
+                    <div className="relative flex-1">
+                      <input
+                        type="number"
+                        min="0"
+                        max={discountType === 'PERCENT' ? 100 : grossSubtotal}
+                        step={discountType === 'PERCENT' ? 1 : 10}
+                        value={discountInput}
+                        onChange={(e) => setDiscountInput(e.target.value)}
+                        placeholder={discountType === 'PERCENT' ? 'Enter % (e.g. 5 or 10)' : 'Enter Flat Amount (e.g. 50)'}
+                        className="w-full bg-white border border-stone-300 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-stone-900 focus:outline-none focus:ring-1 focus:ring-amber-500 shadow-2xs"
+                      />
+                    </div>
+
+                    {discountInput && (
+                      <button
+                        type="button"
+                        onClick={() => setDiscountInput('')}
+                        className="text-stone-400 hover:text-stone-700 p-1 text-xs cursor-pointer"
+                        title="Clear discount"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Quick Preset Buttons */}
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <span className="text-[10px] text-stone-500 font-medium">Presets:</span>
+                    {[
+                      { type: 'PERCENT' as const, val: 5, label: '5%' },
+                      { type: 'PERCENT' as const, val: 10, label: '10%' },
+                      { type: 'FLAT' as const, val: 20, label: '₹20' },
+                      { type: 'FLAT' as const, val: 50, label: '₹50' },
+                      { type: 'FLAT' as const, val: 100, label: '₹100' },
+                    ].map(btn => (
+                      <button
+                        key={btn.label}
+                        type="button"
+                        onClick={() => {
+                          setDiscountType(btn.type);
+                          setDiscountInput(String(btn.val));
+                        }}
+                        className="px-2 py-0.5 bg-white border border-stone-200 hover:border-amber-400 text-stone-700 rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer"
+                      >
+                        {btn.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Subtotal, Discount, Net Amount, and 5% Inclusive GST Breakdown */}
+                <div className="mt-3 p-3.5 bg-stone-50 rounded-xl space-y-2 text-xs border border-stone-200">
+                  <div className="flex justify-between text-stone-600">
+                    <span>Gross Order Total (Incl. of GST)</span>
+                    <span className="font-mono tabular-nums text-stone-900 font-semibold">₹{grossSubtotal.toFixed(2)}</span>
+                  </div>
+
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between text-emerald-700 font-medium">
+                      <span>Discount ({discountType === 'PERCENT' ? `${discountValue}%` : `Flat ₹${discountValue}`})</span>
+                      <span className="font-mono tabular-nums font-bold">-₹{discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between text-base font-bold text-stone-900 pt-1.5 border-t border-stone-200">
+                    <span>Net Amount Due</span>
+                    <span className="font-mono tabular-nums text-amber-800 text-xl font-black">
+                      ₹{netPayable.toFixed(2)}
+                    </span>
+                  </div>
+
+                  {/* Inclusive 5% GST Breakdown (GST ONLY IN CASHIER BILL) */}
+                  <div className="pt-2 border-t border-stone-200 space-y-1 text-[11px] text-stone-600 font-mono">
+                    <div className="flex justify-between font-sans text-stone-700 font-bold text-xs pb-0.5">
+                      <span>GST Breakdown (Inclusive 5% Rate):</span>
+                      <span className="text-[10px] bg-stone-200/90 text-stone-700 px-1.5 py-0.2 rounded font-mono">Printed on 3" Bill</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Taxable Value of Goods:</span>
+                      <span>₹{taxableGoods.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>CGST (Central Tax @ 2.5%):</span>
+                      <span>₹{cgstAmt.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>SGST (State Tax @ 2.5%):</span>
+                      <span>₹{sgstAmt.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-stone-800 pt-0.5 border-t border-stone-200">
+                      <span>Total GST Amount (5.0%):</span>
+                      <span>₹{totalGst.toFixed(2)}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -419,14 +610,14 @@ export const BillingTerminal: React.FC = () => {
               {selectedOrder.paymentStatus === 'UNPAID' && selectedOrder.status !== 'CANCELLED' ? (
                 <div className="pt-2 border-t border-stone-200">
                   <div className="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-3">
-                    Select Payment Method
+                    Mode of Payment (Select How Customer Paid)
                   </div>
 
                   {/* Payment Method Switcher Tabs */}
                   <div className="grid grid-cols-4 gap-2 mb-4">
                     {[
                       { id: 'CASH', label: 'Cash', icon: Banknote },
-                      { id: 'UPI', label: 'UPI QR', icon: QrCode },
+                      { id: 'UPI', label: 'UPI', icon: Smartphone },
                       { id: 'CARD', label: 'Card', icon: CreditCard },
                       { id: 'SPLIT', label: 'Split', icon: Split },
                     ].map(tab => {
@@ -437,7 +628,7 @@ export const BillingTerminal: React.FC = () => {
                           key={tab.id}
                           type="button"
                           onClick={() => setPaymentMethod(tab.id as PaymentMethod)}
-                          className={`p-2.5 rounded-lg border text-center transition-all flex flex-col items-center justify-center gap-1 ${
+                          className={`p-2.5 rounded-lg border text-center transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
                             isSel
                               ? 'border-amber-600 bg-amber-50 text-amber-900 font-bold ring-1 ring-amber-600 shadow-xs'
                               : 'border-stone-200 bg-white text-stone-600 hover:border-stone-300'
@@ -455,11 +646,11 @@ export const BillingTerminal: React.FC = () => {
                     <div className="space-y-3 bg-stone-50 p-4 rounded-xl border border-stone-200">
                       <div>
                         <label className="text-xs font-semibold text-stone-700 block mb-1">
-                          Quick Cash Denomination Buttons:
+                          Quick Cash Denominations:
                         </label>
                         <div className="grid grid-cols-6 gap-1.5">
                           {[
-                            { label: 'Exact', val: finalAmount },
+                            { label: 'Exact', val: netPayable },
                             { label: '₹100', val: 100 },
                             { label: '₹200', val: 200 },
                             { label: '₹500', val: 500 },
@@ -470,7 +661,7 @@ export const BillingTerminal: React.FC = () => {
                               key={d.label}
                               type="button"
                               onClick={() => setCashTendered(String(d.val))}
-                              className="py-1.5 bg-white border border-stone-200 hover:border-amber-500 rounded text-xs font-mono font-medium text-stone-800 transition-colors shadow-2xs"
+                              className="py-1.5 bg-white border border-stone-200 hover:border-amber-500 rounded text-xs font-mono font-medium text-stone-800 transition-colors shadow-2xs cursor-pointer"
                             >
                               {d.label}
                             </button>
@@ -489,7 +680,7 @@ export const BillingTerminal: React.FC = () => {
                             step="1"
                             value={cashTendered}
                             onChange={(e) => setCashTendered(e.target.value)}
-                            placeholder={String(finalAmount)}
+                            placeholder={String(netPayable)}
                             className="w-full bg-white border border-stone-300 rounded px-3 py-2 text-sm font-mono font-bold text-stone-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
                           />
                         </div>
@@ -506,86 +697,119 @@ export const BillingTerminal: React.FC = () => {
                     </div>
                   )}
 
-                  {/* UPI Mode: Dynamic QR Code simulation */}
+                  {/* UPI Mode: Streamlined mode recording (No QR or VPA clutter) */}
                   {paymentMethod === 'UPI' && (
-                    <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 space-y-3">
-                      <div className="flex items-center gap-4">
-                        <div className="w-24 h-24 bg-white border border-stone-300 rounded-lg p-2 flex flex-col items-center justify-center shadow-xs shrink-0">
-                          <QrCode className="w-16 h-16 text-stone-800" />
-                          <span className="text-[9px] text-stone-400 font-mono mt-0.5">BHIM UPI</span>
+                    <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-lg flex items-center justify-center shrink-0">
+                          <Smartphone className="w-5 h-5" />
                         </div>
-                        <div className="text-xs space-y-1">
-                          <p className="font-semibold text-stone-900">Scan to Pay via Any UPI App</p>
-                          <p className="text-stone-500 font-mono text-[11px]">VPA: mithaiflow@okhdfcbank</p>
-                          <p className="text-stone-500 font-mono text-[11px]">Ref Token: {selectedOrder.tokenNumber}</p>
-                          <p className="text-xs font-bold text-amber-800 font-mono">Amount: ₹{finalAmount.toFixed(2)}</p>
+                        <div>
+                          <p className="font-semibold text-stone-900 text-xs">Payment via UPI Transfer / Soundbox Scan</p>
+                          <p className="text-stone-500 text-[11px]">
+                            Customer scanned UPI standee or paid via soundbox. Net amount: <strong className="text-stone-900 font-mono">₹{netPayable.toFixed(2)}</strong>
+                          </p>
                         </div>
                       </div>
-
-                      <div>
-                        <label className="text-xs font-medium text-stone-600 block mb-1">
-                          UPI UTR / Reference ID (Optional):
-                        </label>
-                        <input
-                          type="text"
-                          value={upiRef}
-                          onChange={(e) => setUpiRef(e.target.value)}
-                          placeholder="e.g. 429104829102 or leave blank for auto"
-                          className="w-full bg-white border border-stone-300 rounded px-3 py-1.5 text-xs font-mono text-stone-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* CARD Mode */}
-                  {paymentMethod === 'CARD' && (
-                    <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 space-y-3">
-                      <p className="text-xs text-stone-600">
-                        Swipe or tap customer card on EDC POS Terminal for <strong>₹{finalAmount.toFixed(2)}</strong>.
+                      <p className="text-[11px] text-stone-400 font-sans border-t border-stone-200 pt-2">
+                        Mode of payment will be recorded as <strong>UPI</strong> on the 3-inch Cashier Tax Bill.
                       </p>
-                      <div>
-                        <label className="text-xs font-medium text-stone-600 block mb-1">
-                          Card Approval Code / Last 4 Digits:
-                        </label>
-                        <input
-                          type="text"
-                          value={cardAuth}
-                          onChange={(e) => setCardAuth(e.target.value)}
-                          placeholder="e.g. AUTH-4829 or Card 4402"
-                          className="w-full bg-white border border-stone-300 rounded px-3 py-1.5 text-xs font-mono text-stone-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                        />
-                      </div>
                     </div>
                   )}
 
-                  {/* SPLIT Mode */}
+                  {/* CARD Mode: Streamlined mode recording (No card digits or auth code) */}
+                  {paymentMethod === 'CARD' && (
+                    <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-amber-100 text-amber-800 rounded-lg flex items-center justify-center shrink-0">
+                          <CreditCard className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-stone-900 text-xs">Payment via EDC Card POS Terminal</p>
+                          <p className="text-stone-500 text-[11px]">
+                            Card swiped or tapped on EDC machine for <strong className="text-stone-900 font-mono">₹{netPayable.toFixed(2)}</strong>.
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-stone-400 font-sans border-t border-stone-200 pt-2">
+                        Mode of payment will be recorded as <strong>CARD</strong> on the 3-inch Cashier Tax Bill.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* SPLIT Mode: Auto-calculating remainder columns */}
                   {paymentMethod === 'SPLIT' && (
                     <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 space-y-3">
-                      <p className="text-xs text-stone-600">
-                        Split payment between Cash and UPI. Total must equal <strong>₹{finalAmount.toFixed(2)}</strong>.
-                      </p>
+                      <div className="flex items-center justify-between text-xs">
+                        <p className="text-stone-600">
+                          Split payment across Cash and UPI. Total: <strong className="text-stone-900 font-mono">₹{netPayable.toFixed(2)}</strong>
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const half = Math.round((netPayable / 2) * 100) / 100;
+                            setSplitCashAmount(String(half));
+                            setSplitUpiAmount(String(Math.round((netPayable - half) * 100) / 100));
+                          }}
+                          className="px-2 py-0.5 bg-white border border-stone-300 hover:border-amber-500 rounded text-[11px] font-semibold text-amber-900 transition-colors cursor-pointer shadow-2xs"
+                        >
+                          50 / 50 Split
+                        </button>
+                      </div>
+
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="text-xs font-medium text-stone-600 block mb-1">Cash Part (₹):</label>
+                          <label className="text-xs font-semibold text-stone-700 block mb-1">
+                            Cash Part (₹):
+                          </label>
                           <input
                             type="number"
+                            min="0"
+                            max={netPayable}
+                            step="1"
                             value={splitCashAmount}
-                            onChange={(e) => setSplitCashAmount(e.target.value)}
+                            onChange={(e) => handleSplitCashChange(e.target.value)}
                             placeholder="e.g. 200"
-                            className="w-full bg-white border border-stone-300 rounded px-3 py-1.5 text-xs font-mono"
+                            className="w-full bg-white border border-stone-300 rounded px-3 py-2 text-sm font-mono font-bold text-stone-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
                           />
+                          <span className="text-[10px] text-stone-400 mt-0.5 block">Auto-calculates UPI column</span>
                         </div>
+
                         <div>
-                          <label className="text-xs font-medium text-stone-600 block mb-1">UPI Part (₹):</label>
+                          <label className="text-xs font-semibold text-stone-700 block mb-1">
+                            UPI Part (₹):
+                          </label>
                           <input
                             type="number"
+                            min="0"
+                            max={netPayable}
+                            step="1"
                             value={splitUpiAmount}
-                            onChange={(e) => setSplitUpiAmount(e.target.value)}
-                            placeholder={String(Math.max(0, finalAmount - (Number(splitCashAmount) || 0)))}
-                            className="w-full bg-white border border-stone-300 rounded px-3 py-1.5 text-xs font-mono"
+                            onChange={(e) => handleSplitUpiChange(e.target.value)}
+                            placeholder="e.g. 300"
+                            className="w-full bg-white border border-stone-300 rounded px-3 py-2 text-sm font-mono font-bold text-stone-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
                           />
+                          <span className="text-[10px] text-stone-400 mt-0.5 block">Auto-calculates Cash column</span>
                         </div>
                       </div>
+
+                      {/* Split Validation Indicator */}
+                      {(() => {
+                        const cVal = Number(splitCashAmount) || 0;
+                        const uVal = Number(splitUpiAmount) || 0;
+                        const sum = Math.round((cVal + uVal) * 100) / 100;
+                        const diff = Math.round((netPayable - sum) * 100) / 100;
+                        const isMatch = Math.abs(diff) < 0.05;
+
+                        return (
+                          <div className={`p-2 rounded-lg text-xs font-mono flex items-center justify-between border ${
+                            isMatch ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200'
+                          }`}>
+                            <span>Split Sum: ₹{sum.toFixed(2)} / ₹{netPayable.toFixed(2)}</span>
+                            <span className="font-bold">{isMatch ? '✓ Exact Match' : `Balance Remaining: ₹${diff.toFixed(2)}`}</span>
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
 
@@ -593,14 +817,14 @@ export const BillingTerminal: React.FC = () => {
                   <button
                     onClick={handleProcessPayment}
                     disabled={isProcessing}
-                    className="w-full mt-4 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+                    className="w-full mt-4 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer"
                   >
                     {isProcessing ? (
                       <span>Recording Payment &amp; Printing Invoice...</span>
                     ) : (
                       <>
                         <Printer className="w-4 h-4" />
-                        <span>COLLECT ₹{finalAmount.toFixed(2)} &amp; PRINT TAX INVOICE</span>
+                        <span>COLLECT ₹{netPayable.toFixed(2)} &amp; PRINT 3-INCH CASHIER BILL</span>
                       </>
                     )}
                   </button>
@@ -615,20 +839,92 @@ export const BillingTerminal: React.FC = () => {
                     </div>
                   </div>
                   <button
-                    onClick={() => {
-                      // Lookup invoice or print job
+                    onClick={async () => {
+                      let billText = '';
+                      try {
+                        const jobs = await api.fetchPrintJobs(50);
+                        const match = jobs.find(j => j.orderId === selectedOrder.id && j.jobType === 'TAX_INVOICE');
+                        if (match?.payload) {
+                          billText = match.payload;
+                        }
+                      } catch {
+                        // fallback
+                      }
+                      if (!billText) {
+                        // Fallback 48-column generator
+                        const now = new Date(selectedOrder.createdAt);
+                        const dateFormatted = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+                        const timeFormatted = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+                        const taxable = Math.round((selectedOrder.finalAmount / 1.05) * 100) / 100;
+                        const tax = Math.round((selectedOrder.finalAmount - taxable) * 100) / 100;
+                        const halfTax = Math.round((tax / 2) * 100) / 100;
+
+                        billText = [
+                          '================================================',
+                          '              SHEETAL GAJAK KULFI               ',
+                          '       Opposite High Court, Shivaji Nagar       ',
+                          '        Indore, Madhya Pradesh - 452003         ',
+                          '         Phone: 0731-2524890 / 9826012345       ',
+                          '    GSTIN: 23AABCS1429K1Z5 | FSSAI: 11421850000123',
+                          '================================================',
+                          '       TAX INVOICE / CASHIER BILL (3-INCH)      ',
+                          '================================================',
+                          `Invoice No : ${selectedOrder.invoiceId || 'INV-COMPLETED'}        Token : #${selectedOrder.tokenNumber}`,
+                          `Date       : ${dateFormatted}            Time  : ${timeFormatted}`,
+                          `Cashier    : ${selectedOrder.createdByName || 'Cashier Counter'}   Counter: ${selectedOrder.counterId || 'POS-1'}`,
+                          'Sale Type  : Retail Counter Sale    Status : PAID IN FULL',
+                          '------------------------------------------------',
+                          '#  ITEM DESCRIPTION        QTY     RATE   AMOUNT(Rs)',
+                          '------------------------------------------------',
+                          ...selectedOrder.items.map((it, idx) => {
+                            const sn = String(idx + 1).padStart(2, '0') + ' ';
+                            const name = it.productName.slice(0, 19).padEnd(20);
+                            const qtyStr = (it.packCount && it.packWeightKg ? `${it.packCount} Pk` : `${it.quantity}`).slice(0, 5).padStart(6);
+                            const rate = it.unitPrice.toFixed(2).slice(0, 8).padStart(9);
+                            const amt = it.totalPrice.toFixed(2).slice(0, 9).padStart(10);
+                            const packNote = it.packCount && it.packWeightKg
+                              ? `\n   [${it.packCount} Packs x ${it.packWeightKg < 1 ? `${Math.round(it.packWeightKg * 1000)}g` : `${it.packWeightKg}kg`} each]`
+                              : '';
+                            return `${sn}${name}${qtyStr}${rate}${amt}${packNote}`;
+                          }),
+                          '------------------------------------------------',
+                          `Gross Order Total (Incl. GST):        Rs. ${selectedOrder.subtotal.toFixed(2).padStart(8)}`,
+                          selectedOrder.totalDiscount > 0 ? `Discount Deducted:                   -Rs. ${selectedOrder.totalDiscount.toFixed(2).padStart(8)}` : '',
+                          '================================================',
+                          `NET AMOUNT DUE & PAID:               Rs. ${selectedOrder.finalAmount.toFixed(2).padStart(8)}`,
+                          '================================================',
+                          '---------------- GST SUMMARY (5.0%) ------------',
+                          'Rate       Taxable Value    CGST(2.5%)    SGST(2.5%)',
+                          `5% GST        Rs. ${taxable.toFixed(2).padStart(8)}     Rs. ${halfTax.toFixed(2).padStart(5)}     Rs. ${(tax - halfTax).toFixed(2).padStart(5)}`,
+                          '------------------------------------------------',
+                          `Total GST Included in Price:         Rs. ${tax.toFixed(2).padStart(8)}`,
+                          '------------------------------------------------',
+                          'PAYMENT SETTLEMENT:',
+                          'Mode of Payment   : PAID IN FULL (COUNTER SETTLED)',
+                          'Settlement Status : SUCCESS (VERIFIED)',
+                          '================================================',
+                          '   * Freshly crafted daily with pure Desi Ghee *  ',
+                          '  * Goods once sold cannot be returned/exchanged *',
+                          '',
+                          '        Thank you for choosing Sheetal Gajak!   ',
+                          '          Pure Indore Heritage Since 1984       ',
+                          '        Opp. High Court, Shivaji Nagar, Indore  ',
+                          '================================================',
+                        ].filter(Boolean).join('\n');
+                      }
+
                       openThermalReceipt({
-                        title: `Tax Invoice - ${selectedOrder.tokenNumber}`,
-                        text: `TAX INVOICE\nToken: ${selectedOrder.tokenNumber}\nAmount: ₹${selectedOrder.finalAmount.toFixed(2)}\nStatus: PAID`,
+                        title: `Tax Invoice - #${selectedOrder.tokenNumber}`,
+                        text: billText,
                         paperWidth: '80mm',
                         tokenNumber: selectedOrder.tokenNumber,
                         jobType: 'TAX_INVOICE',
                       });
                     }}
-                    className="px-3 py-1.5 bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 rounded text-xs font-semibold transition-colors flex items-center gap-1.5"
+                    className="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
                   >
                     <Printer className="w-3.5 h-3.5" />
-                    <span>View / Reprint Invoice</span>
+                    <span>View / Print 3-Inch Bill</span>
                   </button>
                 </div>
               ) : (
@@ -647,51 +943,60 @@ export const BillingTerminal: React.FC = () => {
         </div>
       </div>
 
-      {/* PAID INVOICE CONFIRMATION POPUP */}
+      {/* PAID INVOICE CONFIRMATION POPUP WITH EMBEDDED RECEIPT PREVIEW */}
       {paidInvoiceModal && (
-        <div className="fixed inset-0 z-50 bg-stone-900/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 text-center shadow-2xl border border-stone-200">
-            <div className="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-3">
+        <div className="fixed inset-0 z-50 bg-stone-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 text-center shadow-2xl border border-stone-200 my-6">
+            <div className="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-2.5">
               <CheckCircle2 className="w-7 h-7" />
             </div>
 
-            <p className="text-xs uppercase tracking-wider font-semibold text-stone-400">
-              Payment Successfully Recorded
+            <p className="text-xs uppercase tracking-widest font-bold text-emerald-800">
+              Payment Confirmed &amp; Bill Generated
             </p>
-            <h3 className="text-xl font-black text-stone-900 font-mono mt-1">
+            <h3 className="text-xl font-black text-stone-900 font-mono mt-0.5">
               Invoice #{paidInvoiceModal.invoiceNumber}
             </h3>
 
-            <div className="my-3 py-2 px-4 bg-stone-50 rounded-lg border border-stone-200 inline-block font-mono text-xs text-stone-700">
-              Token: <strong>{paidInvoiceModal.tokenNumber}</strong> · Amount: <strong>₹{paidInvoiceModal.amount.toFixed(2)}</strong> ({paidInvoiceModal.paymentMethod})
+            <div className="my-2.5 py-1.5 px-3 bg-stone-100 rounded-lg border border-stone-200 inline-flex items-center gap-2 font-mono text-xs text-stone-700">
+              <span>Token: <strong>#{paidInvoiceModal.tokenNumber}</strong></span>
+              <span>·</span>
+              <span>Amount: <strong className="text-emerald-800">₹{paidInvoiceModal.amount.toFixed(2)}</strong></span>
+              <span>·</span>
+              <span className="bg-white px-1.5 py-0.5 rounded border border-stone-300 text-[10px] font-bold text-stone-800">
+                {paidInvoiceModal.paymentMethod}
+              </span>
             </div>
 
-            <p className="text-xs text-stone-500 max-w-xs mx-auto">
-              Tax invoice has been automatically dispatched to the billing counter thermal printer (80mm).
-            </p>
+            {/* Embedded Mini Thermal Preview */}
+            <div className="my-3 text-left bg-stone-50 border border-stone-200 rounded-xl p-3 max-h-48 overflow-y-auto font-mono text-[10.5px] leading-tight text-stone-800 select-text scrollbar-none shadow-inner">
+              <pre className="whitespace-pre font-mono">
+                {paidInvoiceModal.receiptText}
+              </pre>
+            </div>
 
-            <div className="mt-5 flex gap-2">
+            <div className="mt-4 flex gap-2">
               <button
                 type="button"
                 onClick={() => {
                   openThermalReceipt({
-                    title: `Tax Invoice - ${paidInvoiceModal.invoiceNumber}`,
+                    title: `Tax Invoice - #${paidInvoiceModal.tokenNumber}`,
                     text: paidInvoiceModal.receiptText,
                     paperWidth: '80mm',
                     tokenNumber: paidInvoiceModal.tokenNumber,
                     jobType: 'TAX_INVOICE',
                   });
                 }}
-                className="flex-1 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                className="flex-1 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm"
               >
-                <FileText className="w-4 h-4 text-stone-600" />
-                <span>View Thermal Invoice</span>
+                <Printer className="w-4 h-4 text-amber-400" />
+                <span>Open &amp; Print 3-Inch Bill</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setPaidInvoiceModal(null)}
-                className="flex-1 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors"
+                className="px-5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded-lg transition-colors cursor-pointer border border-stone-300"
               >
                 Done
               </button>

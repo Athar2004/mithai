@@ -139,7 +139,7 @@ router.patch('/orders/:id/status', (req: Request, res: Response) => {
 // --- Payments & Invoicing ---
 router.post('/orders/:id/pay', (req: Request, res: Response) => {
   try {
-    const { amount, method, splits, cashierId, cashierName, tenderedAmount, transactionReference } = req.body;
+    const { amount, method, splits, cashierId, cashierName, tenderedAmount, transactionReference, discountAmount } = req.body;
     const result = db.processPayment({
       orderId: req.params.id,
       amount: Number(amount),
@@ -149,6 +149,7 @@ router.post('/orders/:id/pay', (req: Request, res: Response) => {
       cashierName: cashierName || 'Cashier',
       tenderedAmount: tenderedAmount ? Number(tenderedAmount) : undefined,
       transactionReference,
+      discountAmount: discountAmount ? Number(discountAmount) : undefined,
     });
 
     // Generate & Enqueue Invoice Print Job

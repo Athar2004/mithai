@@ -1,0 +1,2324 @@
+{
+  "categories": [
+    {
+      "id": "dry-fruits",
+      "name": "Dry Fruit Sweets",
+      "description": "Premium cashew, pistachio, and almond sweets with silver vark",
+      "iconName": "Sparkles",
+      "displayOrder": 1
+    },
+    {
+      "id": "milk-sweets",
+      "name": "Milk Sweets",
+      "description": "Fresh khoya, mawa, and chenna sweets prepared daily",
+      "iconName": "Milk",
+      "displayOrder": 2
+    },
+    {
+      "id": "bengali-sweets",
+      "name": "Bengali Sweets",
+      "description": "Delicate sponge and chenna delicacies in aromatic syrup",
+      "iconName": "HeartHandshake",
+      "displayOrder": 3
+    },
+    {
+      "id": "traditional",
+      "name": "Traditional Indian",
+      "description": "Classic laddoos, halwas, and heritage regional sweets",
+      "iconName": "Flame",
+      "displayOrder": 4
+    },
+    {
+      "id": "namkeen",
+      "name": "Namkeen & Farsan",
+      "description": "Crispy sev, spiced mixtures, and savory snacks",
+      "iconName": "Package",
+      "displayOrder": 5
+    },
+    {
+      "id": "snacks",
+      "name": "Samosa, Kachori & Snacks",
+      "description": "Freshly fried hot snacks and chaat items from our kitchen",
+      "iconName": "UtensilsCrossed",
+      "displayOrder": 6
+    },
+    {
+      "id": "bakery",
+      "name": "Bakery & Cookies",
+      "description": "Desi ghee nan khatai, rusks, and dry cookies",
+      "iconName": "Cookie",
+      "displayOrder": 7
+    },
+    {
+      "id": "beverages",
+      "name": "Beverages",
+      "description": "Chilled lassi, badam milk, and aromatic masala chai",
+      "iconName": "Coffee",
+      "displayOrder": 8
+    }
+  ],
+  "products": [
+    {
+      "id": "prod_sheetal_til_gajak",
+      "sku": "GJK-TL-01",
+      "name": "Sheetal Shahi Til Gajak",
+      "hindiName": "शाही तिल गजक (इंदौर स्पेशल)",
+      "categoryId": "gajak",
+      "unit": "kg",
+      "pricePerUnit": 440,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": false,
+      "imageUrl": "/images/kaju-katli.jpg",
+      "description": "Crispy, wafer-thin sesame seed and pure desi ghee gajak made with traditional Indore recipe",
+      "popularItem": true,
+      "standardWeights": [
+        0.25,
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "prod_sheetal_gud_gajak",
+      "sku": "GJK-GD-02",
+      "name": "Special Gud Khasta Gajak",
+      "hindiName": "गुड़ खस्ता गजक",
+      "categoryId": "gajak",
+      "unit": "kg",
+      "pricePerUnit": 420,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": false,
+      "imageUrl": "/images/kaju-katli.jpg",
+      "description": "Traditional organic jaggery and roasted sesame gajak with rich cardamom aroma",
+      "popularItem": true,
+      "standardWeights": [
+        0.25,
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "prod_sheetal_matka_kulfi",
+      "sku": "KLF-MT-01",
+      "name": "Kesar Pista Matka Kulfi",
+      "hindiName": "केसर पिस्ता मटका कुल्फी",
+      "categoryId": "kulfi",
+      "unit": "piece",
+      "pricePerUnit": 60,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": false,
+      "imageUrl": "/images/rasgulla.jpg",
+      "description": "Authentic clay pot slow-cooked rabdi kulfi enriched with Kashmiri saffron and crunchy pistachios",
+      "popularItem": true,
+      "standardCounts": [
+        1,
+        2,
+        4,
+        6
+      ]
+    },
+    {
+      "id": "prod_sheetal_rabdi_falooda",
+      "sku": "KLF-RF-02",
+      "name": "Special Rabdi Falooda Kulfi",
+      "hindiName": "स्पेशल रबड़ी फालूदा कुल्फी",
+      "categoryId": "kulfi",
+      "unit": "piece",
+      "pricePerUnit": 80,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": false,
+      "imageUrl": "/images/gulab-jamun.jpg",
+      "description": "Creamy sliced roll-cut kulfi served with rich thickened rabdi, handmade falooda and rose syrup",
+      "popularItem": true,
+      "standardCounts": [
+        1,
+        2,
+        3,
+        5
+      ]
+    },
+    {
+      "id": "prod_kaju_katli",
+      "sku": "SWT-KJ-01",
+      "name": "Kaju Katli (Pure Cashew)",
+      "hindiName": "काजू कतली",
+      "categoryId": "dry-fruits",
+      "unit": "kg",
+      "pricePerUnit": 960,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": false,
+      "imageUrl": "/images/kaju-katli.jpg",
+      "description": "Diamond-shaped cashew fudge topped with pure vegetarian edible silver vark",
+      "popularItem": true,
+      "standardWeights": [
+        0.1,
+        0.25,
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "prod_gulab_jamun",
+      "sku": "SWT-GJ-02",
+      "name": "Gulab Jamun (Shahi Ghee)",
+      "hindiName": "गुलाब जामुन",
+      "categoryId": "milk-sweets",
+      "unit": "piece",
+      "pricePerUnit": 25,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": true,
+      "imageUrl": "/images/gulab-jamun.jpg",
+      "description": "Warm, soft mawa dumplings soaked in cardamom and rose saffron syrup",
+      "popularItem": true,
+      "standardCounts": [
+        1,
+        2,
+        4,
+        8,
+        12
+      ]
+    },
+    {
+      "id": "prod_rasgulla",
+      "sku": "SWT-RG-03",
+      "name": "Bengali Spongy Rasgulla",
+      "hindiName": "रसगुल्ला",
+      "categoryId": "bengali-sweets",
+      "unit": "piece",
+      "pricePerUnit": 22,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": true,
+      "imageUrl": "/images/rasgulla.jpg",
+      "description": "Handmade fresh cow milk chenna spheres soaked in light syrup",
+      "popularItem": true,
+      "standardCounts": [
+        2,
+        4,
+        6,
+        10,
+        12
+      ]
+    },
+    {
+      "id": "prod_samosa",
+      "sku": "SNK-SM-04",
+      "name": "Special Aloo Samosa",
+      "hindiName": "गरम समोसा",
+      "categoryId": "snacks",
+      "unit": "piece",
+      "pricePerUnit": 18,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": true,
+      "imageUrl": "/images/samosa.jpg",
+      "description": "Crispy flaky pastry stuffed with spiced potato, peas, cashew & raisins",
+      "popularItem": true,
+      "standardCounts": [
+        1,
+        2,
+        4,
+        6,
+        10
+      ]
+    },
+    {
+      "id": "prod_kachori",
+      "sku": "SNK-KC-05",
+      "name": "Jodhpuri Pyaaz Kachori",
+      "hindiName": "प्याज कचौरी",
+      "categoryId": "snacks",
+      "unit": "piece",
+      "pricePerUnit": 30,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": true,
+      "imageUrl": "/images/kachori.jpg",
+      "description": "Crispy golden kachori filled with spiced caramelised onion masala",
+      "popularItem": true,
+      "standardCounts": [
+        1,
+        2,
+        4,
+        6
+      ]
+    },
+    {
+      "id": "prod_motichoor",
+      "sku": "SWT-ML-06",
+      "name": "Motichoor Laddu (Pure Desi Ghee)",
+      "hindiName": "मोतीचूर लड्डू",
+      "categoryId": "traditional",
+      "unit": "kg",
+      "pricePerUnit": 540,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": false,
+      "imageUrl": "/images/motichoor.jpg",
+      "description": "Melt-in-mouth micro gram-flour pearls fried in pure ghee, garnished with melon seeds",
+      "popularItem": true,
+      "standardWeights": [
+        0.25,
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "prod_rasmalai",
+      "sku": "SWT-RM-07",
+      "name": "Kesariya Rasmalai",
+      "hindiName": "केसरिया रसमलाई",
+      "categoryId": "bengali-sweets",
+      "unit": "piece",
+      "pricePerUnit": 45,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": true,
+      "imageUrl": "/images/rasmalai.jpg",
+      "description": "Flattened chenna patties immersed in thickened saffron rabdi with sliced pistachios",
+      "popularItem": true,
+      "standardCounts": [
+        2,
+        4,
+        6
+      ]
+    },
+    {
+      "id": "prod_ratlami_sev",
+      "sku": "NMK-RS-08",
+      "name": "Indori Ratlami Sev (Laung Spiced)",
+      "hindiName": "रतलामी सेव",
+      "categoryId": "namkeen",
+      "unit": "kg",
+      "pricePerUnit": 280,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": false,
+      "imageUrl": "/images/ratlami-sev.jpg",
+      "description": "Famous spicy chickpea noodles flavored with cloves, black pepper, and hing",
+      "popularItem": true,
+      "standardWeights": [
+        0.25,
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "prod_kaju_roll",
+      "sku": "SWT-KR-09",
+      "name": "Kaju Pista Roll",
+      "hindiName": "काजू पिस्ता रोल",
+      "categoryId": "dry-fruits",
+      "unit": "kg",
+      "pricePerUnit": 1100,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": false,
+      "imageUrl": "/images/kaju-roll.jpg",
+      "description": "Cashew sheets rolled around aromatic roasted pistachio and green cardamom stuffing",
+      "popularItem": false,
+      "standardWeights": [
+        0.25,
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "prod_dhokla",
+      "sku": "SNK-DK-10",
+      "name": "Khaman Dhokla",
+      "hindiName": "खमण ढोकला",
+      "categoryId": "snacks",
+      "unit": "kg",
+      "pricePerUnit": 240,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": true,
+      "imageUrl": "/images/dhokla.jpg",
+      "description": "Juicy steamed gram flour sponge tempered with mustard seeds, green chillies & coriander",
+      "popularItem": false,
+      "standardWeights": [
+        0.25,
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "prod_lassi",
+      "sku": "BEV-LS-11",
+      "name": "Kesariya Kulhad Lassi",
+      "hindiName": "कुल्हड़ लस्सी",
+      "categoryId": "beverages",
+      "unit": "portion",
+      "pricePerUnit": 60,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": true,
+      "imageUrl": "/images/lassi.jpg",
+      "description": "Thick churned sweet curd served in earthen kulhad with fresh malai and saffron syrup",
+      "popularItem": true,
+      "standardCounts": [
+        1,
+        2,
+        4
+      ]
+    },
+    {
+      "id": "prod_masala_chai",
+      "sku": "BEV-MC-12",
+      "name": "Special Masala Chai",
+      "hindiName": "मसाला चाय",
+      "categoryId": "beverages",
+      "unit": "portion",
+      "pricePerUnit": 25,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": true,
+      "imageUrl": "/images/masala-chai.jpg",
+      "description": "Freshly brewed aromatic tea infused with ginger, cardamom, and whole spices",
+      "popularItem": false,
+      "standardCounts": [
+        1,
+        2,
+        4,
+        6
+      ]
+    },
+    {
+      "id": "prod_peda",
+      "sku": "SWT-PD-13",
+      "name": "Mathura Peda (Brown Mawa)",
+      "hindiName": "मथुरा पेड़ा",
+      "categoryId": "milk-sweets",
+      "unit": "kg",
+      "pricePerUnit": 520,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": false,
+      "imageUrl": "/images/peda.jpg",
+      "description": "Traditional slow-caramelized mawa peda dusted with fragrant cardamom sugar",
+      "popularItem": true,
+      "standardWeights": [
+        0.25,
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "prod_chamcham",
+      "sku": "SWT-CC-14",
+      "name": "Bengali Malai Cham Cham",
+      "hindiName": "मलाई चमचम",
+      "categoryId": "bengali-sweets",
+      "unit": "piece",
+      "pricePerUnit": 35,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": true,
+      "imageUrl": "/images/chamcham.jpg",
+      "description": "Delicate oval chenna confection stuffed with rich mawa and pistachio crumb",
+      "popularItem": false,
+      "standardCounts": [
+        2,
+        4,
+        6
+      ]
+    },
+    {
+      "id": "prod_bhujia",
+      "sku": "NMK-BJ-15",
+      "name": "Bikaneri Aloo Bhujia",
+      "hindiName": "आलू भुजिया",
+      "categoryId": "namkeen",
+      "unit": "kg",
+      "pricePerUnit": 260,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": false,
+      "imageUrl": "/images/bhujia.jpg",
+      "description": "Crisp and crunchy spiced potato and moth bean vermicelli",
+      "popularItem": true,
+      "standardWeights": [
+        0.25,
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "prod_badam_milk",
+      "sku": "BEV-BM-16",
+      "name": "Chilled Kesar Badam Milk",
+      "hindiName": "केसर बादाम दूध",
+      "categoryId": "beverages",
+      "unit": "portion",
+      "pricePerUnit": 50,
+      "taxRatePercent": 5,
+      "isActive": true,
+      "requiresKitchen": true,
+      "imageUrl": "/images/badam-milk.jpg",
+      "description": "Slow boiled buffalo milk with almond paste, saffron strands, and crushed pistachios",
+      "popularItem": true,
+      "standardCounts": [
+        1,
+        2,
+        4
+      ]
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_1792322097655_qyema",
+      "tokenNumber": "T-002",
+      "businessDate": "2026-10-18",
+      "counterId": "POS-1",
+      "createdByUserId": "usr_pos",
+      "createdByName": "Order POS Staff",
+      "createdAt": "2026-10-18T11:14:57.655Z",
+      "updatedAt": "2026-10-18T11:14:57.655Z",
+      "status": "RECEIVED",
+      "statusHistory": [
+        {
+          "status": "RECEIVED",
+          "updatedBy": "Order POS Staff",
+          "timestamp": "2026-10-18T11:14:57.655Z",
+          "note": "Order taken at POS"
+        }
+      ],
+      "items": [
+        {
+          "id": "item_ord_1792322097655_qyema_1",
+          "productId": "prod_sheetal_til_gajak",
+          "productName": "Sheetal Shahi Til Gajak",
+          "hindiName": "शाही तिल गजक (इंदौर स्पेशल)",
+          "unit": "kg",
+          "quantity": 0.25,
+          "unitPrice": 440,
+          "taxRatePercent": 5,
+          "taxAmount": 5.5,
+          "discountAmount": 0,
+          "totalPrice": 115.5
+        }
+      ],
+      "subtotal": 110,
+      "totalTax": 5.5,
+      "totalDiscount": 0,
+      "finalAmount": 115.5,
+      "paymentStatus": "UNPAID",
+      "isKitchenRequired": false
+    },
+    {
+      "id": "ord_1792320564692_w50fz",
+      "tokenNumber": "T-001",
+      "businessDate": "2026-10-18",
+      "counterId": "POS-1",
+      "createdByUserId": "usr_pos",
+      "createdByName": "Order POS Staff",
+      "createdAt": "2026-10-18T10:49:24.692Z",
+      "updatedAt": "2026-10-18T10:49:24.692Z",
+      "status": "RECEIVED",
+      "statusHistory": [
+        {
+          "status": "RECEIVED",
+          "updatedBy": "Order POS Staff",
+          "timestamp": "2026-10-18T10:49:24.692Z",
+          "note": "Order taken at POS"
+        }
+      ],
+      "items": [
+        {
+          "id": "item_ord_1792320564692_w50fz_1",
+          "productId": "prod_kachori",
+          "productName": "Jodhpuri Pyaaz Kachori",
+          "hindiName": "प्याज कचौरी",
+          "unit": "piece",
+          "quantity": 1,
+          "unitPrice": 30,
+          "taxRatePercent": 5,
+          "taxAmount": 1.5,
+          "discountAmount": 0,
+          "totalPrice": 31.5
+        },
+        {
+          "id": "item_ord_1792320564692_w50fz_2",
+          "productId": "prod_rasgulla",
+          "productName": "Bengali Spongy Rasgulla",
+          "hindiName": "रसगुल्ला",
+          "unit": "piece",
+          "quantity": 1,
+          "unitPrice": 22,
+          "taxRatePercent": 5,
+          "taxAmount": 1.1,
+          "discountAmount": 0,
+          "totalPrice": 23.1
+        },
+        {
+          "id": "item_ord_1792320564692_w50fz_3",
+          "productId": "prod_gulab_jamun",
+          "productName": "Gulab Jamun (Shahi Ghee)",
+          "hindiName": "गुलाब जामुन",
+          "unit": "piece",
+          "quantity": 1,
+          "unitPrice": 25,
+          "taxRatePercent": 5,
+          "taxAmount": 1.25,
+          "discountAmount": 0,
+          "totalPrice": 26.25
+        }
+      ],
+      "subtotal": 77,
+      "totalTax": 3.85,
+      "totalDiscount": 0,
+      "finalAmount": 80.85,
+      "paymentStatus": "UNPAID",
+      "isKitchenRequired": true
+    },
+    {
+      "id": "ord_1792294512373_ey3uv",
+      "tokenNumber": "T-013",
+      "businessDate": "2026-10-17",
+      "counterId": "POS-1",
+      "createdByUserId": "usr_pos1",
+      "createdByName": "Rajesh Sharma",
+      "createdAt": "2026-10-18T03:35:12.373Z",
+      "updatedAt": "2026-10-18T03:35:12.373Z",
+      "status": "RECEIVED",
+      "statusHistory": [
+        {
+          "status": "RECEIVED",
+          "updatedBy": "Rajesh Sharma",
+          "timestamp": "2026-10-18T03:35:12.373Z",
+          "note": "Order taken at POS"
+        }
+      ],
+      "items": [
+        {
+          "id": "item_ord_1792294512373_ey3uv_1",
+          "productId": "prod_kaju_katli",
+          "productName": "Kaju Katli (Pure Cashew)",
+          "hindiName": "काजू कतली",
+          "unit": "kg",
+          "quantity": 0.25,
+          "unitPrice": 960,
+          "taxRatePercent": 5,
+          "taxAmount": 12,
+          "discountAmount": 0,
+          "totalPrice": 252
+        },
+        {
+          "id": "item_ord_1792294512373_ey3uv_2",
+          "productId": "prod_kachori",
+          "productName": "Jodhpuri Pyaaz Kachori",
+          "hindiName": "प्याज कचौरी",
+          "unit": "piece",
+          "quantity": 1,
+          "unitPrice": 30,
+          "taxRatePercent": 5,
+          "taxAmount": 1.5,
+          "discountAmount": 0,
+          "totalPrice": 31.5
+        },
+        {
+          "id": "item_ord_1792294512373_ey3uv_3",
+          "productId": "prod_kaju_roll",
+          "productName": "Kaju Pista Roll",
+          "hindiName": "काजू पिस्ता रोल",
+          "unit": "kg",
+          "quantity": 0.25,
+          "unitPrice": 1100,
+          "taxRatePercent": 5,
+          "taxAmount": 13.75,
+          "discountAmount": 0,
+          "totalPrice": 288.75
+        }
+      ],
+      "subtotal": 545,
+      "totalTax": 27.25,
+      "totalDiscount": 0,
+      "finalAmount": 572.25,
+      "paymentStatus": "UNPAID",
+      "isKitchenRequired": true
+    },
+    {
+      "id": "ord_1792294188722_5wsjg",
+      "tokenNumber": "T-012",
+      "businessDate": "2026-10-17",
+      "counterId": "POS-1",
+      "createdByUserId": "usr_pos1",
+      "createdByName": "Rajesh Sharma",
+      "createdAt": "2026-10-18T03:29:48.722Z",
+      "updatedAt": "2026-10-18T03:36:32.721Z",
+      "status": "RECEIVED",
+      "statusHistory": [
+        {
+          "status": "RECEIVED",
+          "updatedBy": "Rajesh Sharma",
+          "timestamp": "2026-10-18T03:29:48.722Z",
+          "note": "Order taken at POS"
+        }
+      ],
+      "items": [
+        {
+          "id": "item_ord_1792294188722_5wsjg_1",
+          "productId": "prod_dhokla",
+          "productName": "Khaman Dhokla",
+          "hindiName": "खमण ढोकला",
+          "unit": "kg",
+          "quantity": 0.25,
+          "unitPrice": 240,
+          "taxRatePercent": 5,
+          "taxAmount": 3,
+          "discountAmount": 0,
+          "totalPrice": 63
+        }
+      ],
+      "subtotal": 60,
+      "totalTax": 3,
+      "totalDiscount": 0,
+      "finalAmount": 63,
+      "paymentStatus": "PAID",
+      "isKitchenRequired": true,
+      "paymentId": "pay_1792294592720_xb1s",
+      "invoiceId": "inv_1792294592721_8h22"
+    },
+    {
+      "id": "ord_1792293933233_67pzw",
+      "tokenNumber": "T-011",
+      "businessDate": "2026-10-17",
+      "counterId": "POS-1",
+      "createdByUserId": "usr_pos1",
+      "createdByName": "Rajesh Sharma",
+      "createdAt": "2026-10-18T03:25:33.233Z",
+      "updatedAt": "2026-10-18T03:25:33.233Z",
+      "status": "RECEIVED",
+      "statusHistory": [
+        {
+          "status": "RECEIVED",
+          "updatedBy": "Rajesh Sharma",
+          "timestamp": "2026-10-18T03:25:33.233Z",
+          "note": "Order taken at POS"
+        }
+      ],
+      "items": [
+        {
+          "id": "item_ord_1792293933233_67pzw_1",
+          "productId": "prod_gulab_jamun",
+          "productName": "Gulab Jamun (Shahi Ghee)",
+          "hindiName": "गुलाब जामुन",
+          "unit": "piece",
+          "quantity": 1,
+          "unitPrice": 25,
+          "taxRatePercent": 5,
+          "taxAmount": 1.25,
+          "discountAmount": 0,
+          "totalPrice": 26.25
+        },
+        {
+          "id": "item_ord_1792293933233_67pzw_2",
+          "productId": "prod_badam_milk",
+          "productName": "Chilled Kesar Badam Milk",
+          "hindiName": "केसर बादाम दूध",
+          "unit": "portion",
+          "quantity": 1,
+          "unitPrice": 50,
+          "taxRatePercent": 5,
+          "taxAmount": 2.5,
+          "discountAmount": 0,
+          "totalPrice": 52.5
+        }
+      ],
+      "subtotal": 75,
+      "totalTax": 3.75,
+      "totalDiscount": 0,
+      "finalAmount": 78.75,
+      "paymentStatus": "UNPAID",
+      "isKitchenRequired": true
+    },
+    {
+      "id": "ord_1792293636455_0o6wm",
+      "tokenNumber": "T-010",
+      "businessDate": "2026-10-17",
+      "counterId": "POS-1",
+      "createdByUserId": "usr_pos1",
+      "createdByName": "Rajesh Sharma",
+      "createdAt": "2026-10-18T03:20:36.455Z",
+      "updatedAt": "2026-10-18T03:20:36.455Z",
+      "status": "RECEIVED",
+      "statusHistory": [
+        {
+          "status": "RECEIVED",
+          "updatedBy": "Rajesh Sharma",
+          "timestamp": "2026-10-18T03:20:36.455Z",
+          "note": "Order taken at POS"
+        }
+      ],
+      "items": [
+        {
+          "id": "item_ord_1792293636455_0o6wm_1",
+          "productId": "prod_samosa",
+          "productName": "Special Aloo Samosa",
+          "hindiName": "गरम समोसा",
+          "unit": "piece",
+          "quantity": 1,
+          "unitPrice": 18,
+          "taxRatePercent": 5,
+          "taxAmount": 0.9,
+          "discountAmount": 0,
+          "totalPrice": 18.9
+        },
+        {
+          "id": "item_ord_1792293636455_0o6wm_2",
+          "productId": "prod_badam_milk",
+          "productName": "Chilled Kesar Badam Milk",
+          "hindiName": "केसर बादाम दूध",
+          "unit": "portion",
+          "quantity": 1,
+          "unitPrice": 50,
+          "taxRatePercent": 5,
+          "taxAmount": 2.5,
+          "discountAmount": 0,
+          "totalPrice": 52.5
+        }
+      ],
+      "subtotal": 68,
+      "totalTax": 3.4,
+      "totalDiscount": 0,
+      "finalAmount": 71.4,
+      "paymentStatus": "UNPAID",
+      "isKitchenRequired": true
+    },
+    {
+      "id": "ord_1792293538854_w6mbt",
+      "tokenNumber": "T-009",
+      "businessDate": "2026-10-17",
+      "counterId": "POS-1",
+      "createdByUserId": "usr_pos1",
+      "createdByName": "Rajesh Sharma",
+      "createdAt": "2026-10-18T03:18:58.854Z",
+      "updatedAt": "2026-10-18T03:20:15.646Z",
+      "status": "RECEIVED",
+      "statusHistory": [
+        {
+          "status": "RECEIVED",
+          "updatedBy": "Rajesh Sharma",
+          "timestamp": "2026-10-18T03:18:58.854Z",
+          "note": "Order taken at POS"
+        }
+      ],
+      "items": [
+        {
+          "id": "item_ord_1792293538854_w6mbt_1",
+          "productId": "prod_badam_milk",
+          "productName": "Chilled Kesar Badam Milk",
+          "hindiName": "केसर बादाम दूध",
+          "unit": "portion",
+          "quantity": 1,
+          "unitPrice": 50,
+          "taxRatePercent": 5,
+          "taxAmount": 2.5,
+          "discountAmount": 0,
+          "totalPrice": 52.5
+        },
+        {
+          "id": "item_ord_1792293538854_w6mbt_2",
+          "productId": "prod_chamcham",
+          "productName": "Bengali Malai Cham Cham",
+          "hindiName": "मलाई चमचम",
+          "unit": "piece",
+          "quantity": 1,
+          "unitPrice": 35,
+          "taxRatePercent": 5,
+          "taxAmount": 1.75,
+          "discountAmount": 0,
+          "totalPrice": 36.75
+        }
+      ],
+      "subtotal": 85,
+      "totalTax": 4.25,
+      "totalDiscount": 0,
+      "finalAmount": 89.25,
+      "paymentStatus": "PAID",
+      "isKitchenRequired": true,
+      "paymentId": "pay_1792293615646_qulj",
+      "invoiceId": "inv_1792293615646_if39"
+    },
+    {
+      "id": "ord_demo_001",
+      "tokenNumber": "T-001",
+      "businessDate": "2026-10-17",
+      "counterId": "POS-1",
+      "createdByUserId": "usr_pos1",
+      "createdByName": "Rajesh Sharma",
+      "createdAt": "2026-10-17T07:29:36.486Z",
+      "updatedAt": "2026-10-17T07:29:36.486Z",
+      "status": "RECEIVED",
+      "statusHistory": [
+        {
+          "status": "RECEIVED",
+          "updatedBy": "Rajesh Sharma",
+          "timestamp": "2026-10-17T07:29:36.486Z",
+          "note": "Order taken at POS Counter 1"
+        }
+      ],
+      "items": [
+        {
+          "id": "item_1_1",
+          "productId": "prod_motichoor",
+          "productName": "Motichoor Laddu (Pure Desi Ghee)",
+          "hindiName": "मोतीचूर लड्डू",
+          "unit": "kg",
+          "quantity": 0.5,
+          "unitPrice": 540,
+          "taxRatePercent": 5,
+          "taxAmount": 13.5,
+          "discountAmount": 0,
+          "totalPrice": 283.5,
+          "specialInstructions": "Pack in round box"
+        },
+        {
+          "id": "item_1_2",
+          "productId": "prod_ratlami_sev",
+          "productName": "Indori Ratlami Sev (Laung Spiced)",
+          "hindiName": "रतलामी सेव",
+          "unit": "kg",
+          "quantity": 0.5,
+          "unitPrice": 280,
+          "taxRatePercent": 5,
+          "taxAmount": 7,
+          "discountAmount": 0,
+          "totalPrice": 147
+        }
+      ],
+      "subtotal": 410,
+      "totalTax": 20.5,
+      "totalDiscount": 0,
+      "finalAmount": 430.5,
+      "paymentStatus": "UNPAID",
+      "notes": "Customer in waiting area",
+      "isKitchenRequired": false
+    },
+    {
+      "id": "ord_demo_002",
+      "tokenNumber": "T-002",
+      "businessDate": "2026-10-17",
+      "counterId": "POS-1",
+      "createdByUserId": "usr_pos1",
+      "createdByName": "Rajesh Sharma",
+      "createdAt": "2026-10-17T07:25:36.486Z",
+      "updatedAt": "2026-10-17T07:27:36.486Z",
+      "status": "PREPARING",
+      "statusHistory": [
+        {
+          "status": "RECEIVED",
+          "updatedBy": "Rajesh Sharma",
+          "timestamp": "2026-10-17T07:25:36.486Z"
+        },
+        {
+          "status": "PREPARING",
+          "updatedBy": "Master Chef Ramesh",
+          "timestamp": "2026-10-17T07:27:36.486Z",
+          "note": "Frying fresh samosas"
+        }
+      ],
+      "items": [
+        {
+          "id": "item_2_1",
+          "productId": "prod_samosa",
+          "productName": "Special Aloo Samosa",
+          "hindiName": "गरम समोसा",
+          "unit": "piece",
+          "quantity": 6,
+          "unitPrice": 18,
+          "taxRatePercent": 5,
+          "taxAmount": 5.4,
+          "discountAmount": 0,
+          "totalPrice": 113.4,
+          "specialInstructions": "Extra sweet tamarind chutney & fried green chillies"
+        },
+        {
+          "id": "item_2_2",
+          "productId": "prod_lassi",
+          "productName": "Kesariya Kulhad Lassi",
+          "hindiName": "कुल्हड़ लस्सी",
+          "unit": "portion",
+          "quantity": 2,
+          "unitPrice": 60,
+          "taxRatePercent": 5,
+          "taxAmount": 6,
+          "discountAmount": 0,
+          "totalPrice": 126,
+          "specialInstructions": "Thick malai topping, less ice"
+        }
+      ],
+      "subtotal": 228,
+      "totalTax": 11.4,
+      "totalDiscount": 0,
+      "finalAmount": 239.4,
+      "paymentStatus": "UNPAID",
+      "notes": "Serve piping hot",
+      "isKitchenRequired": true
+    },
+    {
+      "id": "ord_demo_003",
+      "tokenNumber": "T-003",
+      "businessDate": "2026-10-17",
+      "counterId": "POS-1",
+      "createdByUserId": "usr_pos1",
+      "createdByName": "Rajesh Sharma",
+      "createdAt": "2026-10-17T07:20:36.486Z",
+      "updatedAt": "2026-10-17T07:20:36.486Z",
+      "status": "RECEIVED",
+      "statusHistory": [
+        {
+          "status": "RECEIVED",
+          "updatedBy": "Rajesh Sharma",
+          "timestamp": "2026-10-17T07:20:36.486Z"
+        }
+      ],
+      "items": [
+        {
+          "id": "item_3_1",
+          "productId": "prod_kachori",
+          "productName": "Jodhpuri Pyaaz Kachori",
+          "hindiName": "प्याज कचौरी",
+          "unit": "piece",
+          "quantity": 4,
+          "unitPrice": 30,
+          "taxRatePercent": 5,
+          "taxAmount": 6,
+          "discountAmount": 0,
+          "totalPrice": 126,
+          "specialInstructions": "Pack in butter paper pouch"
+        },
+        {
+          "id": "item_3_2",
+          "productId": "prod_dhokla",
+          "productName": "Khaman Dhokla",
+          "hindiName": "खमण ढोकला",
+          "unit": "kg",
+          "quantity": 0.5,
+          "unitPrice": 240,
+          "taxRatePercent": 5,
+          "taxAmount": 6,
+          "discountAmount": 0,
+          "totalPrice": 126,
+          "specialInstructions": "Mustard seed tadka extra"
+        },
+        {
+          "id": "item_3_3",
+          "productId": "prod_masala_chai",
+          "productName": "Special Masala Chai",
+          "hindiName": "मसाला चाय",
+          "unit": "portion",
+          "quantity": 4,
+          "unitPrice": 25,
+          "taxRatePercent": 5,
+          "taxAmount": 5,
+          "discountAmount": 0,
+          "totalPrice": 105
+        }
+      ],
+      "subtotal": 340,
+      "totalTax": 17,
+      "totalDiscount": 0,
+      "finalAmount": 357,
+      "paymentStatus": "UNPAID",
+      "notes": "Urgent family pickup",
+      "isKitchenRequired": true
+    },
+    {
+      "id": "ord_demo_004",
+      "tokenNumber": "T-004",
+      "businessDate": "2026-10-17",
+      "counterId": "POS-1",
+      "createdByUserId": "usr_pos1",
+      "createdByName": "Rajesh Sharma",
+      "createdAt": "2026-10-17T07:15:36.486Z",
+      "updatedAt": "2026-10-17T07:31:36.486Z",
+      "status": "READY",
+      "preparedAt": "2026-10-17T07:31:36.486Z",
+      "statusHistory": [
+        {
+          "status": "RECEIVED",
+          "updatedBy": "Rajesh Sharma",
+          "timestamp": "2026-10-17T07:15:36.486Z"
+        },
+        {
+          "status": "PREPARING",
+          "updatedBy": "Master Chef Ramesh",
+          "timestamp": "2026-10-17T07:18:36.486Z"
+        },
+        {
+          "status": "READY",
+          "updatedBy": "Master Chef Ramesh",
+          "timestamp": "2026-10-17T07:31:36.486Z",
+          "note": "Packed with garnishing"
+        }
+      ],
+      "items": [
+        {
+          "id": "item_4_1",
+          "productId": "prod_rasmalai",
+          "productName": "Kesariya Rasmalai",
+          "hindiName": "केसरिया रसमलाई",
+          "unit": "piece",
+          "quantity": 4,
+          "unitPrice": 45,
+          "taxRatePercent": 5,
+          "taxAmount": 9,
+          "discountAmount": 0,
+          "totalPrice": 189,
+          "specialInstructions": "Extra saffron rabdi"
+        },
+        {
+          "id": "item_4_2",
+          "productId": "prod_rasgulla",
+          "productName": "Bengali Spongy Rasgulla",
+          "hindiName": "रसगुल्ला",
+          "unit": "piece",
+          "quantity": 6,
+          "unitPrice": 22,
+          "taxRatePercent": 5,
+          "taxAmount": 6.6,
+          "discountAmount": 0,
+          "totalPrice": 138.6
+        }
+      ],
+      "subtotal": 312,
+      "totalTax": 15.6,
+      "totalDiscount": 0,
+      "finalAmount": 327.6,
+      "paymentStatus": "UNPAID",
+      "isKitchenRequired": true
+    },
+    {
+      "id": "ord_demo_005",
+      "tokenNumber": "T-005",
+      "businessDate": "2026-10-17",
+      "counterId": "POS-1",
+      "createdByUserId": "usr_pos1",
+      "createdByName": "Rajesh Sharma",
+      "createdAt": "2026-10-17T06:48:36.486Z",
+      "updatedAt": "2026-10-17T06:58:36.486Z",
+      "status": "COMPLETED",
+      "preparedAt": "2026-10-17T06:55:36.486Z",
+      "completedAt": "2026-10-17T06:58:36.486Z",
+      "paymentStatus": "PAID",
+      "paymentId": "pay_demo_005",
+      "invoiceId": "inv_demo_005",
+      "statusHistory": [
+        {
+          "status": "RECEIVED",
+          "updatedBy": "Rajesh Sharma",
+          "timestamp": "2026-10-17T06:48:36.486Z"
+        },
+        {
+          "status": "PREPARING",
+          "updatedBy": "Master Chef Ramesh",
+          "timestamp": "2026-10-17T06:51:36.486Z"
+        },
+        {
+          "status": "READY",
+          "updatedBy": "Master Chef Ramesh",
+          "timestamp": "2026-10-17T06:55:36.486Z"
+        },
+        {
+          "status": "COMPLETED",
+          "updatedBy": "Pooja Verma",
+          "timestamp": "2026-10-17T06:58:36.486Z"
+        }
+      ],
+      "items": [
+        {
+          "id": "item_5_1",
+          "productId": "prod_kaju_katli",
+          "productName": "Kaju Katli (Pure Cashew)",
+          "hindiName": "काजू कतली",
+          "unit": "kg",
+          "quantity": 1,
+          "unitPrice": 960,
+          "taxRatePercent": 5,
+          "taxAmount": 48,
+          "discountAmount": 0,
+          "totalPrice": 1008,
+          "specialInstructions": "Festive gold gift box with ribbon"
+        },
+        {
+          "id": "item_5_2",
+          "productId": "prod_kaju_roll",
+          "productName": "Kaju Pista Roll",
+          "hindiName": "काजू पिस्ता रोल",
+          "unit": "kg",
+          "quantity": 0.5,
+          "unitPrice": 1100,
+          "taxRatePercent": 5,
+          "taxAmount": 27.5,
+          "discountAmount": 0,
+          "totalPrice": 577.5
+        }
+      ],
+      "subtotal": 1510,
+      "totalTax": 75.5,
+      "totalDiscount": 0,
+      "finalAmount": 1585.5,
+      "isKitchenRequired": false
+    },
+    {
+      "id": "ord_demo_006",
+      "tokenNumber": "T-006",
+      "businessDate": "2026-10-17",
+      "counterId": "POS-1",
+      "createdByUserId": "usr_pos1",
+      "createdByName": "Rajesh Sharma",
+      "createdAt": "2026-10-17T06:18:36.486Z",
+      "updatedAt": "2026-10-17T06:28:36.486Z",
+      "status": "COMPLETED",
+      "preparedAt": "2026-10-17T06:25:36.486Z",
+      "completedAt": "2026-10-17T06:28:36.486Z",
+      "paymentStatus": "PAID",
+      "paymentId": "pay_demo_006",
+      "invoiceId": "inv_demo_006",
+      "statusHistory": [
+        {
+          "status": "RECEIVED",
+          "updatedBy": "Rajesh Sharma",
+          "timestamp": "2026-10-17T06:18:36.486Z"
+        },
+        {
+          "status": "READY",
+          "updatedBy": "Master Chef Ramesh",
+          "timestamp": "2026-10-17T06:25:36.486Z"
+        },
+        {
+          "status": "COMPLETED",
+          "updatedBy": "Pooja Verma",
+          "timestamp": "2026-10-17T06:28:36.486Z"
+        }
+      ],
+      "items": [
+        {
+          "id": "item_6_1",
+          "productId": "prod_gulab_jamun",
+          "productName": "Gulab Jamun (Shahi Ghee)",
+          "hindiName": "गुलाब जामुन",
+          "unit": "piece",
+          "quantity": 12,
+          "unitPrice": 25,
+          "taxRatePercent": 5,
+          "taxAmount": 15,
+          "discountAmount": 0,
+          "totalPrice": 315
+        },
+        {
+          "id": "item_6_2",
+          "productId": "prod_motichoor",
+          "productName": "Motichoor Laddu (Pure Desi Ghee)",
+          "hindiName": "मोतीचूर लड्डू",
+          "unit": "kg",
+          "quantity": 1,
+          "unitPrice": 540,
+          "taxRatePercent": 5,
+          "taxAmount": 27,
+          "discountAmount": 0,
+          "totalPrice": 567
+        }
+      ],
+      "subtotal": 840,
+      "totalTax": 42,
+      "totalDiscount": 0,
+      "finalAmount": 882,
+      "isKitchenRequired": true
+    },
+    {
+      "id": "ord_demo_007",
+      "tokenNumber": "T-007",
+      "businessDate": "2026-10-17",
+      "counterId": "POS-1",
+      "createdByUserId": "usr_pos1",
+      "createdByName": "Rajesh Sharma",
+      "createdAt": "2026-10-17T05:43:36.486Z",
+      "updatedAt": "2026-10-17T05:53:36.486Z",
+      "status": "COMPLETED",
+      "completedAt": "2026-10-17T05:53:36.486Z",
+      "paymentStatus": "PAID",
+      "paymentId": "pay_demo_007",
+      "invoiceId": "inv_demo_007",
+      "statusHistory": [
+        {
+          "status": "RECEIVED",
+          "updatedBy": "Rajesh Sharma",
+          "timestamp": "2026-10-17T05:43:36.486Z"
+        },
+        {
+          "status": "COMPLETED",
+          "updatedBy": "Pooja Verma",
+          "timestamp": "2026-10-17T05:53:36.486Z"
+        }
+      ],
+      "items": [
+        {
+          "id": "item_7_1",
+          "productId": "prod_ratlami_sev",
+          "productName": "Indori Ratlami Sev (Laung Spiced)",
+          "hindiName": "रतलामी सेव",
+          "unit": "kg",
+          "quantity": 1,
+          "unitPrice": 280,
+          "taxRatePercent": 5,
+          "taxAmount": 14,
+          "discountAmount": 0,
+          "totalPrice": 294
+        },
+        {
+          "id": "item_7_2",
+          "productId": "prod_kaju_katli",
+          "productName": "Kaju Katli (Pure Cashew)",
+          "hindiName": "काजू कतली",
+          "unit": "kg",
+          "quantity": 0.5,
+          "unitPrice": 960,
+          "taxRatePercent": 5,
+          "taxAmount": 24,
+          "discountAmount": 0,
+          "totalPrice": 504
+        }
+      ],
+      "subtotal": 760,
+      "totalTax": 38,
+      "totalDiscount": 0,
+      "finalAmount": 798,
+      "isKitchenRequired": false
+    },
+    {
+      "id": "ord_demo_008",
+      "tokenNumber": "T-008",
+      "businessDate": "2026-10-17",
+      "counterId": "POS-1",
+      "createdByUserId": "usr_pos1",
+      "createdByName": "Rajesh Sharma",
+      "createdAt": "2026-10-17T05:13:36.486Z",
+      "updatedAt": "2026-10-17T05:23:36.486Z",
+      "status": "COMPLETED",
+      "completedAt": "2026-10-17T05:23:36.486Z",
+      "paymentStatus": "PAID",
+      "paymentId": "pay_demo_008",
+      "invoiceId": "inv_demo_008",
+      "statusHistory": [
+        {
+          "status": "RECEIVED",
+          "updatedBy": "Rajesh Sharma",
+          "timestamp": "2026-10-17T05:13:36.486Z"
+        },
+        {
+          "status": "COMPLETED",
+          "updatedBy": "Pooja Verma",
+          "timestamp": "2026-10-17T05:23:36.486Z"
+        }
+      ],
+      "items": [
+        {
+          "id": "item_8_1",
+          "productId": "prod_samosa",
+          "productName": "Special Aloo Samosa",
+          "hindiName": "गरम समोसा",
+          "unit": "piece",
+          "quantity": 10,
+          "unitPrice": 18,
+          "taxRatePercent": 5,
+          "taxAmount": 9,
+          "discountAmount": 0,
+          "totalPrice": 189
+        },
+        {
+          "id": "item_8_2",
+          "productId": "prod_kachori",
+          "productName": "Jodhpuri Pyaaz Kachori",
+          "hindiName": "प्याज कचौरी",
+          "unit": "piece",
+          "quantity": 6,
+          "unitPrice": 30,
+          "taxRatePercent": 5,
+          "taxAmount": 9,
+          "discountAmount": 0,
+          "totalPrice": 189
+        }
+      ],
+      "subtotal": 360,
+      "totalTax": 18,
+      "totalDiscount": 0,
+      "finalAmount": 378,
+      "isKitchenRequired": true
+    }
+  ],
+  "payments": [
+    {
+      "id": "pay_1792294592720_xb1s",
+      "orderId": "ord_1792294188722_5wsjg",
+      "tokenNumber": "T-012",
+      "amount": 63,
+      "method": "CASH",
+      "status": "SUCCESS",
+      "cashierId": "usr_pos1",
+      "cashierName": "Rajesh Sharma",
+      "timestamp": "2026-10-18T03:36:32.720Z",
+      "changeReturned": 0
+    },
+    {
+      "id": "pay_1792293615646_qulj",
+      "orderId": "ord_1792293538854_w6mbt",
+      "tokenNumber": "T-009",
+      "amount": 89.25,
+      "method": "CASH",
+      "status": "SUCCESS",
+      "cashierId": "usr_pos1",
+      "cashierName": "Rajesh Sharma",
+      "timestamp": "2026-10-18T03:20:15.646Z",
+      "tenderedAmount": 100,
+      "changeReturned": 10.75
+    },
+    {
+      "id": "pay_demo_005",
+      "orderId": "ord_demo_005",
+      "tokenNumber": "T-005",
+      "amount": 1585.5,
+      "method": "UPI",
+      "status": "SUCCESS",
+      "cashierId": "usr_billing",
+      "cashierName": "Pooja Verma",
+      "timestamp": "2026-10-17T06:58:36.486Z",
+      "transactionReference": "UPI/628104829102"
+    },
+    {
+      "id": "pay_demo_006",
+      "orderId": "ord_demo_006",
+      "tokenNumber": "T-006",
+      "amount": 882,
+      "method": "CASH",
+      "status": "SUCCESS",
+      "cashierId": "usr_billing",
+      "cashierName": "Pooja Verma",
+      "timestamp": "2026-10-17T06:28:36.486Z",
+      "tenderedAmount": 1000,
+      "changeReturned": 118
+    },
+    {
+      "id": "pay_demo_007",
+      "orderId": "ord_demo_007",
+      "tokenNumber": "T-007",
+      "amount": 798,
+      "method": "CARD",
+      "status": "SUCCESS",
+      "cashierId": "usr_billing",
+      "cashierName": "Pooja Verma",
+      "timestamp": "2026-10-17T05:53:36.486Z",
+      "transactionReference": "CARD/AUTH-9428"
+    },
+    {
+      "id": "pay_demo_008",
+      "orderId": "ord_demo_008",
+      "tokenNumber": "T-008",
+      "amount": 378,
+      "method": "SPLIT",
+      "splits": [
+        {
+          "method": "CASH",
+          "amount": 200
+        },
+        {
+          "method": "UPI",
+          "amount": 178,
+          "reference": "UPI/9912019482"
+        }
+      ],
+      "status": "SUCCESS",
+      "cashierId": "usr_billing",
+      "cashierName": "Pooja Verma",
+      "timestamp": "2026-10-17T05:23:36.486Z"
+    }
+  ],
+  "invoices": [
+    {
+      "id": "inv_1792294592721_8h22",
+      "invoiceNumber": "INV-20261018-0106",
+      "orderId": "ord_1792294188722_5wsjg",
+      "tokenNumber": "T-012",
+      "businessDate": "2026-10-17",
+      "timestamp": "2026-10-18T03:36:32.721Z",
+      "items": [
+        {
+          "id": "item_ord_1792294188722_5wsjg_1",
+          "productId": "prod_dhokla",
+          "productName": "Khaman Dhokla",
+          "hindiName": "खमण ढोकला",
+          "unit": "kg",
+          "quantity": 0.25,
+          "unitPrice": 240,
+          "taxRatePercent": 5,
+          "taxAmount": 3,
+          "discountAmount": 0,
+          "totalPrice": 63
+        }
+      ],
+      "subtotal": 60,
+      "cgstAmount": 1.5,
+      "sgstAmount": 1.5,
+      "totalTax": 3,
+      "discountAmount": 0,
+      "totalAmount": 63,
+      "paymentMethod": "CASH",
+      "cashierName": "Rajesh Sharma"
+    },
+    {
+      "id": "inv_1792293615646_if39",
+      "invoiceNumber": "INV-20261018-0105",
+      "orderId": "ord_1792293538854_w6mbt",
+      "tokenNumber": "T-009",
+      "businessDate": "2026-10-17",
+      "timestamp": "2026-10-18T03:20:15.646Z",
+      "items": [
+        {
+          "id": "item_ord_1792293538854_w6mbt_1",
+          "productId": "prod_badam_milk",
+          "productName": "Chilled Kesar Badam Milk",
+          "hindiName": "केसर बादाम दूध",
+          "unit": "portion",
+          "quantity": 1,
+          "unitPrice": 50,
+          "taxRatePercent": 5,
+          "taxAmount": 2.5,
+          "discountAmount": 0,
+          "totalPrice": 52.5
+        },
+        {
+          "id": "item_ord_1792293538854_w6mbt_2",
+          "productId": "prod_chamcham",
+          "productName": "Bengali Malai Cham Cham",
+          "hindiName": "मलाई चमचम",
+          "unit": "piece",
+          "quantity": 1,
+          "unitPrice": 35,
+          "taxRatePercent": 5,
+          "taxAmount": 1.75,
+          "discountAmount": 0,
+          "totalPrice": 36.75
+        }
+      ],
+      "subtotal": 85,
+      "cgstAmount": 2.13,
+      "sgstAmount": 2.13,
+      "totalTax": 4.25,
+      "discountAmount": 0,
+      "totalAmount": 89.25,
+      "paymentMethod": "CASH",
+      "cashierName": "Rajesh Sharma"
+    },
+    {
+      "id": "inv_demo_005",
+      "invoiceNumber": "INV-20261017-0101",
+      "orderId": "ord_demo_005",
+      "tokenNumber": "T-005",
+      "businessDate": "2026-10-17",
+      "timestamp": "2026-10-17T06:58:36.486Z",
+      "items": [
+        {
+          "id": "item_5_1",
+          "productId": "prod_kaju_katli",
+          "productName": "Kaju Katli (Pure Cashew)",
+          "hindiName": "काजू कतली",
+          "unit": "kg",
+          "quantity": 1,
+          "unitPrice": 960,
+          "taxRatePercent": 5,
+          "taxAmount": 48,
+          "discountAmount": 0,
+          "totalPrice": 1008,
+          "specialInstructions": "Festive gold gift box with ribbon"
+        },
+        {
+          "id": "item_5_2",
+          "productId": "prod_kaju_roll",
+          "productName": "Kaju Pista Roll",
+          "hindiName": "काजू पिस्ता रोल",
+          "unit": "kg",
+          "quantity": 0.5,
+          "unitPrice": 1100,
+          "taxRatePercent": 5,
+          "taxAmount": 27.5,
+          "discountAmount": 0,
+          "totalPrice": 577.5
+        }
+      ],
+      "subtotal": 1510,
+      "cgstAmount": 37.75,
+      "sgstAmount": 37.75,
+      "totalTax": 75.5,
+      "discountAmount": 0,
+      "totalAmount": 1585.5,
+      "paymentMethod": "UPI",
+      "paymentReference": "UPI/628104829102",
+      "cashierName": "Pooja Verma"
+    },
+    {
+      "id": "inv_demo_006",
+      "invoiceNumber": "INV-20261017-0102",
+      "orderId": "ord_demo_006",
+      "tokenNumber": "T-006",
+      "businessDate": "2026-10-17",
+      "timestamp": "2026-10-17T06:28:36.486Z",
+      "items": [
+        {
+          "id": "item_6_1",
+          "productId": "prod_gulab_jamun",
+          "productName": "Gulab Jamun (Shahi Ghee)",
+          "hindiName": "गुलाब जामुन",
+          "unit": "piece",
+          "quantity": 12,
+          "unitPrice": 25,
+          "taxRatePercent": 5,
+          "taxAmount": 15,
+          "discountAmount": 0,
+          "totalPrice": 315
+        },
+        {
+          "id": "item_6_2",
+          "productId": "prod_motichoor",
+          "productName": "Motichoor Laddu (Pure Desi Ghee)",
+          "hindiName": "मोतीचूर लड्डू",
+          "unit": "kg",
+          "quantity": 1,
+          "unitPrice": 540,
+          "taxRatePercent": 5,
+          "taxAmount": 27,
+          "discountAmount": 0,
+          "totalPrice": 567
+        }
+      ],
+      "subtotal": 840,
+      "cgstAmount": 21,
+      "sgstAmount": 21,
+      "totalTax": 42,
+      "discountAmount": 0,
+      "totalAmount": 882,
+      "paymentMethod": "CASH",
+      "cashierName": "Pooja Verma"
+    },
+    {
+      "id": "inv_demo_007",
+      "invoiceNumber": "INV-20261017-0103",
+      "orderId": "ord_demo_007",
+      "tokenNumber": "T-007",
+      "businessDate": "2026-10-17",
+      "timestamp": "2026-10-17T05:53:36.486Z",
+      "items": [
+        {
+          "id": "item_7_1",
+          "productId": "prod_ratlami_sev",
+          "productName": "Indori Ratlami Sev (Laung Spiced)",
+          "hindiName": "रतलामी सेव",
+          "unit": "kg",
+          "quantity": 1,
+          "unitPrice": 280,
+          "taxRatePercent": 5,
+          "taxAmount": 14,
+          "discountAmount": 0,
+          "totalPrice": 294
+        },
+        {
+          "id": "item_7_2",
+          "productId": "prod_kaju_katli",
+          "productName": "Kaju Katli (Pure Cashew)",
+          "hindiName": "काजू कतली",
+          "unit": "kg",
+          "quantity": 0.5,
+          "unitPrice": 960,
+          "taxRatePercent": 5,
+          "taxAmount": 24,
+          "discountAmount": 0,
+          "totalPrice": 504
+        }
+      ],
+      "subtotal": 760,
+      "cgstAmount": 19,
+      "sgstAmount": 19,
+      "totalTax": 38,
+      "discountAmount": 0,
+      "totalAmount": 798,
+      "paymentMethod": "CARD",
+      "paymentReference": "CARD/AUTH-9428",
+      "cashierName": "Pooja Verma"
+    },
+    {
+      "id": "inv_demo_008",
+      "invoiceNumber": "INV-20261017-0104",
+      "orderId": "ord_demo_008",
+      "tokenNumber": "T-008",
+      "businessDate": "2026-10-17",
+      "timestamp": "2026-10-17T05:23:36.486Z",
+      "items": [
+        {
+          "id": "item_8_1",
+          "productId": "prod_samosa",
+          "productName": "Special Aloo Samosa",
+          "hindiName": "गरम समोसा",
+          "unit": "piece",
+          "quantity": 10,
+          "unitPrice": 18,
+          "taxRatePercent": 5,
+          "taxAmount": 9,
+          "discountAmount": 0,
+          "totalPrice": 189
+        },
+        {
+          "id": "item_8_2",
+          "productId": "prod_kachori",
+          "productName": "Jodhpuri Pyaaz Kachori",
+          "hindiName": "प्याज कचौरी",
+          "unit": "piece",
+          "quantity": 6,
+          "unitPrice": 30,
+          "taxRatePercent": 5,
+          "taxAmount": 9,
+          "discountAmount": 0,
+          "totalPrice": 189
+        }
+      ],
+      "subtotal": 360,
+      "cgstAmount": 9,
+      "sgstAmount": 9,
+      "totalTax": 18,
+      "discountAmount": 0,
+      "totalAmount": 378,
+      "paymentMethod": "SPLIT",
+      "cashierName": "Pooja Verma"
+    }
+  ],
+  "printJobs": [
+    {
+      "id": "PJ-097667",
+      "jobType": "KITCHEN_TICKET",
+      "orderId": "ord_1792322097655_qyema",
+      "tokenNumber": "T-002",
+      "printerId": "prn_kitchen_kds",
+      "printerName": "Kitchen Ticket Thermal Printer (KDS Room)",
+      "paperWidth": "80mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T11:14:57.667Z",
+      "printedAt": "2026-10-18T11:14:57.667Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": "        *** ORDER POS SLIP (2-INCH) ***\n              SHEETAL GAJAK KULFI\n     Opp. High Court, Shivaji Nagar, Indore\n================================================\n              *** TOKEN: T-002 ***\n================================================\nOrder: ord_179232                 Counter: POS-1\nTime: 11:14 am                  Date: 2026-10-18\n------------------------------------------------\nITEM & PACKING                               QTY\n------------------------------------------------\n[ ] 1. SHEETAL SHAHI TIL GAJAK              250g\n       (शाही तिल गजक (इंदौर स्पेशल))\n------------------------------------------------\nTOTAL ITEMS:                             1 items\nEST. TOTAL:                           INR 115.50\n================================================\n         >>> PACK FRESH & HAND OVER <<<\n",
+      "rawEscPosHex": "20202020202020202a2a2a204f5244455220504f5320534c49502028322d494e434829202a2a2a0a20202020202020202020202020205348454554414c2047414a414b204b554c46490a20202020204f70702e204869676820436f7572742c2053686976616a69204e616761722c20496e646f72650a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a20202020202020202020202020202a2a2a20544f4b454e3a20542d303032202a2a2a0a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a4f726465723a206f72645f3137393233322020202020202020202020202020202020436f756e7465723a20504f532d310a54696d653a2031313a313420616d202020202020202020202020202020202020446174653a20323032362d31302d31380a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4954454d2026205041434b494e47202020202020202020202020202020202020202020202020202020202020205154590a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a5b205d20312e205348454554414c2053484148492054494c2047414a414b2020202020202020202020202020323530670a2020202020202028e0a4b6e0a4bee0a4b9e0a58020e0a4a4e0a4bfe0a4b220e0a497e0a49ce0a4952028e0a487e0a482e0a4a6e0a58ce0a4b020e0a4b8e0a58de0a4aae0a587e0a4b6e0a4b229290a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a544f54414c204954454d533a202020202020202020202020202020202020202020202020202020202031206974656d730a4553542e20544f54414c3a202020202020202020202020202020202020202020202020202020494e52203131352e35300a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a2020202020202020203e3e3e205041434b20465245534820262048414e44204f564552203c3c3c0a"
+    },
+    {
+      "id": "PJ-097665",
+      "jobType": "CUSTOMER_TOKEN",
+      "orderId": "ord_1792322097655_qyema",
+      "tokenNumber": "T-002",
+      "printerId": "prn_customer_token",
+      "printerName": "Token Counter Thermal Printer (POS-1)",
+      "paperWidth": "58mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T11:14:57.665Z",
+      "printedAt": "2026-10-18T11:14:57.665Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": "      SHEETAL GAJAK KULFI\n Opp. High Court, Shivaji Nagar\n      Indore, MP - 452003\n      Ph: +91 98260 54321\n================================\n     CUSTOMER WAITING SLIP\n  (Keep slip until token call)\n--------------------------------\n\n      *** TOKEN NUMBER ***\n         >>> T-002 <<<\n\n--------------------------------\nOrder No:             ord_179232\nDate:                 2026-10-18\nTime:                   11:14 am\nCounter: POS-1 (Order POS Staff)\n================================\n>> PLEASE WAIT FOR TOKEN CALL <<\nShow this token at billing count\n    Thank You! Visit Again.\n",
+      "rawEscPosHex": "2020202020205348454554414c2047414a414b204b554c46490a204f70702e204869676820436f7572742c2053686976616a69204e616761720a202020202020496e646f72652c204d50202d203435323030330a20202020202050683a202b39312039383236302035343332310a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a2020202020435553544f4d45522057414954494e4720534c49500a2020284b65657020736c697020756e74696c20746f6b656e2063616c6c290a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a0a2020202020202a2a2a20544f4b454e204e554d424552202a2a2a0a2020202020202020203e3e3e20542d303032203c3c3c0a0a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4f72646572204e6f3a202020202020202020202020206f72645f3137393233320a446174653a2020202020202020202020202020202020323032362d31302d31380a54696d653a2020202020202020202020202020202020202031313a313420616d0a436f756e7465723a20504f532d3120284f7264657220504f53205374616666290a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a3e3e20504c45415345205741495420464f5220544f4b454e2043414c4c203c3c0a53686f77207468697320746f6b656e2061742062696c6c696e6720636f756e740a202020205468616e6b20596f752120566973697420416761696e2e0a"
+    },
+    {
+      "id": "PJ-564705",
+      "jobType": "KITCHEN_TICKET",
+      "orderId": "ord_1792320564692_w50fz",
+      "tokenNumber": "T-001",
+      "printerId": "prn_kitchen_kds",
+      "printerName": "Kitchen Ticket Thermal Printer (KDS Room)",
+      "paperWidth": "80mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T10:49:24.705Z",
+      "printedAt": "2026-10-18T10:49:24.705Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": "       *** KITCHEN ORDER TICKET (KOT) ***\n         SHREE KRISHNA SWEETS & NAMKEEN\n================================================\n              *** TOKEN: T-001 ***\n================================================\n       >> HAND OVER TO KITCHEN COUNTER <<\n       (Customer copy to give to kitchen)\n------------------------------------------------\nOrder ID: ord_17923205            Counter: POS-1\nTime: 10:49:24 am               Date: 2026-10-18\n------------------------------------------------\nITEM & SPECIFICATIONS                  EXACT QTY\n------------------------------------------------\n[ ] 1. JODHPURI PYAAZ KACHORI               1 pc\n       (प्याज कचौरी)\n[ ] 2. BENGALI SPONGY RASGULLA              1 pc\n       (रसगुल्ला)\n[ ] 3. GULAB JAMUN (SHAHI GHEE)             1 pc\n       (गुलाब जामुन)\n------------------------------------------------\nTOTAL ITEMS:                             3 items\n================================================\n     >>> PREPARE FRESH & PACK WITH CARE <<<\n",
+      "rawEscPosHex": "202020202020202a2a2a204b49544348454e204f52444552205449434b455420284b4f5429202a2a2a0a2020202020202020205348524545204b524953484e41205357454554532026204e414d4b45454e0a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a20202020202020202020202020202a2a2a20544f4b454e3a20542d303031202a2a2a0a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a202020202020203e3e2048414e44204f56455220544f204b49544348454e20434f554e544552203c3c0a2020202020202028437573746f6d657220636f707920746f206769766520746f206b69746368656e290a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4f726465722049443a206f72645f3137393233323035202020202020202020202020436f756e7465723a20504f532d310a54696d653a2031303a34393a323420616d202020202020202020202020202020446174653a20323032362d31302d31380a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4954454d20262053504543494649434154494f4e532020202020202020202020202020202020204558414354205154590a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a5b205d20312e204a4f44485055524920505941415a204b4143484f5249202020202020202020202020202020312070630a2020202020202028e0a4aae0a58de0a4afe0a4bee0a49c20e0a495e0a49ae0a58ce0a4b0e0a580290a5b205d20322e2042454e47414c492053504f4e47592052415347554c4c412020202020202020202020202020312070630a2020202020202028e0a4b0e0a4b8e0a497e0a581e0a4b2e0a58de0a4b2e0a4be290a5b205d20332e2047554c4142204a414d554e2028534841484920474845452920202020202020202020202020312070630a2020202020202028e0a497e0a581e0a4b2e0a4bee0a4ac20e0a49ce0a4bee0a4aee0a581e0a4a8290a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a544f54414c204954454d533a202020202020202020202020202020202020202020202020202020202033206974656d730a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a20202020203e3e3e20505245504152452046524553482026205041434b20574954482043415245203c3c3c0a"
+    },
+    {
+      "id": "PJ-564703",
+      "jobType": "CUSTOMER_TOKEN",
+      "orderId": "ord_1792320564692_w50fz",
+      "tokenNumber": "T-001",
+      "printerId": "prn_customer_token",
+      "printerName": "Token Counter Thermal Printer (POS-1)",
+      "paperWidth": "58mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T10:49:24.703Z",
+      "printedAt": "2026-10-18T10:49:24.703Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": " SHREE KRISHNA SWEETS & NAMKEEN\nPure Desi Ghee Mithai & Artisan \n      Ph: +91 98260 12345\n================================\n     CUSTOMER WAITING SLIP\n   (Keep this slip with you)\n\n      *** TOKEN NUMBER ***\n         >>> T-001 <<<\n\n--------------------------------\nOrder No:           ord_17923205\nDate: 2026-10-18        10:49 am\nCounter: POS By: Order POS Staff\n--------------------------------\nITEM SUMMARY                 QTY\n--------------------------------\nJodhpuri Pyaaz Kachori      1 pc\nBengali Spongy Rasgull      1 pc\nGulab Jamun (Shahi Ghe      1 pc\n--------------------------------\nEST. TOTAL:            INR 80.85\nPAYMENT: UNPAID (Pay at Cashier)\n================================\n\n>> PLEASE TAKE A SEAT & RELAX <<\nWAIT FOR YOUR TOKEN NUMBER TO BE\n ANNOUNCED ON DISPLAY / SPEAKER\n\n* Hand 2nd slip (KOT) to Kitchen\n* Keep this slip to claim order \n\n    Thank You! Visit Again.\n          [QR: T-001]\n",
+      "rawEscPosHex": "205348524545204b524953484e41205357454554532026204e414d4b45454e0a5075726520446573692047686565204d69746861692026204172746973616e200a20202020202050683a202b39312039383236302031323334350a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a2020202020435553544f4d45522057414954494e4720534c49500a202020284b656570207468697320736c6970207769746820796f75290a0a2020202020202a2a2a20544f4b454e204e554d424552202a2a2a0a2020202020202020203e3e3e20542d303031203c3c3c0a0a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4f72646572204e6f3a20202020202020202020206f72645f31373932333230350a446174653a20323032362d31302d3138202020202020202031303a343920616d0a436f756e7465723a20504f532042793a204f7264657220504f532053746166660a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4954454d2053554d4d41525920202020202020202020202020202020205154590a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4a6f64687075726920507961617a204b6163686f7269202020202020312070630a42656e67616c692053706f6e67792052617367756c6c202020202020312070630a47756c6162204a616d756e2028536861686920476865202020202020312070630a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4553542e20544f54414c3a202020202020202020202020494e522038302e38350a5041594d454e543a20554e5041494420285061792061742043617368696572290a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a0a3e3e20504c454153452054414b452041205345415420262052454c4158203c3c0a5741495420464f5220594f555220544f4b454e204e554d42455220544f2042450a20414e4e4f554e434544204f4e20444953504c4159202f20535045414b45520a0a2a2048616e6420326e6420736c697020284b4f542920746f204b69746368656e0a2a204b656570207468697320736c697020746f20636c61696d206f72646572200a0a202020205468616e6b20596f752120566973697420416761696e2e0a202020202020202020205b51523a20542d3030315d0a"
+    },
+    {
+      "id": "PJ-592725",
+      "jobType": "TAX_INVOICE",
+      "orderId": "ord_1792294188722_5wsjg",
+      "tokenNumber": "T-012",
+      "printerId": "prn_billing_invoice",
+      "printerName": "Billing Cashier Invoice Printer",
+      "paperWidth": "80mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T03:36:32.725Z",
+      "printedAt": "2026-10-18T03:36:32.725Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": "         SHREE KRISHNA SWEETS & NAMKEEN\n    Shop No. 14-16, Mithai Market, M.G. Road\n        Indore, Madhya Pradesh - 452001\n             GSTIN: 23AAAAA0000A1Z5\n           FSSAI Lic: 11418850000342\n              Ph: +91 98260 12345\n================================================\n                  TAX INVOICE\n================================================\nInvoice: INV-20261018-0106          Token: T-012\nDate: 2026-10-17                        03:36 am\nCashier: Rajesh Sharma             Payment: CASH\n------------------------------------------------\nITEM NAME            QTY      RATE     AMOUNT\n------------------------------------------------\nKhaman Dhokla       250g     ₹240         ₹63.00\n------------------------------------------------\nSubtotal (Taxable):                       ₹60.00\nCGST (2.5%):                               ₹1.50\nSGST (2.5%):                               ₹1.50\n================================================\nTOTAL AMOUNT PAID:                        ₹63.00\n================================================\n\nThank you for choosing pure taste! FSSAI Lic #11\n      Goods once sold cannot be returned.\n             MithaiFlow POS System\n",
+      "rawEscPosHex": "2020202020202020205348524545204b524953484e41205357454554532026204e414d4b45454e0a2020202053686f70204e6f2e2031342d31362c204d6974686169204d61726b65742c204d2e472e20526f61640a2020202020202020496e646f72652c204d61646879612050726164657368202d203435323030310a20202020202020202020202020475354494e3a20323341414141413030303041315a350a20202020202020202020204653534149204c69633a2031313431383835303030303334320a202020202020202020202020202050683a202b39312039383236302031323334350a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a20202020202020202020202020202020202054415820494e564f4943450a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a496e766f6963653a20494e562d32303236313031382d3031303620202020202020202020546f6b656e3a20542d3031320a446174653a20323032362d31302d313720202020202020202020202020202020202020202020202030333a333620616d0a436173686965723a2052616a65736820536861726d61202020202020202020202020205061796d656e743a20434153480a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4954454d204e414d45202020202020202020202020515459202020202020524154452020202020414d4f554e540a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4b68616d616e2044686f6b6c6120202020202020323530672020202020e282b9323430202020202020202020e282b936332e30300a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a537562746f74616c202854617861626c65293a2020202020202020202020202020202020202020202020e282b936302e30300a434753542028322e3525293a20202020202020202020202020202020202020202020202020202020202020e282b9312e35300a534753542028322e3525293a20202020202020202020202020202020202020202020202020202020202020e282b9312e35300a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a544f54414c20414d4f554e5420504149443a202020202020202020202020202020202020202020202020e282b936332e30300a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a0a5468616e6b20796f7520666f722063686f6f73696e67207075726520746173746521204653534149204c6963202331310a202020202020476f6f6473206f6e636520736f6c642063616e6e6f742062652072657475726e65642e0a202020202020202020202020204d6974686169466c6f7720504f532053797374656d0a"
+    },
+    {
+      "id": "PJ-512384",
+      "jobType": "KITCHEN_TICKET",
+      "orderId": "ord_1792294512373_ey3uv",
+      "tokenNumber": "T-013",
+      "printerId": "prn_kitchen_kds",
+      "printerName": "Kitchen Ticket Thermal Printer (KDS Room)",
+      "paperWidth": "80mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T03:35:12.384Z",
+      "printedAt": "2026-10-18T03:35:12.384Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": "       *** KITCHEN ORDER TICKET (KOT) ***\n         SHREE KRISHNA SWEETS & NAMKEEN\n================================================\n              *** TOKEN: T-013 ***\n================================================\n       >> HAND OVER TO KITCHEN COUNTER <<\n       (Customer copy to give to kitchen)\n------------------------------------------------\nOrder ID: ord_17922945            Counter: POS-1\nTime: 3:35:12 am                Date: 2026-10-17\n------------------------------------------------\nITEM & SPECIFICATIONS                  EXACT QTY\n------------------------------------------------\n[ ] 1. KAJU KATLI (PURE CASHEW)             250g\n       (काजू कतली)\n[ ] 2. JODHPURI PYAAZ KACHORI               1 pc\n       (प्याज कचौरी)\n[ ] 3. KAJU PISTA ROLL                      250g\n       (काजू पिस्ता रोल)\n------------------------------------------------\nTOTAL ITEMS:                             3 items\n================================================\n     >>> PREPARE FRESH & PACK WITH CARE <<<\n",
+      "rawEscPosHex": "202020202020202a2a2a204b49544348454e204f52444552205449434b455420284b4f5429202a2a2a0a2020202020202020205348524545204b524953484e41205357454554532026204e414d4b45454e0a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a20202020202020202020202020202a2a2a20544f4b454e3a20542d303133202a2a2a0a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a202020202020203e3e2048414e44204f56455220544f204b49544348454e20434f554e544552203c3c0a2020202020202028437573746f6d657220636f707920746f206769766520746f206b69746368656e290a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4f726465722049443a206f72645f3137393232393435202020202020202020202020436f756e7465723a20504f532d310a54696d653a20333a33353a313220616d20202020202020202020202020202020446174653a20323032362d31302d31370a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4954454d20262053504543494649434154494f4e532020202020202020202020202020202020204558414354205154590a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a5b205d20312e204b414a55204b41544c49202850555245204341534845572920202020202020202020202020323530670a2020202020202028e0a495e0a4bee0a49ce0a58220e0a495e0a4a4e0a4b2e0a580290a5b205d20322e204a4f44485055524920505941415a204b4143484f5249202020202020202020202020202020312070630a2020202020202028e0a4aae0a58de0a4afe0a4bee0a49c20e0a495e0a49ae0a58ce0a4b0e0a580290a5b205d20332e204b414a5520504953544120524f4c4c20202020202020202020202020202020202020202020323530670a2020202020202028e0a495e0a4bee0a49ce0a58220e0a4aae0a4bfe0a4b8e0a58de0a4a4e0a4be20e0a4b0e0a58be0a4b2290a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a544f54414c204954454d533a202020202020202020202020202020202020202020202020202020202033206974656d730a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a20202020203e3e3e20505245504152452046524553482026205041434b20574954482043415245203c3c3c0a"
+    },
+    {
+      "id": "PJ-512382",
+      "jobType": "CUSTOMER_TOKEN",
+      "orderId": "ord_1792294512373_ey3uv",
+      "tokenNumber": "T-013",
+      "printerId": "prn_customer_token",
+      "printerName": "Token Counter Thermal Printer (POS-1)",
+      "paperWidth": "58mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T03:35:12.382Z",
+      "printedAt": "2026-10-18T03:35:12.382Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": " SHREE KRISHNA SWEETS & NAMKEEN\nPure Desi Ghee Mithai & Artisan \n      Ph: +91 98260 12345\n================================\n     CUSTOMER WAITING SLIP\n   (Keep this slip with you)\n\n      *** TOKEN NUMBER ***\n         >>> T-013 <<<\n\n--------------------------------\nOrder No:           ord_17922945\nDate: 2026-10-17        03:35 am\nCounter: POS-1 By: Rajesh Sharma\n--------------------------------\nITEM SUMMARY                 QTY\n--------------------------------\nKaju Katli (Pure Cashe      250g\nJodhpuri Pyaaz Kachori      1 pc\nKaju Pista Roll             250g\n--------------------------------\nEST. TOTAL:           INR 572.25\nPAYMENT: UNPAID (Pay at Cashier)\n================================\n\n>> PLEASE TAKE A SEAT & RELAX <<\nWAIT FOR YOUR TOKEN NUMBER TO BE\n ANNOUNCED ON DISPLAY / SPEAKER\n\n* Hand 2nd slip (KOT) to Kitchen\n* Keep this slip to claim order \n\n    Thank You! Visit Again.\n          [QR: T-013]\n",
+      "rawEscPosHex": "205348524545204b524953484e41205357454554532026204e414d4b45454e0a5075726520446573692047686565204d69746861692026204172746973616e200a20202020202050683a202b39312039383236302031323334350a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a2020202020435553544f4d45522057414954494e4720534c49500a202020284b656570207468697320736c6970207769746820796f75290a0a2020202020202a2a2a20544f4b454e204e554d424552202a2a2a0a2020202020202020203e3e3e20542d303133203c3c3c0a0a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4f72646572204e6f3a20202020202020202020206f72645f31373932323934350a446174653a20323032362d31302d3137202020202020202030333a333520616d0a436f756e7465723a20504f532d312042793a2052616a65736820536861726d610a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4954454d2053554d4d41525920202020202020202020202020202020205154590a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4b616a75204b61746c69202850757265204361736865202020202020323530670a4a6f64687075726920507961617a204b6163686f7269202020202020312070630a4b616a7520506973746120526f6c6c20202020202020202020202020323530670a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4553542e20544f54414c3a2020202020202020202020494e52203537322e32350a5041594d454e543a20554e5041494420285061792061742043617368696572290a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a0a3e3e20504c454153452054414b452041205345415420262052454c4158203c3c0a5741495420464f5220594f555220544f4b454e204e554d42455220544f2042450a20414e4e4f554e434544204f4e20444953504c4159202f20535045414b45520a0a2a2048616e6420326e6420736c697020284b4f542920746f204b69746368656e0a2a204b656570207468697320736c697020746f20636c61696d206f72646572200a0a202020205468616e6b20596f752120566973697420416761696e2e0a202020202020202020205b51523a20542d3031335d0a"
+    },
+    {
+      "id": "PJ-188726",
+      "jobType": "KITCHEN_TICKET",
+      "orderId": "ord_1792294188722_5wsjg",
+      "tokenNumber": "T-012",
+      "printerId": "prn_kitchen_kds",
+      "printerName": "Kitchen Ticket Thermal Printer (KDS Room)",
+      "paperWidth": "80mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T03:29:48.726Z",
+      "printedAt": "2026-10-18T03:29:48.726Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": "       *** KITCHEN ORDER TICKET (KOT) ***\n         Shree Krishna Sweets & Namkeen\n================================================\n\n                  TOKEN: T-012\n\n================================================\nTime: 3:29:48 am                Date: 2026-10-17\nOrder Ref: ord_1792               Counter: POS-1\n------------------------------------------------\nITEM & PREPARATION                     EXACT QTY\n------------------------------------------------\n[ ] KHAMAN DHOKLA                           250g\n================================================\n         >>> PLEASE PACK WITH CARE <<<\n",
+      "rawEscPosHex": "202020202020202a2a2a204b49544348454e204f52444552205449434b455420284b4f5429202a2a2a0a2020202020202020205368726565204b726973686e61205377656574732026204e616d6b65656e0a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a0a202020202020202020202020202020202020544f4b454e3a20542d3031320a0a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a54696d653a20333a32393a343820616d20202020202020202020202020202020446174653a20323032362d31302d31370a4f72646572205265663a206f72645f31373932202020202020202020202020202020436f756e7465723a20504f532d310a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4954454d2026205052455041524154494f4e2020202020202020202020202020202020202020204558414354205154590a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a5b205d204b48414d414e2044484f4b4c41202020202020202020202020202020202020202020202020202020323530670a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a2020202020202020203e3e3e20504c45415345205041434b20574954482043415245203c3c3c0a"
+    },
+    {
+      "id": "PJ-188725",
+      "jobType": "CUSTOMER_TOKEN",
+      "orderId": "ord_1792294188722_5wsjg",
+      "tokenNumber": "T-012",
+      "printerId": "prn_customer_token",
+      "printerName": "Token Counter Thermal Printer (POS-1)",
+      "paperWidth": "58mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T03:29:48.725Z",
+      "printedAt": "2026-10-18T03:29:48.725Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": " SHREE KRISHNA SWEETS & NAMKEEN\nPure Desi Ghee Mithai & Artisan \n      Ph: +91 98260 12345\n================================\n      *** ORDER TOKEN ***\n\n           [ T-012 ]\n\n--------------------------------\nDate: 2026-10-17        03:29 am\nOrder ID:             ord_179229\nCounter: POS-1 By: Rajesh Sharma\n--------------------------------\nITEM                         QTY\n--------------------------------\nKhaman Dhokla               250g\n--------------------------------\nEST. TOTAL:            INR 63.00\nSTATUS:                   UNPAID\n================================\n\n   PLEASE PROCEED TO BILLING\n COUNTER FOR PAYMENT & INVOICE\n\n    Thank You! Visit Again.\n\n          [QR: T-012]\n",
+      "rawEscPosHex": "205348524545204b524953484e41205357454554532026204e414d4b45454e0a5075726520446573692047686565204d69746861692026204172746973616e200a20202020202050683a202b39312039383236302031323334350a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a2020202020202a2a2a204f5244455220544f4b454e202a2a2a0a0a20202020202020202020205b20542d303132205d0a0a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a446174653a20323032362d31302d3137202020202020202030333a323920616d0a4f726465722049443a202020202020202020202020206f72645f3137393232390a436f756e7465723a20504f532d312042793a2052616a65736820536861726d610a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4954454d202020202020202020202020202020202020202020202020205154590a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4b68616d616e2044686f6b6c61202020202020202020202020202020323530670a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4553542e20544f54414c3a202020202020202020202020494e522036332e30300a5354415455533a20202020202020202020202020202020202020554e504149440a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a0a202020504c454153452050524f4345454420544f2042494c4c494e470a20434f554e54455220464f52205041594d454e54202620494e564f4943450a0a202020205468616e6b20596f752120566973697420416761696e2e0a0a202020202020202020205b51523a20542d3031325d0a"
+    },
+    {
+      "id": "PJ-933237",
+      "jobType": "KITCHEN_TICKET",
+      "orderId": "ord_1792293933233_67pzw",
+      "tokenNumber": "T-011",
+      "printerId": "prn_kitchen_kds",
+      "printerName": "Kitchen Ticket Thermal Printer (KDS Room)",
+      "paperWidth": "80mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T03:25:33.237Z",
+      "printedAt": "2026-10-18T03:25:33.237Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": "       *** KITCHEN ORDER TICKET (KOT) ***\n         Shree Krishna Sweets & Namkeen\n================================================\n\n                  TOKEN: T-011\n\n================================================\nTime: 3:25:33 am                Date: 2026-10-17\nOrder Ref: ord_1792               Counter: POS-1\n------------------------------------------------\nITEM & PREPARATION                     EXACT QTY\n------------------------------------------------\n[ ] GULAB JAMUN (SHAHI GHEE)                1 pc\n[ ] CHILLED KESAR BADAM MILK           1 portion\n================================================\n         >>> PLEASE PACK WITH CARE <<<\n",
+      "rawEscPosHex": "202020202020202a2a2a204b49544348454e204f52444552205449434b455420284b4f5429202a2a2a0a2020202020202020205368726565204b726973686e61205377656574732026204e616d6b65656e0a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a0a202020202020202020202020202020202020544f4b454e3a20542d3031310a0a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a54696d653a20333a32353a333320616d20202020202020202020202020202020446174653a20323032362d31302d31370a4f72646572205265663a206f72645f31373932202020202020202020202020202020436f756e7465723a20504f532d310a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4954454d2026205052455041524154494f4e2020202020202020202020202020202020202020204558414354205154590a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a5b205d2047554c4142204a414d554e2028534841484920474845452920202020202020202020202020202020312070630a5b205d204348494c4c4544204b4553415220424144414d204d494c4b20202020202020202020203120706f7274696f6e0a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a2020202020202020203e3e3e20504c45415345205041434b20574954482043415245203c3c3c0a"
+    },
+    {
+      "id": "PJ-933236",
+      "jobType": "CUSTOMER_TOKEN",
+      "orderId": "ord_1792293933233_67pzw",
+      "tokenNumber": "T-011",
+      "printerId": "prn_customer_token",
+      "printerName": "Token Counter Thermal Printer (POS-1)",
+      "paperWidth": "58mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T03:25:33.236Z",
+      "printedAt": "2026-10-18T03:25:33.236Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": " SHREE KRISHNA SWEETS & NAMKEEN\nPure Desi Ghee Mithai & Artisan \n      Ph: +91 98260 12345\n================================\n      *** ORDER TOKEN ***\n\n           [ T-011 ]\n\n--------------------------------\nDate: 2026-10-17        03:25 am\nOrder ID:             ord_179229\nCounter: POS-1 By: Rajesh Sharma\n--------------------------------\nITEM                         QTY\n--------------------------------\nGulab Jamun (Shahi Ghee)    1 pc\nChilled Kesar Badam Mi 1 portion\n--------------------------------\nEST. TOTAL:            INR 78.75\nSTATUS:                   UNPAID\n================================\n\n   PLEASE PROCEED TO BILLING\n COUNTER FOR PAYMENT & INVOICE\n\n    Thank You! Visit Again.\n\n          [QR: T-011]\n",
+      "rawEscPosHex": "205348524545204b524953484e41205357454554532026204e414d4b45454e0a5075726520446573692047686565204d69746861692026204172746973616e200a20202020202050683a202b39312039383236302031323334350a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a2020202020202a2a2a204f5244455220544f4b454e202a2a2a0a0a20202020202020202020205b20542d303131205d0a0a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a446174653a20323032362d31302d3137202020202020202030333a323520616d0a4f726465722049443a202020202020202020202020206f72645f3137393232390a436f756e7465723a20504f532d312042793a2052616a65736820536861726d610a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4954454d202020202020202020202020202020202020202020202020205154590a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a47756c6162204a616d756e2028536861686920476865652920202020312070630a4368696c6c6564204b6573617220426164616d204d69203120706f7274696f6e0a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4553542e20544f54414c3a202020202020202020202020494e522037382e37350a5354415455533a20202020202020202020202020202020202020554e504149440a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a0a202020504c454153452050524f4345454420544f2042494c4c494e470a20434f554e54455220464f52205041594d454e54202620494e564f4943450a0a202020205468616e6b20596f752120566973697420416761696e2e0a0a202020202020202020205b51523a20542d3031315d0a"
+    },
+    {
+      "id": "PJ-636458",
+      "jobType": "KITCHEN_TICKET",
+      "orderId": "ord_1792293636455_0o6wm",
+      "tokenNumber": "T-010",
+      "printerId": "prn_kitchen_kds",
+      "printerName": "Kitchen Ticket Thermal Printer (KDS Room)",
+      "paperWidth": "80mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T03:20:36.458Z",
+      "printedAt": "2026-10-18T03:20:36.458Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": "       *** KITCHEN ORDER TICKET (KOT) ***\n         Shree Krishna Sweets & Namkeen\n================================================\n\n                  TOKEN: T-010\n\n================================================\nTime: 3:20:36 am                Date: 2026-10-17\nOrder Ref: ord_1792               Counter: POS-1\n------------------------------------------------\nITEM & PREPARATION                     EXACT QTY\n------------------------------------------------\n[ ] SPECIAL ALOO SAMOSA                     1 pc\n[ ] CHILLED KESAR BADAM MILK           1 portion\n================================================\n         >>> PLEASE PACK WITH CARE <<<\n",
+      "rawEscPosHex": "202020202020202a2a2a204b49544348454e204f52444552205449434b455420284b4f5429202a2a2a0a2020202020202020205368726565204b726973686e61205377656574732026204e616d6b65656e0a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a0a202020202020202020202020202020202020544f4b454e3a20542d3031300a0a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a54696d653a20333a32303a333620616d20202020202020202020202020202020446174653a20323032362d31302d31370a4f72646572205265663a206f72645f31373932202020202020202020202020202020436f756e7465723a20504f532d310a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4954454d2026205052455041524154494f4e2020202020202020202020202020202020202020204558414354205154590a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a5b205d205350454349414c20414c4f4f2053414d4f5341202020202020202020202020202020202020202020312070630a5b205d204348494c4c4544204b4553415220424144414d204d494c4b20202020202020202020203120706f7274696f6e0a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a2020202020202020203e3e3e20504c45415345205041434b20574954482043415245203c3c3c0a"
+    },
+    {
+      "id": "PJ-636457",
+      "jobType": "CUSTOMER_TOKEN",
+      "orderId": "ord_1792293636455_0o6wm",
+      "tokenNumber": "T-010",
+      "printerId": "prn_customer_token",
+      "printerName": "Token Counter Thermal Printer (POS-1)",
+      "paperWidth": "58mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T03:20:36.457Z",
+      "printedAt": "2026-10-18T03:20:36.457Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": " SHREE KRISHNA SWEETS & NAMKEEN\nPure Desi Ghee Mithai & Artisan \n      Ph: +91 98260 12345\n================================\n      *** ORDER TOKEN ***\n\n           [ T-010 ]\n\n--------------------------------\nDate: 2026-10-17        03:20 am\nOrder ID:             ord_179229\nCounter: POS-1 By: Rajesh Sharma\n--------------------------------\nITEM                         QTY\n--------------------------------\nSpecial Aloo Samosa         1 pc\nChilled Kesar Badam Mi 1 portion\n--------------------------------\nEST. TOTAL:            INR 71.40\nSTATUS:                   UNPAID\n================================\n\n   PLEASE PROCEED TO BILLING\n COUNTER FOR PAYMENT & INVOICE\n\n    Thank You! Visit Again.\n\n          [QR: T-010]\n",
+      "rawEscPosHex": "205348524545204b524953484e41205357454554532026204e414d4b45454e0a5075726520446573692047686565204d69746861692026204172746973616e200a20202020202050683a202b39312039383236302031323334350a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a2020202020202a2a2a204f5244455220544f4b454e202a2a2a0a0a20202020202020202020205b20542d303130205d0a0a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a446174653a20323032362d31302d3137202020202020202030333a323020616d0a4f726465722049443a202020202020202020202020206f72645f3137393232390a436f756e7465723a20504f532d312042793a2052616a65736820536861726d610a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4954454d202020202020202020202020202020202020202020202020205154590a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a5370656369616c20416c6f6f2053616d6f7361202020202020202020312070630a4368696c6c6564204b6573617220426164616d204d69203120706f7274696f6e0a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4553542e20544f54414c3a202020202020202020202020494e522037312e34300a5354415455533a20202020202020202020202020202020202020554e504149440a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a0a202020504c454153452050524f4345454420544f2042494c4c494e470a20434f554e54455220464f52205041594d454e54202620494e564f4943450a0a202020205468616e6b20596f752120566973697420416761696e2e0a0a202020202020202020205b51523a20542d3031305d0a"
+    },
+    {
+      "id": "PJ-615654",
+      "jobType": "TAX_INVOICE",
+      "orderId": "ord_1792293538854_w6mbt",
+      "tokenNumber": "T-009",
+      "printerId": "prn_billing_invoice",
+      "printerName": "Billing Cashier Invoice Printer",
+      "paperWidth": "80mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T03:20:15.654Z",
+      "printedAt": "2026-10-18T03:20:15.654Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": "         SHREE KRISHNA SWEETS & NAMKEEN\n    Shop No. 14-16, Mithai Market, M.G. Road\n        Indore, Madhya Pradesh - 452001\n             GSTIN: 23AAAAA0000A1Z5\n           FSSAI Lic: 11418850000342\n              Ph: +91 98260 12345\n================================================\n                  TAX INVOICE\n================================================\nInvoice: INV-20261018-0105          Token: T-009\nDate: 2026-10-17                        03:20 am\nCashier: Rajesh Sharma             Payment: CASH\n------------------------------------------------\nITEM NAME            QTY      RATE     AMOUNT\n------------------------------------------------\nChilled Kesar Badam 1 portio ₹50          ₹52.50\nBengali Malai Cham  1 pc     ₹35          ₹36.75\n------------------------------------------------\nSubtotal (Taxable):                       ₹85.00\nCGST (2.5%):                               ₹2.13\nSGST (2.5%):                               ₹2.13\n================================================\nTOTAL AMOUNT PAID:                        ₹89.25\n================================================\n\nThank you for choosing pure taste! FSSAI Lic #11\n      Goods once sold cannot be returned.\n             MithaiFlow POS System\n",
+      "rawEscPosHex": "2020202020202020205348524545204b524953484e41205357454554532026204e414d4b45454e0a2020202053686f70204e6f2e2031342d31362c204d6974686169204d61726b65742c204d2e472e20526f61640a2020202020202020496e646f72652c204d61646879612050726164657368202d203435323030310a20202020202020202020202020475354494e3a20323341414141413030303041315a350a20202020202020202020204653534149204c69633a2031313431383835303030303334320a202020202020202020202020202050683a202b39312039383236302031323334350a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a20202020202020202020202020202020202054415820494e564f4943450a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a496e766f6963653a20494e562d32303236313031382d3031303520202020202020202020546f6b656e3a20542d3030390a446174653a20323032362d31302d313720202020202020202020202020202020202020202020202030333a323020616d0a436173686965723a2052616a65736820536861726d61202020202020202020202020205061796d656e743a20434153480a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4954454d204e414d45202020202020202020202020515459202020202020524154452020202020414d4f554e540a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4368696c6c6564204b6573617220426164616d203120706f7274696f20e282b9353020202020202020202020e282b935322e35300a42656e67616c69204d616c6169204368616d2020312070632020202020e282b9333520202020202020202020e282b933362e37350a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a537562746f74616c202854617861626c65293a2020202020202020202020202020202020202020202020e282b938352e30300a434753542028322e3525293a20202020202020202020202020202020202020202020202020202020202020e282b9322e31330a534753542028322e3525293a20202020202020202020202020202020202020202020202020202020202020e282b9322e31330a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a544f54414c20414d4f554e5420504149443a202020202020202020202020202020202020202020202020e282b938392e32350a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a0a5468616e6b20796f7520666f722063686f6f73696e67207075726520746173746521204653534149204c6963202331310a202020202020476f6f6473206f6e636520736f6c642063616e6e6f742062652072657475726e65642e0a202020202020202020202020204d6974686169466c6f7720504f532053797374656d0a"
+    },
+    {
+      "id": "PJ-538859",
+      "jobType": "KITCHEN_TICKET",
+      "orderId": "ord_1792293538854_w6mbt",
+      "tokenNumber": "T-009",
+      "printerId": "prn_kitchen_kds",
+      "printerName": "Kitchen Ticket Thermal Printer (KDS Room)",
+      "paperWidth": "80mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T03:18:58.859Z",
+      "printedAt": "2026-10-18T03:18:58.859Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": "       *** KITCHEN ORDER TICKET (KOT) ***\n         Shree Krishna Sweets & Namkeen\n================================================\n\n                  TOKEN: T-009\n\n================================================\nTime: 3:18:58 am                Date: 2026-10-17\nOrder Ref: ord_1792               Counter: POS-1\n------------------------------------------------\nITEM & PREPARATION                     EXACT QTY\n------------------------------------------------\n[ ] CHILLED KESAR BADAM MILK           1 portion\n[ ] BENGALI MALAI CHAM CHAM                 1 pc\n================================================\n         >>> PLEASE PACK WITH CARE <<<\n",
+      "rawEscPosHex": "202020202020202a2a2a204b49544348454e204f52444552205449434b455420284b4f5429202a2a2a0a2020202020202020205368726565204b726973686e61205377656574732026204e616d6b65656e0a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a0a202020202020202020202020202020202020544f4b454e3a20542d3030390a0a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a54696d653a20333a31383a353820616d20202020202020202020202020202020446174653a20323032362d31302d31370a4f72646572205265663a206f72645f31373932202020202020202020202020202020436f756e7465723a20504f532d310a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4954454d2026205052455041524154494f4e2020202020202020202020202020202020202020204558414354205154590a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a5b205d204348494c4c4544204b4553415220424144414d204d494c4b20202020202020202020203120706f7274696f6e0a5b205d2042454e47414c49204d414c4149204348414d204348414d2020202020202020202020202020202020312070630a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a2020202020202020203e3e3e20504c45415345205041434b20574954482043415245203c3c3c0a"
+    },
+    {
+      "id": "PJ-538858",
+      "jobType": "CUSTOMER_TOKEN",
+      "orderId": "ord_1792293538854_w6mbt",
+      "tokenNumber": "T-009",
+      "printerId": "prn_customer_token",
+      "printerName": "Token Counter Thermal Printer (POS-1)",
+      "paperWidth": "58mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-18T03:18:58.858Z",
+      "printedAt": "2026-10-18T03:18:58.858Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": " SHREE KRISHNA SWEETS & NAMKEEN\nPure Desi Ghee Mithai & Artisan \n      Ph: +91 98260 12345\n================================\n      *** ORDER TOKEN ***\n\n           [ T-009 ]\n\n--------------------------------\nDate: 2026-10-17        03:18 am\nOrder ID:             ord_179229\nCounter: POS-1 By: Rajesh Sharma\n--------------------------------\nITEM                         QTY\n--------------------------------\nChilled Kesar Badam Mi 1 portion\nBengali Malai Cham Cham     1 pc\n--------------------------------\nEST. TOTAL:            INR 89.25\nSTATUS:                   UNPAID\n================================\n\n   PLEASE PROCEED TO BILLING\n COUNTER FOR PAYMENT & INVOICE\n\n    Thank You! Visit Again.\n\n          [QR: T-009]\n",
+      "rawEscPosHex": "205348524545204b524953484e41205357454554532026204e414d4b45454e0a5075726520446573692047686565204d69746861692026204172746973616e200a20202020202050683a202b39312039383236302031323334350a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a2020202020202a2a2a204f5244455220544f4b454e202a2a2a0a0a20202020202020202020205b20542d303039205d0a0a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a446174653a20323032362d31302d3137202020202020202030333a313820616d0a4f726465722049443a202020202020202020202020206f72645f3137393232390a436f756e7465723a20504f532d312042793a2052616a65736820536861726d610a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4954454d202020202020202020202020202020202020202020202020205154590a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4368696c6c6564204b6573617220426164616d204d69203120706f7274696f6e0a42656e67616c69204d616c6169204368616d204368616d2020202020312070630a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d0a4553542e20544f54414c3a202020202020202020202020494e522038392e32350a5354415455533a20202020202020202020202020202020202020554e504149440a3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d0a0a202020504c454153452050524f4345454420544f2042494c4c494e470a20434f554e54455220464f52205041594d454e54202620494e564f4943450a0a202020205468616e6b20596f752120566973697420416761696e2e0a0a202020202020202020205b51523a20542d3030395d0a"
+    },
+    {
+      "id": "PJ-00101",
+      "jobType": "CUSTOMER_TOKEN",
+      "orderId": "ord_demo_001",
+      "tokenNumber": "T-001",
+      "printerId": "prn_customer_token",
+      "printerName": "Token Counter Thermal Printer (POS-1)",
+      "paperWidth": "58mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-17T07:29:36.486Z",
+      "printedAt": "2026-10-17T07:29:36.486Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": "SHREE KRISHNA SWEETS\n*** ORDER TOKEN ***\n\n[ T-001 ]\n\nDate: 2026-10-17\nEstimated Total: INR 430.5\nPLEASE PROCEED TO BILLING\nThank You!"
+    },
+    {
+      "id": "PJ-00102",
+      "jobType": "KITCHEN_TICKET",
+      "orderId": "ord_demo_002",
+      "tokenNumber": "T-002",
+      "printerId": "prn_kitchen_kds",
+      "printerName": "Kitchen Ticket Thermal Printer (KDS Room)",
+      "paperWidth": "80mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-17T07:25:36.486Z",
+      "printedAt": "2026-10-18T03:28:29.568Z",
+      "retryCount": 0,
+      "reprintCount": 2,
+      "payload": "*** KITCHEN ORDER TICKET (KOT) ***\nTOKEN: T-002\nTime: 7:25:36 am\n\n[ ] SPECIAL ALOO SAMOSA: 6 pcs\n    >>> NOTE: Extra sweet tamarind chutney\n[ ] KESARIYA KULHAD LASSI: 2 portions\n    >>> NOTE: Thick malai topping\n\nPLEASE PACK WITH CARE"
+    },
+    {
+      "id": "PJ-00105",
+      "jobType": "TAX_INVOICE",
+      "orderId": "ord_demo_005",
+      "tokenNumber": "T-005",
+      "printerId": "prn_billing_invoice",
+      "printerName": "Billing Cashier Invoice Printer",
+      "paperWidth": "80mm",
+      "status": "PRINTED",
+      "createdAt": "2026-10-17T06:58:36.486Z",
+      "printedAt": "2026-10-17T06:58:36.486Z",
+      "retryCount": 0,
+      "reprintCount": 0,
+      "payload": "SHREE KRISHNA SWEETS\nTAX INVOICE #INV-20261017-0101\nToken: T-005\nDate: 2026-10-17\nPayment: UPI (Ref: UPI/628104829102)\n\nITEM NAME            QTY      RATE     AMOUNT\nKaju Katli           1.0 kg   960      ₹1008.00\nKaju Pista Roll      500g     1100     ₹577.50\n------------------------------------------------\nCGST (2.5%): ₹37.75\nSGST (2.5%): ₹37.75\nTOTAL PAID: ₹1585.50\n\nThank you for choosing pure taste!"
+    }
+  ],
+  "printers": [
+    {
+      "id": "prn_customer_token",
+      "name": "Customer Waiting Token Printer (2-Inch / 50.8mm)",
+      "targetRole": "CUSTOMER_TOKEN",
+      "paperWidth": "58mm",
+      "interfaceType": "SIMULATOR",
+      "isConnected": true,
+      "autoPrint": true
+    },
+    {
+      "id": "prn_kitchen_kds",
+      "name": "Order POS Dispatch Slip Printer (2-Inch / 50.8mm)",
+      "targetRole": "KITCHEN_TICKET",
+      "paperWidth": "58mm",
+      "interfaceType": "SIMULATOR",
+      "isConnected": true,
+      "autoPrint": true
+    },
+    {
+      "id": "prn_billing_invoice",
+      "name": "Billing Cashier Invoice Printer",
+      "targetRole": "BILLING_INVOICE",
+      "paperWidth": "80mm",
+      "interfaceType": "SIMULATOR",
+      "isConnected": true,
+      "autoPrint": true
+    }
+  ],
+  "settings": {
+    "shopName": "Sheetal Gajak Kulfi",
+    "tagline": "Famous Indore Gajak, Rabdi Kulfi & Traditional Sweets",
+    "address": "Opposite High Court, Shivaji Nagar",
+    "city": "Indore",
+    "state": "Madhya Pradesh",
+    "pincode": "452003",
+    "phone": "+91 98260 54321",
+    "gstin": "23AAAAA0000A1Z5",
+    "fssaiNumber": "11418850000342",
+    "tokenPrefix": "T-",
+    "businessDayCutoffHour": 4,
+    "kitchenDelayThresholdMinutes": 10,
+    "currencySymbol": "₹",
+    "taxConfig": {
+      "cgstRate": 2.5,
+      "sgstRate": 2.5
+    },
+    "footerMessage": "Thank you for choosing Sheetal Gajak Kulfi! Visit Again."
+  },
+  "auditLogs": [
+    {
+      "id": "aud_1792322097657_gmzn",
+      "timestamp": "2026-10-18T11:14:57.657Z",
+      "userId": "usr_pos",
+      "userName": "Order POS Staff",
+      "action": "ORDER_CREATED",
+      "entityType": "ORDER",
+      "entityId": "ord_1792322097655_qyema",
+      "details": "Token T-002 created with 1 items. Amount: ₹115.5"
+    },
+    {
+      "id": "aud_1792322085173_xvdm",
+      "timestamp": "2026-10-18T11:14:45.173Z",
+      "userId": "usr_admin",
+      "userName": "Admin Manager",
+      "action": "USER_LOGIN",
+      "entityType": "SETTINGS",
+      "entityId": "usr_admin",
+      "details": "User Admin Manager (admin) logged in successfully"
+    },
+    {
+      "id": "aud_1792322080401_f6xs",
+      "timestamp": "2026-10-18T11:14:40.401Z",
+      "userId": "usr_cashier",
+      "userName": "Cashier & Biller",
+      "action": "USER_LOGIN",
+      "entityType": "SETTINGS",
+      "entityId": "usr_cashier",
+      "details": "User Cashier & Biller (cashier) logged in successfully"
+    },
+    {
+      "id": "aud_1792322074974_lpqc",
+      "timestamp": "2026-10-18T11:14:34.974Z",
+      "userId": "usr_pos",
+      "userName": "Order POS Staff",
+      "action": "USER_LOGIN",
+      "entityType": "SETTINGS",
+      "entityId": "usr_pos",
+      "details": "User Order POS Staff (order_pos) logged in successfully"
+    },
+    {
+      "id": "aud_1792320700356_qdvd",
+      "timestamp": "2026-10-18T10:51:40.356Z",
+      "userId": "usr_admin",
+      "userName": "Admin Manager",
+      "action": "USER_LOGIN",
+      "entityType": "SETTINGS",
+      "entityId": "usr_admin",
+      "details": "User Admin Manager (admin) logged in successfully"
+    },
+    {
+      "id": "aud_1792320564693_zspv",
+      "timestamp": "2026-10-18T10:49:24.693Z",
+      "userId": "usr_pos",
+      "userName": "Order POS Staff",
+      "action": "ORDER_CREATED",
+      "entityType": "ORDER",
+      "entityId": "ord_1792320564692_w50fz",
+      "details": "Token T-001 created with 3 items. Amount: ₹80.85"
+    },
+    {
+      "id": "aud_1792320545082_g4v8",
+      "timestamp": "2026-10-18T10:49:05.082Z",
+      "userId": "usr_pos",
+      "userName": "Order POS Staff",
+      "action": "USER_LOGIN",
+      "entityType": "SETTINGS",
+      "entityId": "usr_pos",
+      "details": "User Order POS Staff (order_pos) logged in successfully"
+    },
+    {
+      "id": "aud_1792320393725_deoa",
+      "timestamp": "2026-10-18T10:46:33.725Z",
+      "userId": "usr_admin",
+      "userName": "Admin Manager",
+      "action": "USER_LOGIN",
+      "entityType": "SETTINGS",
+      "entityId": "usr_admin",
+      "details": "User Admin Manager (admin) logged in successfully"
+    },
+    {
+      "id": "aud_1792320031744_ow6v",
+      "timestamp": "2026-10-18T10:40:31.744Z",
+      "userId": "usr_admin",
+      "userName": "Admin Manager",
+      "action": "USER_LOGIN",
+      "entityType": "SETTINGS",
+      "entityId": "usr_admin",
+      "details": "User Admin Manager (admin) logged in successfully"
+    },
+    {
+      "id": "aud_1792320031726_6lfr",
+      "timestamp": "2026-10-18T10:40:31.726Z",
+      "userId": "usr_cashier",
+      "userName": "Cashier & Biller",
+      "action": "USER_LOGIN",
+      "entityType": "SETTINGS",
+      "entityId": "usr_cashier",
+      "details": "User Cashier & Biller (cashier) logged in successfully"
+    },
+    {
+      "id": "aud_1792320031706_bre9",
+      "timestamp": "2026-10-18T10:40:31.706Z",
+      "userId": "usr_pos",
+      "userName": "Order POS Staff",
+      "action": "USER_LOGIN",
+      "entityType": "SETTINGS",
+      "entityId": "usr_pos",
+      "details": "User Order POS Staff (order_pos) logged in successfully"
+    },
+    {
+      "id": "aud_1792294592722_4uze",
+      "timestamp": "2026-10-18T03:36:32.722Z",
+      "userId": "usr_pos1",
+      "userName": "Rajesh Sharma",
+      "action": "PAYMENT_COLLECTED",
+      "entityType": "PAYMENT",
+      "entityId": "pay_1792294592720_xb1s",
+      "details": "Payment of ₹63 via CASH for Token T-012. Invoice #INV-20261018-0106"
+    },
+    {
+      "id": "aud_1792294512374_9ska",
+      "timestamp": "2026-10-18T03:35:12.374Z",
+      "userId": "usr_pos1",
+      "userName": "Rajesh Sharma",
+      "action": "ORDER_CREATED",
+      "entityType": "ORDER",
+      "entityId": "ord_1792294512373_ey3uv",
+      "details": "Token T-013 created with 3 items. Amount: ₹572.25"
+    },
+    {
+      "id": "aud_1792294188723_q1m2",
+      "timestamp": "2026-10-18T03:29:48.723Z",
+      "userId": "usr_pos1",
+      "userName": "Rajesh Sharma",
+      "action": "ORDER_CREATED",
+      "entityType": "ORDER",
+      "entityId": "ord_1792294188722_5wsjg",
+      "details": "Token T-012 created with 1 items. Amount: ₹63"
+    },
+    {
+      "id": "aud_1792294109569_9ijd",
+      "timestamp": "2026-10-18T03:28:29.570Z",
+      "userId": "user",
+      "userName": "Rajesh Sharma",
+      "action": "REPRINT_REQUESTED",
+      "entityType": "PRINTER",
+      "entityId": "PJ-00102",
+      "details": "Reprinted KITCHEN_TICKET for Token T-002 (Count: 2)"
+    },
+    {
+      "id": "aud_1792293933234_ec38",
+      "timestamp": "2026-10-18T03:25:33.234Z",
+      "userId": "usr_pos1",
+      "userName": "Rajesh Sharma",
+      "action": "ORDER_CREATED",
+      "entityType": "ORDER",
+      "entityId": "ord_1792293933233_67pzw",
+      "details": "Token T-011 created with 2 items. Amount: ₹78.75"
+    },
+    {
+      "id": "aud_1792293636455_g00o",
+      "timestamp": "2026-10-18T03:20:36.455Z",
+      "userId": "usr_pos1",
+      "userName": "Rajesh Sharma",
+      "action": "ORDER_CREATED",
+      "entityType": "ORDER",
+      "entityId": "ord_1792293636455_0o6wm",
+      "details": "Token T-010 created with 2 items. Amount: ₹71.4"
+    },
+    {
+      "id": "aud_1792293615647_togj",
+      "timestamp": "2026-10-18T03:20:15.647Z",
+      "userId": "usr_pos1",
+      "userName": "Rajesh Sharma",
+      "action": "PAYMENT_COLLECTED",
+      "entityType": "PAYMENT",
+      "entityId": "pay_1792293615646_qulj",
+      "details": "Payment of ₹89.25 via CASH for Token T-009. Invoice #INV-20261018-0105"
+    },
+    {
+      "id": "aud_1792293538855_xb78",
+      "timestamp": "2026-10-18T03:18:58.855Z",
+      "userId": "usr_pos1",
+      "userName": "Rajesh Sharma",
+      "action": "ORDER_CREATED",
+      "entityType": "ORDER",
+      "entityId": "ord_1792293538854_w6mbt",
+      "details": "Token T-009 created with 2 items. Amount: ₹89.25"
+    },
+    {
+      "id": "aud_demo_1",
+      "timestamp": "2026-10-17T05:13:36.486Z",
+      "userId": "usr_pos1",
+      "userName": "Rajesh Sharma",
+      "action": "ORDER_CREATED",
+      "entityType": "ORDER",
+      "entityId": "ord_demo_008",
+      "details": "Token T-008 created at POS-1. Total: ₹378.00"
+    },
+    {
+      "id": "aud_demo_2",
+      "timestamp": "2026-10-17T05:23:36.486Z",
+      "userId": "usr_billing",
+      "userName": "Pooja Verma",
+      "action": "PAYMENT_COLLECTED",
+      "entityType": "PAYMENT",
+      "entityId": "pay_demo_008",
+      "details": "Split payment ₹378 collected for Token T-008. Invoice #INV-20261017-0104 generated."
+    },
+    {
+      "id": "aud_demo_3",
+      "timestamp": "2026-10-17T06:58:36.486Z",
+      "userId": "usr_billing",
+      "userName": "Pooja Verma",
+      "action": "PAYMENT_COLLECTED",
+      "entityType": "PAYMENT",
+      "entityId": "pay_demo_005",
+      "details": "UPI payment ₹1585.50 collected for Token T-005. Invoice #INV-20261017-0101 generated."
+    },
+    {
+      "id": "aud_demo_4",
+      "timestamp": "2026-10-17T07:27:36.486Z",
+      "userId": "usr_kitchen",
+      "userName": "Master Chef Ramesh",
+      "action": "STATUS_UPDATED",
+      "entityType": "ORDER",
+      "entityId": "ord_demo_002",
+      "details": "Order T-002 status changed from RECEIVED to PREPARING."
+    },
+    {
+      "id": "aud_demo_5",
+      "timestamp": "2026-10-17T07:31:36.486Z",
+      "userId": "usr_kitchen",
+      "userName": "Master Chef Ramesh",
+      "action": "STATUS_UPDATED",
+      "entityType": "ORDER",
+      "entityId": "ord_demo_004",
+      "details": "Order T-004 status changed from PREPARING to READY at counter."
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_pos",
+      "name": "Order POS Staff",
+      "email": "pos@gmail.com",
+      "password": "pos@123",
+      "role": "order_pos",
+      "pin": "1234"
+    },
+    {
+      "id": "usr_cashier",
+      "name": "Cashier & Biller",
+      "email": "cashier@gmail.com",
+      "password": "cashier@123",
+      "role": "cashier",
+      "pin": "4321"
+    },
+    {
+      "id": "usr_admin",
+      "name": "Admin Manager",
+      "email": "admin@gmail.com",
+      "password": "admin@123",
+      "role": "admin",
+      "pin": "9999"
+    }
+  ],
+  "counters": {
+    "lastTokenNumber": 2,
+    "lastTokenDate": "2026-10-18",
+    "lastInvoiceNumber": 106
+  }
+}

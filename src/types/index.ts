@@ -22,16 +22,12 @@ export interface Category {
 export interface Product {
   id: string;
   sku: string;
-  barcode?: string;
-  alias?: string;
   name: string;
   hindiName?: string;
   categoryId: string;
   unit: UnitType;
-  packWeightKg?: number; // e.g. 0.2, 0.25, 0.4, 0.5, 1.0
   pricePerUnit: number; // In INR (₹)
-  taxRatePercent: number; // Standard 5%, 12%, or 18% GST
-  hsnCode?: string; // e.g. '2106909', '2109', '210609'
+  taxRatePercent: number; // Standard 5% GST for sweets/food
   isActive: boolean;
   requiresKitchen: boolean;
   imageUrl?: string;
@@ -51,7 +47,6 @@ export interface OrderItem {
   productName: string;
   hindiName?: string;
   unit: UnitType;
-  hsnCode?: string;
   packWeightKg?: number; // e.g. 0.25 (for 250g pack)
   packCount?: number; // e.g. 2 (for 2 packs of 250g)
   quantity: number; // e.g., 0.50 (total kg) or 4 (for 4 pieces)
@@ -216,29 +211,5 @@ export interface DashboardMetrics {
   categoryPerformance: Array<{ category: string; revenue: number; count: number }>;
 }
 
-export interface DayEndSalesReportItem {
-  date: string; // YYYY-MM-DD
-  orderCount: number;
-  netAmount: number;
-  cashAmount: number;
-  upiAmount: number;
-  cardAmount: number;
-  discountAmount: number;
-  taxAmount: number;
-}
-
-export interface DayEndSummaryReport {
-  startDate?: string;
-  endDate?: string;
-  totalOrders: number;
-  totalNet: number;
-  totalCash: number;
-  totalUpi: number;
-  totalCard: number;
-  totalDiscount: number;
-  totalTax: number;
-  dateWise: DayEndSalesReportItem[];
-}
-
-export const SCHEMA_VERSION = '2.5.0';
+export const SCHEMA_VERSION = '2.4.0';
 

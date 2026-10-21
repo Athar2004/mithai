@@ -194,22 +194,21 @@ export function generateInvoiceReceipt(
       const name = item.productName.slice(0, 19).padEnd(20);
 
       let qtyStr = `${item.quantity}`;
-      const hsn = item.hsnCode || '2106909';
-      const details: string[] = [`HSN: ${hsn}`];
+      let packNote = '';
 
       if (item.packCount && item.packCount > 1 && item.packWeightKg) {
         const wtStr = item.packWeightKg < 1 ? `${Math.round(item.packWeightKg * 1000)}g` : `${item.packWeightKg}kg`;
         qtyStr = `${item.packCount} Pk`;
-        details.push(`${item.packCount} Pks x ${wtStr}`);
+        packNote = `   [${item.packCount} Packs x ${wtStr} each${item.hindiName ? ` | ${item.hindiName}` : ''}]`;
       } else if (item.packWeightKg) {
         const wtStr = item.packWeightKg < 1 ? `${Math.round(item.packWeightKg * 1000)}g` : `${item.packWeightKg}kg`;
         qtyStr = `1 Pk`;
-        details.push(`${wtStr} pack`);
+        packNote = `   [${wtStr} pack${item.hindiName ? ` | ${item.hindiName}` : ''}]`;
       } else if (item.packCount && item.packCount > 1) {
         qtyStr = `${item.packCount} Pk`;
-      }
-      if (item.hindiName) {
-        details.push(item.hindiName);
+        packNote = item.hindiName ? `   [${item.hindiName}]` : '';
+      } else if (item.hindiName) {
+        packNote = `   [${item.hindiName}]`;
       }
 
       const colQty = qtyStr.slice(0, 5).padStart(6);
@@ -217,7 +216,9 @@ export function generateInvoiceReceipt(
       const colAmt = item.totalPrice.toFixed(2).slice(0, 9).padStart(10);
 
       lines.push(`${sn}${name}${colQty}${colRate}${colAmt}`);
-      lines.push(`   [${details.join(' | ')}]`);
+      if (packNote) {
+        lines.push(packNote);
+      }
     });
   } else {
     // 32-column fallback format

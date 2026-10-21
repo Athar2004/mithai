@@ -64,8 +64,7 @@ function getClientStore(): ClientStore {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      // Ensure categories, products and users have latest Sheetal Gajak catalog
-      parsed.categories = DEMO_CATEGORIES;
+      // Ensure products have latest demo images and users have latest credentials
       parsed.products = DEMO_PRODUCTS;
       parsed.users = DEMO_USERS;
       return parsed;
@@ -120,30 +119,18 @@ export async function fetchProducts(): Promise<Product[]> {
   }
 }
 
-export async function saveProduct(
-  product: Partial<Product> & { name: string; pricePerUnit: number; unit: Product['unit'] },
-  userRole?: string
-): Promise<Product> {
+export async function saveProduct(product: Partial<Product> & { name: string; pricePerUnit: number; unit: Product['unit'] }): Promise<Product> {
   try {
     const res = await fetch('/api/products', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(userRole ? { 'x-user-role': userRole } : {}),
-      },
-      body: JSON.stringify({ ...product, userRole }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(product),
     });
-    if (!res.ok) {
-      const errData = await safeJson(res);
-      throw new Error(errData?.error || 'Failed to save product');
-    }
+    if (!res.ok) throw new Error('API unavailable');
     const data = await safeJson(res);
     if (!data.success) throw new Error(data.error);
     return data.product;
-  } catch (err: unknown) {
-    if (userRole && userRole !== 'admin') {
-      throw new Error('Access Denied: Only administrators have permission to add or edit product catalog');
-    }
+  } catch {
     const store = getClientStore();
     let saved: Product;
     if (product.id) {
@@ -252,12 +239,9 @@ export async function createOrder(payload: {
         productName: prod.name,
         hindiName: prod.hindiName,
         unit: prod.unit,
-        hsnCode: prod.hsnCode || '2106909',
-        packWeightKg: (it as any).packWeightKg,
-        packCount: (it as any).packCount || 1,
         quantity: qty,
         unitPrice: prod.pricePerUnit,
-        taxRatePercent: prod.taxRatePercent || 5,
+        taxRatePercent: 5,
         taxAmount: lineTax,
         discountAmount: 0,
         totalPrice: lineSub + lineTax,
@@ -405,130 +389,6 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, up
     saveClientStore(store);
     return order;
   }
-}
-
-/**
- * Builds a pixel-perfect 48-column thermal receipt text for 3-inch printers.
- * Displays shop header, invoice metadata, items with HSN codes, gross/discount,
- * net amount due/paid, statutory 5% inclusive GST breakdown, and settlement details.
- */
-export function buildTaxInvoiceReceiptText(order: Order, settings: ShopSettings | null, invoice?: Invoice | null): string {
-  const formatLine48 = (left: string, right: string) => {
-    const spaceNeeded = 48 - (left.length + right.length);
-    if (spaceNeeded <= 0) return left.slice(0, 48 - right.length - 1) + ' ' + right;
-    return left + ' '.repeat(spaceNeeded) + right;
-  };
-  const center48 = (text: string) => {
-    if (text.length >= 48) return text.slice(0, 48);
-    const leftPad = Math.floor((48 - text.length) / 2);
-    return ' '.repeat(leftPad) + text;
-  };
-
-  const invoiceNumber = invoice?.invoiceNumber || `INV-${(order.businessDate || new Date().toISOString().slice(0, 10)).replace(/-/g, '')}-${order.tokenNumber.replace(/\D/g, '') || '0101'}`;
-  const now = new Date(order.completedAt || order.createdAt || Date.now());
-  const dateFormatted = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-  const timeFormatted = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
-
-  const shopName = (settings?.shopName || 'SHEETAL GAJAK KULFI').toUpperCase();
-  const address = settings?.address || 'Opposite High Court, Shivaji Nagar';
-  const cityState = `${settings?.city || 'Indore'}, ${settings?.state || 'Madhya Pradesh'} - ${settings?.pincode || '452003'}`;
-  const phone = settings?.phone ? `Phone: ${settings.phone} / +91 98260 12345` : 'Phone: +91 98260 54321 / +91 98260 12345';
-  const taxReg = `GSTIN: ${settings?.gstin || '23AAAAA0000A1Z5'} | FSSAI: ${settings?.fssaiNumber || '11418850000342'}`;
-
-  const cashierBillLines = [
-    '================================================',
-    center48(shopName),
-    center48(address),
-    center48(cityState),
-    center48(phone),
-    center48(taxReg),
-    '================================================',
-    center48('TAX INVOICE / CASHIER BILL (3-INCH)'),
-    '================================================',
-    formatLine48(`Invoice No : ${invoiceNumber}`, `Token : #${order.tokenNumber}`),
-    formatLine48(`Date       : ${dateFormatted}`, `Time  : ${timeFormatted}`),
-    formatLine48(`Cashier    : ${invoice?.cashierName || 'Counter Staff'}`, `Counter: ${order.counterId || 'POS-1'}`),
-    formatLine48('Sale Type  : Retail Counter Sale', 'Status : PAID IN FULL'),
-    '------------------------------------------------',
-    '#  ITEM DESCRIPTION        QTY     RATE   AMOUNT(Rs)',
-    '------------------------------------------------',
-  ];
-
-  order.items.forEach((it, idx) => {
-    const sn = String(idx + 1).padStart(2, '0') + ' ';
-    const name = it.productName.slice(0, 19).padEnd(20);
-
-    let qtyStr = `${it.quantity}`;
-    const hsn = it.hsnCode || '2106909';
-    const details = [`HSN: ${hsn}`];
-
-    if (it.packCount && it.packCount > 1 && it.packWeightKg) {
-      const wtStr = it.packWeightKg < 1 ? `${Math.round(it.packWeightKg * 1000)}g` : `${it.packWeightKg}kg`;
-      qtyStr = `${it.packCount} Pk`;
-      details.push(`${it.packCount} Pks x ${wtStr}`);
-    } else if (it.packWeightKg) {
-      const wtStr = it.packWeightKg < 1 ? `${Math.round(it.packWeightKg * 1000)}g` : `${it.packWeightKg}kg`;
-      qtyStr = `1 Pk`;
-      details.push(`${wtStr} pack`);
-    } else if (it.packCount && it.packCount > 1) {
-      qtyStr = `${it.packCount} Pk`;
-    }
-    if (it.hindiName) {
-      details.push(it.hindiName);
-    }
-
-    const colQty = qtyStr.slice(0, 5).padStart(6);
-    const colRate = it.unitPrice.toFixed(2).slice(0, 8).padStart(9);
-    const colAmt = it.totalPrice.toFixed(2).slice(0, 9).padStart(10);
-
-    cashierBillLines.push(`${sn}${name}${colQty}${colRate}${colAmt}`);
-    cashierBillLines.push(`   [${details.join(' | ')}]`);
-  });
-
-  cashierBillLines.push('------------------------------------------------');
-  cashierBillLines.push(formatLine48('Gross Order Total (Incl. GST):', `Rs. ${order.subtotal.toFixed(2).padStart(8)}`));
-  const discountAmount = order.totalDiscount || 0;
-  if (discountAmount > 0) {
-    cashierBillLines.push(formatLine48('Discount Deducted:', `-Rs. ${discountAmount.toFixed(2).padStart(8)}`));
-  }
-  cashierBillLines.push('================================================');
-  cashierBillLines.push(formatLine48('NET AMOUNT DUE & PAID:', `Rs. ${order.finalAmount.toFixed(2).padStart(8)}`));
-  cashierBillLines.push('================================================');
-
-  // Statutory 5% Inclusive GST Summary Table
-  const taxableGoods = Math.round((order.finalAmount / 1.05) * 100) / 100;
-  const totalGst = Math.round((order.finalAmount - taxableGoods) * 100) / 100;
-  const cgstAmt = Math.round((totalGst / 2) * 100) / 100;
-  const sgstAmt = Math.round((totalGst - cgstAmt) * 100) / 100;
-
-  cashierBillLines.push(center48('---------------- GST SUMMARY (5.0%) ------------'));
-  cashierBillLines.push('Rate       Taxable Value    CGST(2.5%)    SGST(2.5%)');
-  const colRate = '5% GST'.padEnd(10);
-  const colTaxVal = `Rs. ${taxableGoods.toFixed(2)}`.padStart(16) + ' ';
-  const colCgst = `Rs. ${cgstAmt.toFixed(2)}`.padStart(13) + ' ';
-  const colSgst = `Rs. ${sgstAmt.toFixed(2)}`.padStart(13);
-  cashierBillLines.push(`${colRate}${colTaxVal}  ${colCgst}${colSgst}`);
-  cashierBillLines.push('------------------------------------------------');
-  cashierBillLines.push(formatLine48('Total GST Included in Price:', `Rs. ${totalGst.toFixed(2).padStart(8)}`));
-  cashierBillLines.push('------------------------------------------------');
-
-  cashierBillLines.push('PAYMENT SETTLEMENT:');
-  cashierBillLines.push(formatLine48('Mode of Payment   :', invoice?.paymentMethod || 'SETTLED'));
-  cashierBillLines.push(formatLine48('Settlement Status    :', 'SUCCESS (PAID IN FULL)'));
-  cashierBillLines.push('================================================');
-
-  cashierBillLines.push(center48('* Freshly crafted daily with pure Desi Ghee *'));
-  cashierBillLines.push(center48('* Goods once sold cannot be returned or exchanged *'));
-  cashierBillLines.push('');
-  cashierBillLines.push(center48(settings?.footerMessage || 'Thank you for choosing Sheetal Gajak Kulfi!'));
-  cashierBillLines.push(center48('Pure Indore Taste & Tradition Since 1984'));
-  cashierBillLines.push(center48('Opposite High Court, Shivaji Nagar, Indore'));
-  cashierBillLines.push('');
-  cashierBillLines.push(center48('|||| ||| |||||| |||| ||||| |||||| |||| |||||'));
-  cashierBillLines.push(center48(`*${invoiceNumber}*`));
-  cashierBillLines.push('================================================');
-
-  return cashierBillLines.join('\n');
 }
 
 export async function processOrderPayment(orderId: string, payload: {
@@ -883,27 +743,18 @@ export async function fetchSettings(): Promise<ShopSettings> {
   }
 }
 
-export async function updateSettings(settings: Partial<ShopSettings>, updatedBy: string, userRole?: string): Promise<ShopSettings> {
+export async function updateSettings(settings: Partial<ShopSettings>, updatedBy: string): Promise<ShopSettings> {
   try {
     const res = await fetch('/api/settings', {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(userRole ? { 'x-user-role': userRole } : {}),
-      },
-      body: JSON.stringify({ settings, updatedBy, userRole }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ settings, updatedBy }),
     });
-    if (!res.ok) {
-      const errData = await safeJson(res);
-      throw new Error(errData?.error || 'Failed to update settings');
-    }
+    if (!res.ok) throw new Error('API unavailable');
     const data = await safeJson(res);
     if (!data.success) throw new Error(data.error);
     return data.settings;
-  } catch (err: unknown) {
-    if (userRole && userRole !== 'admin') {
-      throw new Error('Access Denied: Only administrators have permission to modify shop settings');
-    }
+  } catch {
     const store = getClientStore();
     store.settings = { ...store.settings, ...settings };
     saveClientStore(store);
@@ -1047,146 +898,6 @@ export async function fetchAnalytics(date?: string): Promise<DashboardMetrics> {
       topProducts,
       categoryPerformance,
     };
-  }
-}
-
-export interface DayEndSalesSummary {
-  date: string;
-  totalBills: number;
-  netAmount: number;
-  grossAmount: number;
-  discountAmount: number;
-  cashAmount: number;
-  upiAmount: number;
-  cardAmount: number;
-  taxableAmount: number;
-  cgstAmount: number;
-  sgstAmount: number;
-  totalTax: number;
-}
-
-export interface DayEndReportResponse {
-  summaries: DayEndSalesSummary[];
-  totals: DayEndSalesSummary;
-}
-
-export async function fetchDayEndSalesReport(date?: string): Promise<DayEndReportResponse> {
-  try {
-    const url = date ? `/api/reports/day-end?date=${encodeURIComponent(date)}` : '/api/reports/day-end';
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('API unavailable');
-    const data = await safeJson(res);
-    return data.report;
-  } catch {
-    const store = getClientStore();
-    const dateMap: Record<string, {
-      totalBills: number;
-      netAmount: number;
-      grossAmount: number;
-      discountAmount: number;
-      cashAmount: number;
-      upiAmount: number;
-      cardAmount: number;
-    }> = {};
-
-    for (const order of store.orders) {
-      if (order.paymentStatus === 'PAID') {
-        const d = order.businessDate || order.createdAt.slice(0, 10);
-        if (date && d !== date) continue;
-
-        if (!dateMap[d]) {
-          dateMap[d] = {
-            totalBills: 0,
-            netAmount: 0,
-            grossAmount: 0,
-            discountAmount: 0,
-            cashAmount: 0,
-            upiAmount: 0,
-            cardAmount: 0,
-          };
-        }
-
-        dateMap[d].totalBills += 1;
-        dateMap[d].netAmount += order.finalAmount;
-        dateMap[d].grossAmount += order.subtotal;
-        dateMap[d].discountAmount += (order.totalDiscount || 0);
-
-        const payment = store.payments.find(p => p.orderId === order.id && p.status === 'SUCCESS');
-        if (payment) {
-          if (payment.method === 'CASH') {
-            dateMap[d].cashAmount += payment.amount;
-          } else if (payment.method === 'UPI') {
-            dateMap[d].upiAmount += payment.amount;
-          } else if (payment.method === 'CARD') {
-            dateMap[d].cardAmount += payment.amount;
-          } else if (payment.method === 'SPLIT' && payment.splits) {
-            for (const sp of payment.splits) {
-              if (sp.method === 'CASH') dateMap[d].cashAmount += sp.amount;
-              else if (sp.method === 'UPI') dateMap[d].upiAmount += sp.amount;
-              else if (sp.method === 'CARD') dateMap[d].cardAmount += sp.amount;
-            }
-          }
-        } else {
-          dateMap[d].cashAmount += order.finalAmount;
-        }
-      }
-    }
-
-    const summaries: DayEndSalesSummary[] = Object.entries(dateMap)
-      .sort((a, b) => b[0].localeCompare(a[0]))
-      .map(([d, val]) => {
-        const net = Math.round(val.netAmount * 100) / 100;
-        const taxable = Math.round((net / 1.05) * 100) / 100;
-        const totalTax = Math.round((net - taxable) * 100) / 100;
-        const half = Math.round((totalTax / 2) * 100) / 100;
-        return {
-          date: d,
-          totalBills: val.totalBills,
-          netAmount: net,
-          grossAmount: Math.round(val.grossAmount * 100) / 100,
-          discountAmount: Math.round(val.discountAmount * 100) / 100,
-          cashAmount: Math.round(val.cashAmount * 100) / 100,
-          upiAmount: Math.round(val.upiAmount * 100) / 100,
-          cardAmount: Math.round(val.cardAmount * 100) / 100,
-          taxableAmount: taxable,
-          cgstAmount: half,
-          sgstAmount: Math.round((totalTax - half) * 100) / 100,
-          totalTax,
-        };
-      });
-
-    const totals: DayEndSalesSummary = summaries.reduce(
-      (acc, cur) => ({
-        date: 'All Dates',
-        totalBills: acc.totalBills + cur.totalBills,
-        netAmount: Math.round((acc.netAmount + cur.netAmount) * 100) / 100,
-        grossAmount: Math.round((acc.grossAmount + cur.grossAmount) * 100) / 100,
-        discountAmount: Math.round((acc.discountAmount + cur.discountAmount) * 100) / 100,
-        cashAmount: Math.round((acc.cashAmount + cur.cashAmount) * 100) / 100,
-        upiAmount: Math.round((acc.upiAmount + cur.upiAmount) * 100) / 100,
-        cardAmount: Math.round((acc.cardAmount + cur.cardAmount) * 100) / 100,
-        taxableAmount: Math.round((acc.taxableAmount + cur.taxableAmount) * 100) / 100,
-        cgstAmount: Math.round((acc.cgstAmount + cur.cgstAmount) * 100) / 100,
-        sgstAmount: Math.round((acc.sgstAmount + cur.sgstAmount) * 100) / 100,
-        totalTax: Math.round((acc.totalTax + cur.totalTax) * 100) / 100,
-      }),
-      {
-        date: 'All Dates',
-        totalBills: 0,
-        netAmount: 0,
-        grossAmount: 0,
-        discountAmount: 0,
-        cashAmount: 0,
-        upiAmount: 0,
-        cardAmount: 0,
-        taxableAmount: 0,
-        cgstAmount: 0,
-        sgstAmount: 0,
-        totalTax: 0,
-      }
-    );
-
-    return { summaries, totals };
   }
 }
 

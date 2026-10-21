@@ -163,8 +163,7 @@ export class Database {
       try {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
         const parsed = JSON.parse(raw);
-        // Ensure categories & products always have latest Sheetal Gajak catalog
-        parsed.categories = DEFAULT_CATEGORIES;
+        // Ensure products always have latest demo images and demo items
         parsed.products = DEFAULT_PRODUCTS;
         return parsed;
       } catch (err) {
@@ -384,7 +383,6 @@ export class Database {
         productName: prod.name,
         hindiName: prod.hindiName,
         unit: prod.unit,
-        hsnCode: prod.hsnCode || '2106909',
         packWeightKg,
         packCount,
         quantity: qty,
@@ -914,118 +912,6 @@ export class Database {
       topProducts,
       categoryPerformance,
     };
-  }
-
-  // --- Date-Wise Day-End Sales Report (Net / Cash / UPI / Card / GST) ---
-  public getDayEndSalesReport(filterDate?: string) {
-    const dateMap: Record<string, {
-      totalBills: number;
-      netAmount: number;
-      grossAmount: number;
-      discountAmount: number;
-      cashAmount: number;
-      upiAmount: number;
-      cardAmount: number;
-    }> = {};
-
-    for (const order of this.data.orders) {
-      if (order.paymentStatus === 'PAID') {
-        const d = order.businessDate || order.createdAt.slice(0, 10);
-        if (filterDate && d !== filterDate) continue;
-
-        if (!dateMap[d]) {
-          dateMap[d] = {
-            totalBills: 0,
-            netAmount: 0,
-            grossAmount: 0,
-            discountAmount: 0,
-            cashAmount: 0,
-            upiAmount: 0,
-            cardAmount: 0,
-          };
-        }
-
-        dateMap[d].totalBills += 1;
-        dateMap[d].netAmount += order.finalAmount;
-        dateMap[d].grossAmount += order.subtotal;
-        dateMap[d].discountAmount += (order.totalDiscount || 0);
-
-        const payment = this.data.payments.find(p => p.orderId === order.id && p.status === 'SUCCESS');
-        if (payment) {
-          if (payment.method === 'CASH') {
-            dateMap[d].cashAmount += payment.amount;
-          } else if (payment.method === 'UPI') {
-            dateMap[d].upiAmount += payment.amount;
-          } else if (payment.method === 'CARD') {
-            dateMap[d].cardAmount += payment.amount;
-          } else if (payment.method === 'SPLIT' && payment.splits) {
-            for (const sp of payment.splits) {
-              if (sp.method === 'CASH') dateMap[d].cashAmount += sp.amount;
-              else if (sp.method === 'UPI') dateMap[d].upiAmount += sp.amount;
-              else if (sp.method === 'CARD') dateMap[d].cardAmount += sp.amount;
-            }
-          }
-        } else {
-          dateMap[d].cashAmount += order.finalAmount;
-        }
-      }
-    }
-
-    const summaries = Object.entries(dateMap)
-      .sort((a, b) => b[0].localeCompare(a[0]))
-      .map(([date, val]) => {
-        const net = Math.round(val.netAmount * 100) / 100;
-        const taxable = Math.round((net / 1.05) * 100) / 100;
-        const totalTax = Math.round((net - taxable) * 100) / 100;
-        const cgst = Math.round((totalTax / 2) * 100) / 100;
-        const sgst = Math.round((totalTax - cgst) * 100) / 100;
-
-        return {
-          date,
-          totalBills: val.totalBills,
-          netAmount: net,
-          grossAmount: Math.round(val.grossAmount * 100) / 100,
-          discountAmount: Math.round(val.discountAmount * 100) / 100,
-          cashAmount: Math.round(val.cashAmount * 100) / 100,
-          upiAmount: Math.round(val.upiAmount * 100) / 100,
-          cardAmount: Math.round(val.cardAmount * 100) / 100,
-          taxableAmount: taxable,
-          cgstAmount: cgst,
-          sgstAmount: sgst,
-          totalTax,
-        };
-      });
-
-    const totals = summaries.reduce(
-      (acc, cur) => ({
-        totalBills: acc.totalBills + cur.totalBills,
-        netAmount: Math.round((acc.netAmount + cur.netAmount) * 100) / 100,
-        grossAmount: Math.round((acc.grossAmount + cur.grossAmount) * 100) / 100,
-        discountAmount: Math.round((acc.discountAmount + cur.discountAmount) * 100) / 100,
-        cashAmount: Math.round((acc.cashAmount + cur.cashAmount) * 100) / 100,
-        upiAmount: Math.round((acc.upiAmount + cur.upiAmount) * 100) / 100,
-        cardAmount: Math.round((acc.cardAmount + cur.cardAmount) * 100) / 100,
-        taxableAmount: Math.round((acc.taxableAmount + cur.taxableAmount) * 100) / 100,
-        cgstAmount: Math.round((acc.cgstAmount + cur.cgstAmount) * 100) / 100,
-        sgstAmount: Math.round((acc.sgstAmount + cur.sgstAmount) * 100) / 100,
-        totalTax: Math.round((acc.totalTax + cur.totalTax) * 100) / 100,
-      }),
-      {
-        totalBills: 0,
-        netAmount: 0,
-        grossAmount: 0,
-        discountAmount: 0,
-        cashAmount: 0,
-        upiAmount: 0,
-        cardAmount: 0,
-        taxableAmount: 0,
-        cgstAmount: 0,
-        sgstAmount: 0,
-        totalTax: 0,
-      }
-    );
-
-    return { summaries, totals };
   }
 
   // --- Seed Realistic Initial Transactions for Instant Immersion ---

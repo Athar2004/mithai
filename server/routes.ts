@@ -45,12 +45,8 @@ router.get('/products', (_req: Request, res: Response) => {
 
 router.post('/products', (req: Request, res: Response) => {
   try {
-    const role = (req.headers['x-user-role'] as string) || req.body?.userRole;
-    if (role && role !== 'admin') {
-      return res.status(403).json({ success: false, error: 'Access Denied: Only administrators have permission to add or edit product catalog' });
-    }
     const saved = db.saveProduct(req.body);
-    db.logAudit(req.body.userId || 'usr_admin', req.body.userName || 'Admin', 'PRODUCT_MODIFIED', 'PRODUCT', saved.id, `Product ${saved.name} saved. Price: ₹${saved.pricePerUnit}/${saved.unit}`);
+    db.logAudit('usr_admin', 'Admin', 'PRODUCT_MODIFIED', 'PRODUCT', saved.id, `Product ${saved.name} saved. Price: ₹${saved.pricePerUnit}/${saved.unit}`);
     res.json({ success: true, product: saved });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to save product';
@@ -242,10 +238,6 @@ router.get('/settings', (_req: Request, res: Response) => {
 
 router.patch('/settings', (req: Request, res: Response) => {
   try {
-    const role = (req.headers['x-user-role'] as string) || req.body?.userRole;
-    if (role && role !== 'admin') {
-      return res.status(403).json({ success: false, error: 'Access Denied: Only administrators have permission to modify shop settings' });
-    }
     const { settings, updatedBy } = req.body;
     const updated = db.updateSettings(settings, updatedBy || 'Admin');
     res.json({ success: true, settings: updated });
@@ -293,6 +285,7 @@ router.post('/auth/login', (req: Request, res: Response) => {
   }
 });
 
+
 router.get('/audit-logs', (req: Request, res: Response) => {
   const limit = req.query.limit ? Number(req.query.limit) : 100;
   res.json({ success: true, auditLogs: db.getAuditLogs(limit) });
@@ -302,18 +295,6 @@ router.get('/analytics', (req: Request, res: Response) => {
   const date = req.query.date as string | undefined;
   const metrics = db.getAnalytics(date);
   res.json({ success: true, metrics });
-});
-
-// --- Date-Wise Day-End Sales Report Endpoint ---
-router.get('/reports/day-end', (req: Request, res: Response) => {
-  try {
-    const date = req.query.date as string | undefined;
-    const report = db.getDayEndSalesReport(date);
-    res.json({ success: true, report });
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Failed to generate day-end sales report';
-    res.status(500).json({ success: false, error: msg });
-  }
 });
 
 // --- Automated Integration Test Suite Endpoint ---

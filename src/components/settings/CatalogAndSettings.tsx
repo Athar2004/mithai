@@ -91,14 +91,12 @@ export const CatalogAndSettings: React.FC = () => {
         name: productForm.name,
         pricePerUnit: Number(productForm.pricePerUnit),
         unit: productForm.unit as UnitType,
-      }, currentUser?.role);
+      });
       setIsEditingProduct(false);
       await refreshData();
       setSaveSuccessMessage('Product saved successfully');
       setTimeout(() => setSaveSuccessMessage(null), 3000);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Save product failed';
-      alert(msg);
+    } catch (err) {
       console.error('Save product failed:', err);
     }
   };
@@ -106,13 +104,11 @@ export const CatalogAndSettings: React.FC = () => {
   const handleSaveShopSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.updateSettings(shopForm, currentUser?.name || 'Admin', currentUser?.role);
+      await api.updateSettings(shopForm, currentUser?.name || 'Admin');
       await refreshData();
       setSaveSuccessMessage('Shop settings saved successfully');
       setTimeout(() => setSaveSuccessMessage(null), 3000);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Save settings failed';
-      alert(msg);
+    } catch (err) {
       console.error('Save settings failed:', err);
     }
   };
@@ -125,24 +121,6 @@ export const CatalogAndSettings: React.FC = () => {
       console.error('Failed to load audit logs:', err);
     }
   };
-
-  // RBAC Guard: Only admin can add/edit catalog or settings
-  if (currentUser?.role !== 'admin') {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-4">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 text-red-600 mb-2">
-          <Shield className="w-8 h-8" />
-        </div>
-        <h2 className="text-2xl font-bold text-stone-900">Administrator Access Required</h2>
-        <p className="text-sm text-stone-600 max-w-md mx-auto">
-          Only administrators have access to add or edit the product catalog, adjust sweet pricing, or modify shop and GST tax configurations.
-        </p>
-        <p className="text-xs text-stone-500">
-          Currently logged in as: <span className="font-semibold text-stone-800">{currentUser?.name || 'Staff'} ({currentUser?.role})</span>
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-6">

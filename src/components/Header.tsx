@@ -39,6 +39,7 @@ export const Header: React.FC = () => {
     navItems.push({ id: 'pos', label: 'Order POS' });
     navItems.push({ id: 'billing', label: 'Billing POS', count: billingUnpaidCount });
     navItems.push({ id: 'dashboard', label: 'Admin Hub' });
+    navItems.push({ id: 'settings', label: 'Catalog & Settings' });
     navItems.push({ id: 'printers', label: 'Print Agent' });
   }
 

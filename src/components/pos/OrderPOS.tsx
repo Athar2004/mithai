@@ -151,16 +151,20 @@ export const OrderPOS: React.FC = () => {
     }
   };
 
-  // Filter products by category and search
+  // Filter products by category and search (Supports name, Hindi, barcode, alias, sku, HSN)
   const filteredProducts = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
     return products.filter(p => {
       if (!p.isActive) return false;
       const matchCat = selectedCategory === 'all' || p.categoryId === selectedCategory;
       const matchSearch =
-        searchQuery.trim() === '' ||
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (p.hindiName && p.hindiName.includes(searchQuery)) ||
-        p.sku.toLowerCase().includes(searchQuery.toLowerCase());
+        query === '' ||
+        p.name.toLowerCase().includes(query) ||
+        (p.hindiName && p.hindiName.includes(query)) ||
+        p.sku.toLowerCase().includes(query) ||
+        (p.barcode && p.barcode.toLowerCase().includes(query)) ||
+        (p.alias && p.alias.toLowerCase().includes(query)) ||
+        (p.hsnCode && p.hsnCode.includes(query));
       return matchCat && matchSearch;
     });
   }, [products, selectedCategory, searchQuery]);
@@ -353,19 +357,27 @@ export const OrderPOS: React.FC = () => {
           >
             All Items ({products.length})
           </button>
-          {categories.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3.5 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                selectedCategory === cat.id
-                  ? 'bg-amber-700 text-white shadow-sm'
-                  : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
+          {categories.filter(cat => cat.id !== 'all').map(cat => {
+            const count = products.filter(p => p.categoryId === cat.id && p.isActive).length;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`px-3.5 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1.5 ${
+                  selectedCategory === cat.id
+                    ? 'bg-amber-700 text-white shadow-sm'
+                    : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'
+                }`}
+              >
+                <span>{cat.name}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                  selectedCategory === cat.id ? 'bg-amber-900/60 text-amber-200' : 'bg-stone-100 text-stone-500'
+                }`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Product Cards Grid */}
